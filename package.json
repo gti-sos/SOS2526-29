@@ -1,0 +1,20 @@
+{
+  "name": "sos2526-29",
+  "version": "1.0.0",
+  "description": "Proyecto SOS2526-29",
+  "homepage": "https://github.com/gti-sos/SOS2526-29#readme",
+  "bugs": {
+    "url": "https://github.com/gti-sos/SOS2526-29/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gti-sos/SOS2526-29.git"
+  },
+  "license": "ISC",
+  "author": "Alberto Lirola",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
