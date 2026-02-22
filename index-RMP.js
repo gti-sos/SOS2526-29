@@ -181,14 +181,14 @@ const datosVinos = [
     }
 ];
 
-var paisesFiltrados = datosVinos.filter(obj => obj.country == "Spain")
+let paisesFiltrados = datosVinos.filter(obj => obj.country == "Spain")
 
-var mapPrecios = paisesFiltrados.map(function (obj) {
+let mapPrecios = paisesFiltrados.map(function (obj) {
     var precios = obj.price
     return precios
 });
 let sum = 0
-var sumatorio = mapPrecios.forEach((precio) => {
+let sumatorio = mapPrecios.forEach((precio) => {
     sum += precio
 }
 );
