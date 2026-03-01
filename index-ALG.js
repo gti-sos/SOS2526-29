@@ -38,6 +38,24 @@ if (datosFiltrados.length > 0) {
 
 
 
+let BASE_URL_API = "/api/v1";
+
+let contacts = [
+    {
+        name:"peter",
+        phone: 123456789
+    },
+    {
+        name:"john",
+        phone: 987654321
+    }
+];
+
+app.get(BASE_URL_API+"/contacts", (req,res)=>{
+    res.send(JSON.stringify(contacts))
+});
+
+"""
 
 
 

@@ -48,6 +48,23 @@ if (datosFiltrados.length > 0) {
 
 
 
+"RUTA DINÁMICA /COOL"
+
+const express = require('express');
+const app = express();
+
+// ... otras configuraciones ...
+
+app.get('/cool', (request, response) => {
+    // Ejemplo de cara ASCII
+    response.send("<html><body><pre>(⌐■_■)</pre></body></html>");
+    console.log("New request to /cool");
+});
+
+
+
+
+
 
 
 
