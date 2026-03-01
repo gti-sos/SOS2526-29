@@ -48,17 +48,32 @@ if (datosFiltrados.length > 0) {
 
 
 
-"RUTA DINÁMICA /COOL"
+"RUTA DINÁMICA /COOL Y PAGINA ESTATICA /ABOUT"
 
-const express = require('express');
+// 1. Importaciones (al principio del archivo)
+const express = require("express");
+const path = require("path");
+
 const app = express();
+const port = process.env.PORT || 10000; // Importante para Render
 
-// ... otras configuraciones ...
+// 2. PUNTO 6: Configurar la carpeta de archivos estáticos
+// Esto le dice a Express que busque archivos en la carpeta "public"
+app.use("/", express.static(path.join(__dirname, "public")));
 
-app.get('/cool', (request, response) => {
-    // Ejemplo de cara ASCII
-    response.send("<html><body><pre>(⌐■_■)</pre></body></html>");
-    console.log("New request to /cool");
+// 3. PUNTO 5: Ruta dinámica /cool
+app.get("/cool", (req, res) => {
+    res.send("<html><body><pre>(⌐■_■)</pre></body></html>");
+});
+
+// 4. PUNTO 6: Ruta /about que sirve el archivo HTML
+app.get("/about", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "about.html"));
+});
+
+// 5. Arrancar el servidor (al final del archivo)
+app.listen(port, () => {
+    console.log(`Servidor listo en el puerto ${port}`);
 });
 
 
