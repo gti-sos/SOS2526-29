@@ -13,6 +13,8 @@ const app = express();
 app.use(express.json()); // Esto permite que Express entienda el formato JSON en los POST/PUT
 const port = process.env.PORT || 10000; // Importante para Render
 
+const { datosVinos, mediaPrecioPorPais } = require('./index-RMP.js');
+
 // 2. PUNTO 6: Configurar la carpeta de archivos estáticos
 // Esto le dice a Express que busque archivos en la carpeta "public"
 app.use(express.json());
