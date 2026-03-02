@@ -1,9 +1,40 @@
 
 
+
+
+
+"RUTA DINÁMICA /COOL Y PAGINA ESTATICA /ABOUT"
+
+// 1. Importaciones (al principio del archivo)
+const express = require("express");
+const path = require("path");
+
+const app = express();
+const port = process.env.PORT || 10000; // Importante para Render
+
+// 2. PUNTO 6: Configurar la carpeta de archivos estáticos
+// Esto le dice a Express que busque archivos en la carpeta "public"
+app.use(express.json());
+
+app.use("/", express.static(path.join(__dirname, "public")));
+
+// 3. PUNTO 5: Ruta dinámica /cool
+app.get("/cool", (req, res) => {
+    res.send(`<html><body><h1>${cool()}</h1></body></html>`);
+});
+
+// 4. PUNTO 6: Ruta /about que sirve el archivo HTML
+app.get("/about", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "about.html"));
+});
+
+
+
+
 "ALGORITMO ALBERTO LIROLA"
 
 // --- PUNTO 1: Algoritmo de Alberto Lirola (ALG) ---
-app.get("/samples/ALG", (request, response) => {
+app.get("/samples/ALG", (req, res) => {
     
     // 1. Tus datos (los mantenemos dentro de la función para este sample)
     const datosDesastres = [
@@ -32,7 +63,7 @@ app.get("/samples/ALG", (request, response) => {
 
         // 3. Respuesta al navegador (Punto clave: usamos response.send)
         // Usamos una plantilla de texto (backticks ``) para que el HTML sea legible
-        response.send(`
+        res.send(`
             <h1>Estadísticas de Desastres Naturales (ALG)</h1>
             <p><strong>País analizado:</strong> ${paisMuertes}</p>
             <p><strong>Total de registros encontrados:</strong> ${datosFiltrados.length}</p>
@@ -42,7 +73,7 @@ app.get("/samples/ALG", (request, response) => {
         `);
 
     } else {
-        response.send(`No se encontraron datos para el país: ${paisMuertes}.`);
+        res.send(`No se encontraron datos para el país: ${paisMuertes}.`);
     }
 
     console.log("Nueva petición a /samples/ALG");
@@ -53,34 +84,6 @@ app.get("/samples/ALG", (request, response) => {
 
 
 
-
-
-
-
-"RUTA DINÁMICA /COOL Y PAGINA ESTATICA /ABOUT"
-
-// 1. Importaciones (al principio del archivo)
-const express = require("express");
-const path = require("path");
-
-const app = express();
-const port = process.env.PORT || 10000; // Importante para Render
-
-// 2. PUNTO 6: Configurar la carpeta de archivos estáticos
-// Esto le dice a Express que busque archivos en la carpeta "public"
-app.use(express.json());
-
-app.use("/", express.static(path.join(__dirname, "public")));
-
-// 3. PUNTO 5: Ruta dinámica /cool
-app.get("/cool", (req, res) => {
-    res.send(`<html><body><h1>${cool()}</h1></body></html>`);
-});
-
-// 4. PUNTO 6: Ruta /about que sirve el archivo HTML
-app.get("/about", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "about.html"));
-});
 
 
 //RUFINO 
