@@ -181,15 +181,25 @@ const datosVinos = [
     }
 ];
 
-let paisesFiltrados = datosVinos.filter(obj => obj.country == "Spain")
+function mediaPrecioPorPais(datosVinos, pais) {
+    const paisesFiltrados = datosVinos.filter(obj => obj.country === pais);
 
-let mapPrecios = paisesFiltrados.map(function (obj) {
-    var precios = obj.price
-    return precios
-});
-let sum = 0
-let sumatorio = mapPrecios.forEach((precio) => {
-    sum += precio
+    if (paisesFiltrados.length === 0) {
+        return null; // o 0, según prefieras
+    }
+
+    const precios = paisesFiltrados.map(obj => obj.price);
+
+    const sum = precios.reduce((acum, precio) => acum + precio, 0);
+
+    return sum / precios.length;
 }
-);
-console.log(sum/mapPrecios.length)
+
+const mediaSpain = mediaPrecioPorPais(datosVinos,"Spain")
+
+console.log(mediaSpain)
+
+module.exports = {
+    datosVinos, mediaPrecioPorPais
+};
+
