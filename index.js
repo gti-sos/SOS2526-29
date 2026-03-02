@@ -65,6 +65,8 @@ const port = process.env.PORT || 10000; // Importante para Render
 
 // 2. PUNTO 6: Configurar la carpeta de archivos estáticos
 // Esto le dice a Express que busque archivos en la carpeta "public"
+app.use(express.json());
+
 app.use("/", express.static(path.join(__dirname, "public")));
 
 // 3. PUNTO 5: Ruta dinámica /cool
@@ -142,29 +144,66 @@ app.get(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
 
 // POST nuevo vino
 app.post(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
-    const nuevo = req.body;
+    // 1. Ver exactamente qué llega
+    console.log("BODY RECIBIDO =>", req.body);
 
-    if (!nuevo || !nuevo.country || !nuevo.year || !nuevo.price) {
-        return res.status(400).json({ error: "Faltan campos obligatorios: country, year, price" });
+    // 2. Si no hay body o es undefined, cortar aquí
+    if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({ error: "Body vacío o no es JSON" });
+    }
+
+    const body = req.body;
+
+    const {
+        title,
+        price,
+        capacity,
+        grape,
+        secondary_grape,
+        closure,
+        country,
+        unit,
+        characteristic,
+        per_bottle_case_each,
+        type,
+        abv,
+        region,
+        style,
+        year,
+        appellation
+    } = body;
+
+    if (!title || !country || year === undefined || price === undefined) {
+        return res.status(400).json({
+            error: "Faltan campos obligatorios: title, country, year, price"
+        });
     }
 
     const nuevoVino = {
         id: wineStats.length + 1,
-        title: nuevo.title,
-        country: nuevo.country.toLowerCase(),
-        region: nuevo.region ? nuevo.region.toLowerCase() : "",
-        year: Number(nuevo.year),
-        price: Number(nuevo.price),
-        abv: Number(nuevo.abv),
-        unit: Number(nuevo.unit),
-        grape: nuevo.grape,
-        type: nuevo.type,
-        capacity: Number(nuevo.capacity)
+        title: String(title),
+        price: Number(price),
+        capacity: Number(capacity) || 0,
+        grape: grape || "",
+        secondary_grape: secondary_grape || "",
+        closure: closure || "",
+        country: String(country).toLowerCase(),
+        unit: Number(unit) || 0,
+        characteristic: characteristic || "",
+        per_bottle_case_each: per_bottle_case_each || "",
+        type: type || "",
+        abv: Number(abv) || 0,
+        region: region ? String(region).toLowerCase() : "",
+        style: style || "",
+        year: String(year),
+        appellation: appellation || ""
     };
 
     wineStats.push(nuevoVino);
     return res.status(201).json(nuevoVino);
 });
+
+
 
 // PUT actualizar por id
 app.put(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
