@@ -8,6 +8,8 @@
 // 1. Importaciones (al principio del archivo)
 const express = require("express");
 const path = require("path");
+let cool = require("cool-ascii-faces");
+
 
 const app = express();
 app.use(express.json()); // Esto permite que Express entienda el formato JSON en los POST/PUT
