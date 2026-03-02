@@ -82,10 +82,7 @@ app.get("/samples/ALG", (req, res) => {
 
 
 // Base de datos en memoria para el recurso natural-disasters
-let naturalDisasters = [
-    { country: 'afghanistan', year: 1950, death_count: 215, injured_count: 200, economic_damage_usd: 0 },
-    { country: 'afghanistan', year: 1960, death_count: 11, injured_count: 0, economic_damage_usd: 20 }
-];
+let naturalDisasters = [];
 
 
 const BASE_API_URL_ND = "/api/v1/natural-disasters";
