@@ -10,6 +10,7 @@ const express = require("express");
 const path = require("path");
 
 const app = express();
+app.use(express.json()); // Esto permite que Express entienda el formato JSON en los POST/PUT
 const port = process.env.PORT || 10000; // Importante para Render
 
 // 2. PUNTO 6: Configurar la carpeta de archivos estáticos
@@ -80,8 +81,114 @@ app.get("/samples/ALG", (req, res) => {
 });
 
 
+// Base de datos en memoria para el recurso natural-disasters
+let naturalDisasters = [
+    { country: 'afghanistan', year: 1950, death_count: 215, injured_count: 200, economic_damage_usd: 0 },
+    { country: 'afghanistan', year: 1960, death_count: 11, injured_count: 0, economic_damage_usd: 20 }
+];
 
 
+const BASE_API_URL_ND = "/api/v1/natural-disasters";
+
+// --- RECURSO: natural-disasters ---
+
+// 2.1 Load Initial Data (GET)
+app.get(BASE_API_URL_ND + "/loadInitialData", (req, res) => {
+    if (naturalDisasters.length === 0) {
+        naturalDisasters = [
+            { country: 'afghanistan', year: 1950, death_count: 215, injured_count: 200, economic_damage_usd: 0 },
+            { country: 'afghanistan', year: 1960, death_count: 11, injured_count: 0, economic_damage_usd: 20 },
+            { country: 'afghanistan', year: 1970, death_count: 48, injured_count: 16, economic_damage_usd: 5200 },
+            { country: 'afghanistan', year: 1980, death_count: 58, injured_count: 352, economic_damage_usd: 26900 },
+            { country: 'afghanistan', year: 1990, death_count: 1039, injured_count: 395, economic_damage_usd: 8401 },
+            { country: 'afghanistan', year: 2000, death_count: 449, injured_count: 197, economic_damage_usd: 2511 },
+            { country: 'afghanistan', year: 2010, death_count: 263, injured_count: 5918, economic_damage_usd: 14800 },
+            { country: 'africa', year: 1900, death_count: 1112, injured_count: 0, economic_damage_usd: 0 },
+            { country: 'africa', year: 1910, death_count: 8501, injured_count: 0, economic_damage_usd: 0 },
+            { country: 'africa', year: 1920, death_count: 2701, injured_count: 0, economic_damage_usd: 0 },
+            { country: 'spain', year: 2024, death_count: 220, injured_count: 500, economic_damage_usd: 30000 }
+        ];
+        res.sendStatus(201); // Created
+    } else {
+        res.status(400).send("Data already initialized");
+    }
+});
+
+// 2.2 GET a la lista completa
+app.get(BASE_API_URL_ND, (req, res) => {
+    res.json(naturalDisasters);
+});
+
+// 2.3 POST a la lista completa (Crear nuevo)
+app.post(BASE_API_URL_ND, (req, res) => {
+    const newData = req.body;
+    
+    // Comprobamos que el cuerpo tiene los campos necesarios
+    if (!newData.country || !newData.year || !newData.death_count) {
+        return res.sendStatus(400); // Bad Request
+    }
+
+    // Comprobar si ya existe (conflicto)
+    const exists = naturalDisasters.some(d => d.country === newData.country && d.year === newData.year);
+    if (exists) {
+        return res.sendStatus(409); // Conflict
+    }
+
+    naturalDisasters.push(newData);
+    res.sendStatus(201); // Created
+});
+
+// 2.4 GET a un recurso concreto (por país y año)
+app.get(BASE_API_URL_ND + "/:country/:year", (req, res) => {
+    const { country, year } = req.params;
+    const resource = naturalDisasters.find(d => d.country === country && d.year == year);
+
+    if (resource) {
+        res.json(resource);
+    } else {
+        res.sendStatus(404); // Not Found
+    }
+});
+
+// 2.5 DELETE a un recurso concreto
+app.delete(BASE_API_URL_ND + "/:country/:year", (req, res) => {
+    const { country, year } = req.params;
+    naturalDisasters = naturalDisasters.filter(d => !(d.country === country && d.year == year));
+    res.sendStatus(200); // OK
+});
+
+// 2.6 PUT a un recurso concreto (Actualizar)
+app.put(BASE_API_URL_ND + "/:country/:year", (req, res) => {
+    const { country, year } = req.params;
+    const index = naturalDisasters.findIndex(d => d.country === country && d.year == year);
+
+    if (index !== -1) {
+        // Comprobar que el ID del cuerpo coincide con la URL
+        if (req.body.country !== country || req.body.year != year) {
+            return res.sendStatus(400); // Bad Request
+        }
+        naturalDisasters[index] = req.body;
+        res.sendStatus(200);
+    } else {
+        res.sendStatus(404);
+    }
+});
+
+// 2.7 DELETE a la lista completa (Borrar todo)
+app.delete(BASE_API_URL_ND, (req, res) => {
+    naturalDisasters = [];
+    res.sendStatus(200);
+});
+
+// 2.8 POST a un recurso concreto (Error 405 - No permitido)
+app.post(BASE_API_URL_ND + "/:country/:year", (req, res) => {
+    res.sendStatus(405); // Method Not Allowed
+});
+
+// 2.9 PUT a la lista completa (Error 405 - No permitido)
+app.put(BASE_API_URL_ND, (req, res) => {
+    res.sendStatus(405); // Method Not Allowed
+});
 
 
 
