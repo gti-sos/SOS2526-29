@@ -1,0 +1,385 @@
+{
+  "info": {
+    "_postman_id": "9adb84f0-5a35-4579-a20a-c34643803dac",
+    "name": "Pruebas-API-F05-ALG",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52437562",
+    "_collection_link": "https://go.postman.co/collection/52437562-9adb84f0-5a35-4579-a20a-c34643803dac?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Load Initial Data",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/loadInitialData",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters",
+            "loadInitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET All",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Single",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/afghanistan/1950",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters",
+            "afghanistan",
+            "1950"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create New",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"country\": \"spain\",\r\n        \"year\": 2025,\r\n        \"death_count\": 230,\r\n        \"injured_count\": 200,\r\n        \"economic_damage_usd\": 25000\r\n    }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Resource",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"country\": \"afghanistan\",\r\n        \"year\": 1950,\r\n        \"death_count\": 245,\r\n        \"injured_count\": 200,\r\n        \"economic_damage_usd\": 0\r\n    }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/afghanistan/1950",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters",
+            "afghanistan",
+            "1950"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Single",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/spain/2025",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters",
+            "spain",
+            "2025"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete All",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error 400 (Bad PUT ID)",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"country\": \"italy\",\r\n        \"year\": 1950,\r\n        \"death_count\": 245,\r\n        \"injured_count\": 200,\r\n        \"economic_damage_usd\": 0\r\n    }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/afghanistan/1950",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters",
+            "afghanistan",
+            "1950"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error 409 (Conflict POST)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"country\": \"afghanistan\",\r\n        \"year\": 1960,\r\n        \"death_count\": 11,\r\n        \"injured_count\": 0,\r\n        \"economic_damage_usd\": 20\r\n    }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error 400 (Bad JSON)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"country\": \"afghanistan\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error 404 (Not Found)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/pais-inventado/1111",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters",
+            "pais-inventado",
+            "1111"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error 405 (Method Not Allowed POST)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/afghanistan/1960",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters",
+            "afghanistan",
+            "1960"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error 405 (Method Not Allowed PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
+          "protocol": "https",
+          "host": [
+            "sos2526-29",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "datos",
+      "value": ""
+    }
+  ]
+}
