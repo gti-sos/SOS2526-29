@@ -449,36 +449,21 @@ app.get(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     return res.status(200).json(encontrado);
 });
 
+// POST a un recurso concreto NO permitido
+// POST /api/v1/wine-stats/:id
+app.post(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
+    return res.status(405).json({
+        error: "Método POST no permitido sobre un recurso concreto (usa POST sobre la colección)"
+    });
+});
+
 // POST nuevo vino
 app.post(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
-    // 1. Ver exactamente qué llega
-    console.log("BODY RECIBIDO =>", req.body);
-
-    // 2. Si no hay body o es undefined, cortar aquí
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ error: "Body vacío o no es JSON" });
     }
 
-    const body = req.body;
-
-    const {
-        title,
-        price,
-        capacity,
-        grape,
-        secondary_grape,
-        closure,
-        country,
-        unit,
-        characteristic,
-        per_bottle_case_each,
-        type,
-        abv,
-        region,
-        style,
-        year,
-        appellation
-    } = body;
+    const { title, country, year, price } = req.body;
 
     if (!title || !country || year === undefined || price === undefined) {
         return res.status(400).json({
@@ -486,62 +471,60 @@ app.post(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
         });
     }
 
+    const yaExiste = wineStats.find(v =>
+        v.title === String(title) && v.year === Number(year)
+    );
+    if (yaExiste) {
+        return res.status(409).json({
+            error: `Ya existe un vino con title="${title}" y year="${year}"`
+        });
+    }
+
     const nuevoVino = {
-        id: wineStats.length + 1,
-        title: String(title),
-        price: Number(price),
-        capacity: Number(capacity) || 0,
-        grape: grape || "",
-        secondary_grape: secondary_grape || "",
-        closure: closure || "",
-        country: String(country).toLowerCase(),
-        unit: Number(unit) || 0,
-        characteristic: characteristic || "",
-        per_bottle_case_each: per_bottle_case_each || "",
-        type: type || "",
-        abv: Number(abv) || 0,
-        region: region ? String(region).toLowerCase() : "",
-        style: style || "",
-        year: String(year),
-        appellation: appellation || ""
+        id:       wineStats.length + 1,
+        title:    req.body.title,
+        country:  req.body.country.toLowerCase(),
+        region:   req.body.region ? req.body.region.toLowerCase() : "",
+        year:     Number(req.body.year),
+        price:    Number(req.body.price),
+        abv:      Number(req.body.abv),
+        unit:     Number(req.body.unit),
+        grape:    req.body.grape,
+        type:     req.body.type,
+        capacity: Number(req.body.capacity)
     };
 
     wineStats.push(nuevoVino);
     return res.status(201).json(nuevoVino);
 });
 
+// PUT sobre la colección raíz NO permitido
+// PUT /api/v1/wine-stats
+app.put(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
+    return res.status(405).json({
+        error: "Método PUT no permitido sobre la colección completa (usa PUT /wine-stats/:id)"
+    });
+});
 
 // PUT /api/v1/wine-stats/:id (actualizar un vino por id)
 app.put(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     const id = Number(req.params.id);
-    const body = req.body;
 
-    if (!body || Object.keys(body).length === 0) {
+    if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ error: "Body vacío o no es JSON" });
     }
 
-    const {
-        title,
-        price,
-        capacity,
-        grape,
-        secondary_grape,
-        closure,
-        country,
-        unit,
-        characteristic,
-        per_bottle_case_each,
-        type,
-        abv,
-        region,
-        style,
-        year,
-        appellation
-    } = body;
+    const { title, country, year, price } = req.body;
 
     if (!title || !country || year === undefined || price === undefined) {
         return res.status(400).json({
             error: "Faltan campos obligatorios: title, country, year, price"
+        });
+    }
+
+    if (req.body.id !== undefined && Number(req.body.id) !== id) {
+        return res.status(400).json({
+            error: `El id del body (${req.body.id}) no coincide con el id de la URL (${id})`
         });
     }
 
@@ -551,42 +534,20 @@ app.put(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     }
 
     wineStats[index] = {
-        id,
-        title: String(title),
-        price: Number(price),
-        capacity: Number(capacity) || 0,
-        grape: grape || "",
-        secondary_grape: secondary_grape || "",
-        closure: closure || "",
-        country: String(country).toLowerCase(),
-        unit: Number(unit) || 0,
-        characteristic: characteristic || "",
-        per_bottle_case_each: per_bottle_case_each || "",
-        type: type || "",
-        abv: Number(abv) || 0,
-        region: region ? String(region).toLowerCase() : "",
-        style: style || "",
-        year: String(year),
-        appellation: appellation || ""
+        id:       id,
+        title:    req.body.title,
+        country:  req.body.country.toLowerCase(),
+        region:   req.body.region ? req.body.region.toLowerCase() : "",
+        year:     Number(req.body.year),
+        price:    Number(req.body.price),
+        abv:      Number(req.body.abv),
+        unit:     Number(req.body.unit),
+        grape:    req.body.grape,
+        type:     req.body.type,
+        capacity: Number(req.body.capacity)
     };
 
     return res.status(200).json(wineStats[index]);
-});
-
-// POST a un recurso concreto NO permitido
-// POST /api/v1/wine-stats/:id
-app.post(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
-    return res.status(405).json({
-        error: "Método POST no permitido sobre un recurso concreto (usa POST sobre la colección)"
-    });
-});
-
-// PUT sobre la colección raíz NO permitido
-// PUT /api/v1/wine-stats
-app.put(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
-    return res.status(405).json({
-        error: "Método PUT no permitido sobre la colección completa (usa PUT /wine-stats/:id)"
-    });
 });
 
 
@@ -607,13 +568,6 @@ app.delete(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
 app.delete(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
     wineStats = [];
     return res.status(200).json({ message: `Colección ${RECURSORMP} vaciada` });
-});
-
-
-app.post(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
-    return res.status(405).json({
-        error: "Método POST no permitido sobre un recurso concreto (usa POST sobre la colección)"
-    });
 });
 
 
