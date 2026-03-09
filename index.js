@@ -85,6 +85,55 @@ app.get("/samples/ALG", (req, res) => {
 });
 
 
+//LCC LUIS CORTES COBOS
+app.get("/samples/LCC", (req, res) => {
+    const data = [
+        { City: "Delhi",     Country: "India", UN_2025_population: 30222405 },
+        { City: "Shanghai",  Country: "China", UN_2025_population: 29558908 },
+        { City: "Guangzhou", Country: "China", UN_2025_population: 27563372 },
+        { City: "Kolkata",   Country: "India", UN_2025_population: 22549738 },
+        { City: "Mumbai",    Country: "India", UN_2025_population: 20203056 },
+        { City: "Beijing",   Country: "China", UN_2025_population: 17013303 },
+        { City: "Shenzhen",  Country: "China", UN_2025_population: 13878396 },
+        { City: "Bengaluru", Country: "India", UN_2025_population: 13187098 },
+        { City: "Chennai",   Country: "India", UN_2025_population: 11153205 },
+        { City: "Hyderabad", Country: "India", UN_2025_population: 9190795 },
+        { City: "Suzhou",    Country: "China", UN_2025_population: 7731101 },
+        { City: "Ahmedabad", Country: "India", UN_2025_population: 7632408 }
+    ];
+
+    const targetCountry = "China";
+    const subset = data.filter(row => row.Country === targetCountry);
+
+    if (subset.length === 0) {
+        return res.status(200).send(`No hay filas para Country="${targetCountry}"`);
+    }
+
+    const avg =
+        subset
+            .map(row => row.UN_2025_population)
+            .reduce((acc, v) => acc + v, 0) / subset.length;
+
+    res.status(200).send(`
+        <html>
+        <body style="font-family: Arial;">
+            <h1>Sample LCC</h1>
+            <p><strong>Country analizado:</strong> ${targetCountry}</p>
+            <p><strong>Filas usadas:</strong> ${subset.length}</p>
+            <p><strong>Media de UN_2025_population:</strong> ${avg}</p>
+            <hr>
+            <a href="/about">Volver a About</a>
+        </body>
+        </html>
+    `);
+});
+
+//LCC
+
+
+
+
+
 // Base de datos en memoria para el recurso natural-disasters
 let naturalDisasters = [];
 
