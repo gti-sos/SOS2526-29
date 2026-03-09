@@ -128,6 +128,150 @@ app.get("/samples/LCC", (req, res) => {
     `);
 });
 
+// API PERSONAL LCC - citys-stats
+let citysStats = [];
+const BASE_API_URL_LCC = "/api/v1/citys-stats";
+
+app.get(BASE_API_URL_LCC + "/loadInitialData", (req, res) => {
+    if (citysStats.length === 0) {
+        citysStats = [
+            { city: "jakarta", country: "indonesia", un_2025_population: 41913860 },
+            { city: "dhaka", country: "bangladesh", un_2025_population: 36585479 },
+            { city: "tokyo", country: "japan", un_2025_population: 33412512 },
+            { city: "delhi", country: "india", un_2025_population: 30222405 },
+            { city: "shanghai", country: "china", un_2025_population: 29558908 },
+            { city: "guangzhou", country: "china", un_2025_population: 27563372 },
+            { city: "cairo", country: "egypt", un_2025_population: 25566102 },
+            { city: "manila", country: "philippines", un_2025_population: 24735305 },
+            { city: "kolkata", country: "india", un_2025_population: 22549738 },
+            { city: "seoul", country: "south-korea", un_2025_population: 22490482 },
+            { city: "karachi", country: "pakistan", un_2025_population: 21422590 },
+            { city: "mumbai", country: "india", un_2025_population: 20203056 }
+        ];
+        return res.status(201).json(citysStats);
+    }
+
+    return res.status(200).json(citysStats);
+});
+
+// GET colección completa
+app.get(BASE_API_URL_LCC, (req, res) => {
+    return res.status(200).json(citysStats);
+});
+
+// GET recurso concreto por city y country
+app.get(BASE_API_URL_LCC + "/:city/:country", (req, res) => {
+    const city = req.params.city.toLowerCase();
+    const country = req.params.country.toLowerCase();
+
+    const item = citysStats.find(
+        d => d.city === city && d.country === country
+    );
+
+    if (!item) {
+        return res.status(404).json({ error: "Resource not found" });
+    }
+
+    return res.status(200).json(item);
+});
+
+// POST colección
+app.post(BASE_API_URL_LCC, (req, res) => {
+    const newData = req.body;
+
+    if (!newData || !newData.city || !newData.country || newData.un_2025_population === undefined) {
+        return res.status(400).json({ error: "Bad request" });
+    }
+
+    const city = String(newData.city).toLowerCase();
+    const country = String(newData.country).toLowerCase();
+    const un_2025_population = Number(newData.un_2025_population);
+
+    const exists = citysStats.some(
+        d => d.city === city && d.country === country
+    );
+
+    if (exists) {
+        return res.status(409).json({ error: "Conflict" });
+    }
+
+    const item = {
+        city,
+        country,
+        un_2025_population
+    };
+
+    citysStats.push(item);
+    return res.status(201).json(item);
+});
+
+// PUT recurso concreto
+app.put(BASE_API_URL_LCC + "/:city/:country", (req, res) => {
+    const city = req.params.city.toLowerCase();
+    const country = req.params.country.toLowerCase();
+    const body = req.body;
+
+    if (!body || !body.city || !body.country || body.un_2025_population === undefined) {
+        return res.status(400).json({ error: "Bad request" });
+    }
+
+    if (
+        String(body.city).toLowerCase() !== city ||
+        String(body.country).toLowerCase() !== country
+    ) {
+        return res.status(400).json({ error: "URL and body do not match" });
+    }
+
+    const index = citysStats.findIndex(
+        d => d.city === city && d.country === country
+    );
+
+    if (index === -1) {
+        return res.status(404).json({ error: "Resource not found" });
+    }
+
+    citysStats[index] = {
+        city,
+        country,
+        un_2025_population: Number(body.un_2025_population)
+    };
+
+    return res.status(200).json(citysStats[index]);
+});
+
+// DELETE colección completa
+app.delete(BASE_API_URL_LCC, (req, res) => {
+    citysStats = [];
+    return res.status(200).json([]);
+});
+
+// DELETE recurso concreto
+app.delete(BASE_API_URL_LCC + "/:city/:country", (req, res) => {
+    const city = req.params.city.toLowerCase();
+    const country = req.params.country.toLowerCase();
+
+    const index = citysStats.findIndex(
+        d => d.city === city && d.country === country
+    );
+
+    if (index === -1) {
+        return res.status(404).json({ error: "Resource not found" });
+    }
+
+    citysStats.splice(index, 1);
+    return res.status(200).json({ message: "Deleted" });
+});
+
+// POST recurso concreto no permitido
+app.post(BASE_API_URL_LCC + "/:city/:country", (req, res) => {
+    return res.status(405).json({ error: "Method not allowed" });
+});
+
+// PUT colección no permitido
+app.put(BASE_API_URL_LCC, (req, res) => {
+    return res.status(405).json({ error: "Method not allowed" });
+});
+
 //LCC
 
 
