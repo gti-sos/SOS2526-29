@@ -1,24 +1,59 @@
 {
   "info": {
     "_postman_id": "9adb84f0-5a35-4579-a20a-c34643803dac",
-    "name": "Pruebas-API-F05-ALG",
+    "name": "Pruebas-API-ALG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "52437562",
     "_collection_link": "https://go.postman.co/collection/52437562-9adb84f0-5a35-4579-a20a-c34643803dac?source=collection_link"
   },
   "item": [
     {
+      "name": "Delete All",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET All (vacio)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Load Initial Data",
       "request": {
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/loadInitialData",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters/loadInitialData",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -36,12 +71,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -58,12 +90,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/afghanistan/1950",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters/afghanistan/1950",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -91,12 +120,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -122,12 +148,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/afghanistan/1950",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters/afghanistan/1950",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -146,12 +169,9 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/spain/2025",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters/spain/2025",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -159,28 +179,6 @@
             "natural-disasters",
             "spain",
             "2025"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Delete All",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
-          "protocol": "https",
-          "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "natural-disasters"
           ]
         }
       },
@@ -201,12 +199,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/afghanistan/1950",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters/afghanistan/1950",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -234,12 +229,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -265,12 +257,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -287,12 +276,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/pais-inventado/1111",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters/pais-inventado/1111",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -311,12 +297,9 @@
         "method": "POST",
         "header": [],
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters/afghanistan/1960",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters/afghanistan/1960",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -335,12 +318,9 @@
         "method": "PUT",
         "header": [],
         "url": {
-          "raw": "https://sos2526-29.onrender.com/api/v1/natural-disasters",
-          "protocol": "https",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
           "host": [
-            "sos2526-29",
-            "onrender",
-            "com"
+            "{{BASE_URL}}"
           ],
           "path": [
             "api",
@@ -374,12 +354,6 @@
           ""
         ]
       }
-    }
-  ],
-  "variable": [
-    {
-      "key": "datos",
-      "value": ""
     }
   ]
 }

@@ -15,12 +15,21 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "express": "^5.2.1",
-    "cool-ascii-faces": "^1.3.4"
+  "start": "node index.js",
+  
+  "test-local-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
+  "test-online-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/online_env.json",
 
+  "test": "npm run test-ALG && npm run test-RMP && npm run test-LCC",
+  "test-RMP": "echo 'Rufino: falta añadir tu comando' && exit 0",
+  "test-LCC": "echo 'Luis: falta añadir tu comando' && exit 0"
+},
+  "dependencies": {
+    "@seald-io/nedb": "^4.1.2",
+    "cool-ascii-faces": "^1.3.4",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "newman": "^6.2.2"
   }
 }
