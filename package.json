@@ -17,10 +17,10 @@
   "scripts": {
   "start": "node index.js",
   
-  "test-local-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
+  "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
   "test-online-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/online_env.json",
 
-  "test": "npm run test-ALG && npm run test-RMP && npm run test-LCC",
+  "test": "npm run test-local-ALG && npm run test-RMP && npm run test-LCC",
   "test-RMP": "echo 'Rufino: falta añadir tu comando' && exit 0",
   "test-LCC": "echo 'Luis: falta añadir tu comando' && exit 0"
 },
