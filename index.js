@@ -1,282 +1,70 @@
-
-
-//INDEX DEFINITIVO
-
-
 const express = require("express");
 const path = require("path");
-const Datastore = require('@seald-io/nedb'); // Versión compatible con Node v24
+const Datastore = require("@seald-io/nedb");
 
 const app = express();
-app.use(express.json()); // Vital para que los POST/PUT funcionen
-
 const port = process.env.PORT || 10000;
 
+app.use(express.json());
+
 // =============================================================================
-// 1. CONFIGURACIÓN DE BASES DE DATOS (Persistencia con NeDB)
+// 1. CONFIGURACIÓN DE BASES DE DATOS
 // =============================================================================
 
 // --- Base de Datos de Alberto (ALG) ---
-const db_ND = new Datastore({ 
-    filename: path.join(__dirname, 'src', 'back', 'natural-disasters.db'), 
-    autoload: true 
+const db_ND = new Datastore({
+    filename: path.join(__dirname, "src", "back", "natural-disasters.db"),
+    autoload: true
+});
+
+// --- Base de Datos de Luis (LCC) ---
+const db_LCC = new Datastore({
+    filename: path.join(__dirname, "src", "back", "citys-stats.db"),
+    autoload: true
 });
 
 // --- Base de Datos de Rufino (RMP) ---
-// Rufino: Descomenta y configura cuando pases a F06
-// const db_RMP = new Datastore({ filename: path.join(__dirname, 'src', 'back', 'wine-stats.db'), autoload: true });
-
-// --- Base de Datos de Luis (LCC) ---
-// Luis: Descomenta y configura cuando pases a F06
-// const db_LCC = new Datastore({ filename: path.join(__dirname, 'src', 'back', 'citys-stats.db'), autoload: true });
-
+// const db_RMP = new Datastore({
+//     filename: path.join(__dirname, "src", "back", "wine-stats.db"),
+//     autoload: true
+// });
 
 // =============================================================================
-// 2. CARGA DE MÓDULOS DE LA API (Modularización v1)
+// 2. CARGA DE MÓDULOS DE LA API
 // =============================================================================
 
 // --- API de Alberto (ALG) ---
 const naturalDisastersAPI = require("./src/back/v1/natural-disasters");
 naturalDisastersAPI(app, db_ND);
 
+// --- API de Luis (LCC) ---
+const citysStatsAPI = require("./src/back/v1/citys-stats");
+citysStatsAPI(app, db_LCC);
+
 // --- API de Rufino (RMP) ---
-// Rufino: Cuando tengas tu archivo wine-stats.js en src/back/v1/, añade:
+// Cuando Rufino la modularice:
 // require("./src/back/v1/wine-stats")(app, db_RMP);
 
-// --- API de Luis (LCC) ---
-// Luis: Cuando tengas tu archivo citys-stats.js en src/back/v1/, añade:
-// require("./src/back/v1/citys-stats")(app, db_LCC);
-
-
 // =============================================================================
-// 3. SERVIDORES ESTÁTICOS Y RUTAS DE INFORMACIÓN (Mantenidas)
+// 3. ESTÁTICOS Y RUTAS DE INFORMACIÓN
 // =============================================================================
 
-// Carpeta pública para el index.html y otros estáticos
 app.use("/", express.static(path.join(__dirname, "public")));
 
-// Ruta explícita para el About (Hito anterior)
 app.get("/about", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "about.html"));
 });
 
-
 // =============================================================================
-// 4. ARRANQUE DEL SERVIDOR
+// 4. CÓDIGO ACTUAL DE RMP (SE MANTIENE TAL CUAL)
 // =============================================================================
-app.listen(port, () => {
-    console.log(`>>> Servidor SOS2526-29 listo en puerto ${port}`);
-    console.log(`>>> API ALG: http://localhost:${port}/api/v1/natural-disasters`);
-});
 
+const { datosVinos, mediaPrecioPorPais } = require("./index-RMP.js");
 
-//INDEX DEFINITIVO END
-
-
-
-
-
-const { datosVinos, mediaPrecioPorPais } = require('./index-RMP.js');
-
-
-
-//LCC LUIS CORTES COBOS
-app.get("/samples/LCC", (req, res) => {
-    const data = [
-        { City: "Delhi",     Country: "India", UN_2025_population: 30222405 },
-        { City: "Shanghai",  Country: "China", UN_2025_population: 29558908 },
-        { City: "Guangzhou", Country: "China", UN_2025_population: 27563372 },
-        { City: "Kolkata",   Country: "India", UN_2025_population: 22549738 },
-        { City: "Mumbai",    Country: "India", UN_2025_population: 20203056 },
-        { City: "Beijing",   Country: "China", UN_2025_population: 17013303 },
-        { City: "Shenzhen",  Country: "China", UN_2025_population: 13878396 },
-        { City: "Bengaluru", Country: "India", UN_2025_population: 13187098 },
-        { City: "Chennai",   Country: "India", UN_2025_population: 11153205 },
-        { City: "Hyderabad", Country: "India", UN_2025_population: 9190795 },
-        { City: "Suzhou",    Country: "China", UN_2025_population: 7731101 },
-        { City: "Ahmedabad", Country: "India", UN_2025_population: 7632408 }
-    ];
-
-    const targetCountry = "China";
-    const subset = data.filter(row => row.Country === targetCountry);
-
-    if (subset.length === 0) {
-        return res.status(200).send(`No hay filas para Country="${targetCountry}"`);
-    }
-
-    const avg =
-        subset
-            .map(row => row.UN_2025_population)
-            .reduce((acc, v) => acc + v, 0) / subset.length;
-
-    res.status(200).send(`
-        <html>
-        <body style="font-family: Arial;">
-            <h1>Sample LCC</h1>
-            <p><strong>Country analizado:</strong> ${targetCountry}</p>
-            <p><strong>Filas usadas:</strong> ${subset.length}</p>
-            <p><strong>Media de UN_2025_population:</strong> ${avg}</p>
-            <hr>
-            <a href="/about">Volver a About</a>
-        </body>
-        </html>
-    `);
-});
-
-// API PERSONAL LCC - citys-stats
-let citysStats = [];
-const BASE_API_URL_LCC = "/api/v1/citys-stats";
-
-app.get(BASE_API_URL_LCC + "/loadInitialData", (req, res) => {
-    if (citysStats.length === 0) {
-        citysStats = [
-            { city: "jakarta", country: "indonesia", un_2025_population: 41913860 },
-            { city: "dhaka", country: "bangladesh", un_2025_population: 36585479 },
-            { city: "tokyo", country: "japan", un_2025_population: 33412512 },
-            { city: "delhi", country: "india", un_2025_population: 30222405 },
-            { city: "shanghai", country: "china", un_2025_population: 29558908 },
-            { city: "guangzhou", country: "china", un_2025_population: 27563372 },
-            { city: "cairo", country: "egypt", un_2025_population: 25566102 },
-            { city: "manila", country: "philippines", un_2025_population: 24735305 },
-            { city: "kolkata", country: "india", un_2025_population: 22549738 },
-            { city: "seoul", country: "south-korea", un_2025_population: 22490482 },
-            { city: "karachi", country: "pakistan", un_2025_population: 21422590 },
-            { city: "mumbai", country: "india", un_2025_population: 20203056 }
-        ];
-        return res.status(201).json(citysStats);
-    }
-
-    return res.status(200).json(citysStats);
-});
-
-// GET colección completa
-app.get(BASE_API_URL_LCC, (req, res) => {
-    return res.status(200).json(citysStats);
-});
-
-// GET recurso concreto por city y country
-app.get(BASE_API_URL_LCC + "/:city/:country", (req, res) => {
-    const city = req.params.city.toLowerCase();
-    const country = req.params.country.toLowerCase();
-
-    const item = citysStats.find(
-        d => d.city === city && d.country === country
-    );
-
-    if (!item) {
-        return res.status(404).json({ error: "Resource not found" });
-    }
-
-    return res.status(200).json(item);
-});
-
-// POST colección
-app.post(BASE_API_URL_LCC, (req, res) => {
-    const newData = req.body;
-
-    if (!newData || !newData.city || !newData.country || newData.un_2025_population === undefined) {
-        return res.status(400).json({ error: "Bad request" });
-    }
-
-    const city = String(newData.city).toLowerCase();
-    const country = String(newData.country).toLowerCase();
-    const un_2025_population = Number(newData.un_2025_population);
-
-    const exists = citysStats.some(
-        d => d.city === city && d.country === country
-    );
-
-    if (exists) {
-        return res.status(409).json({ error: "Conflict" });
-    }
-
-    const item = {
-        city,
-        country,
-        un_2025_population
-    };
-
-    citysStats.push(item);
-    return res.status(201).json(item);
-});
-
-// PUT recurso concreto
-app.put(BASE_API_URL_LCC + "/:city/:country", (req, res) => {
-    const city = req.params.city.toLowerCase();
-    const country = req.params.country.toLowerCase();
-    const body = req.body;
-
-    if (!body || !body.city || !body.country || body.un_2025_population === undefined) {
-        return res.status(400).json({ error: "Bad request" });
-    }
-
-    if (
-        String(body.city).toLowerCase() !== city ||
-        String(body.country).toLowerCase() !== country
-    ) {
-        return res.status(400).json({ error: "URL and body do not match" });
-    }
-
-    const index = citysStats.findIndex(
-        d => d.city === city && d.country === country
-    );
-
-    if (index === -1) {
-        return res.status(404).json({ error: "Resource not found" });
-    }
-
-    citysStats[index] = {
-        city,
-        country,
-        un_2025_population: Number(body.un_2025_population)
-    };
-
-    return res.status(200).json(citysStats[index]);
-});
-
-// DELETE colección completa
-app.delete(BASE_API_URL_LCC, (req, res) => {
-    citysStats = [];
-    return res.status(200).json([]);
-});
-
-// DELETE recurso concreto
-app.delete(BASE_API_URL_LCC + "/:city/:country", (req, res) => {
-    const city = req.params.city.toLowerCase();
-    const country = req.params.country.toLowerCase();
-
-    const index = citysStats.findIndex(
-        d => d.city === city && d.country === country
-    );
-
-    if (index === -1) {
-        return res.status(404).json({ error: "Resource not found" });
-    }
-
-    citysStats.splice(index, 1);
-    return res.status(200).json({ message: "Deleted" });
-});
-
-// POST recurso concreto no permitido
-app.post(BASE_API_URL_LCC + "/:city/:country", (req, res) => {
-    return res.status(405).json({ error: "Method not allowed" });
-});
-
-// PUT colección no permitido
-app.put(BASE_API_URL_LCC, (req, res) => {
-    return res.status(405).json({ error: "Method not allowed" });
-});
-
-//LCC
-
-
-
-
-
-
-//RUFINO 
+// Sample RMP
 app.get("/samples/RMP", (req, res) => {
-    mediaSpain = mediaPrecioPorPais(datosVinos, "Spain")
+    const mediaSpain = mediaPrecioPorPais(datosVinos, "Spain");
+
     res.send(`
         <html>
         <body style="font-family: Arial;">
@@ -323,7 +111,6 @@ app.get(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
     return res.status(200).json(wineStats);
 });
 
-// GET recurso concreto por id
 app.get(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     const id = Number(req.params.id);
 
@@ -336,15 +123,12 @@ app.get(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     return res.status(200).json(encontrado);
 });
 
-// POST a un recurso concreto NO permitido
-// POST /api/v1/wine-stats/:id
 app.post(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     return res.status(405).json({
         error: "Método POST no permitido sobre un recurso concreto (usa POST sobre la colección)"
     });
 });
 
-// POST nuevo vino
 app.post(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ error: "Body vacío o no es JSON" });
@@ -358,9 +142,10 @@ app.post(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
         });
     }
 
-    const yaExiste = wineStats.find(v =>
-        v.title === String(title) && v.year === Number(year)
+    const yaExiste = wineStats.find(
+        v => v.title === String(title) && v.year === Number(year)
     );
+
     if (yaExiste) {
         return res.status(409).json({
             error: `Ya existe un vino con title="${title}" y year="${year}"`
@@ -368,16 +153,16 @@ app.post(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
     }
 
     const nuevoVino = {
-        id:       wineStats.length + 1,
-        title:    req.body.title,
-        country:  req.body.country.toLowerCase(),
-        region:   req.body.region ? req.body.region.toLowerCase() : "",
-        year:     Number(req.body.year),
-        price:    Number(req.body.price),
-        abv:      Number(req.body.abv),
-        unit:     Number(req.body.unit),
-        grape:    req.body.grape,
-        type:     req.body.type,
+        id: wineStats.length + 1,
+        title: req.body.title,
+        country: req.body.country.toLowerCase(),
+        region: req.body.region ? req.body.region.toLowerCase() : "",
+        year: Number(req.body.year),
+        price: Number(req.body.price),
+        abv: Number(req.body.abv),
+        unit: Number(req.body.unit),
+        grape: req.body.grape,
+        type: req.body.type,
         capacity: Number(req.body.capacity)
     };
 
@@ -385,15 +170,12 @@ app.post(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
     return res.status(201).json(nuevoVino);
 });
 
-// PUT sobre la colección raíz NO permitido
-// PUT /api/v1/wine-stats
 app.put(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
     return res.status(405).json({
         error: "Método PUT no permitido sobre la colección completa (usa PUT /wine-stats/:id)"
     });
 });
 
-// PUT /api/v1/wine-stats/:id (actualizar un vino por id)
 app.put(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     const id = Number(req.params.id);
 
@@ -416,33 +198,33 @@ app.put(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     }
 
     const index = wineStats.findIndex(v => v.id === id);
+
     if (index === -1) {
         return res.status(404).json({ error: `No encontrado vino con id: ${id}` });
     }
 
     wineStats[index] = {
-        id:       id,
-        title:    req.body.title,
-        country:  req.body.country.toLowerCase(),
-        region:   req.body.region ? req.body.region.toLowerCase() : "",
-        year:     Number(req.body.year),
-        price:    Number(req.body.price),
-        abv:      Number(req.body.abv),
-        unit:     Number(req.body.unit),
-        grape:    req.body.grape,
-        type:     req.body.type,
+        id: id,
+        title: req.body.title,
+        country: req.body.country.toLowerCase(),
+        region: req.body.region ? req.body.region.toLowerCase() : "",
+        year: Number(req.body.year),
+        price: Number(req.body.price),
+        abv: Number(req.body.abv),
+        unit: Number(req.body.unit),
+        grape: req.body.grape,
+        type: req.body.type,
         capacity: Number(req.body.capacity)
     };
 
     return res.status(200).json(wineStats[index]);
 });
 
-
-// DELETE borrar por id
 app.delete(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     const id = Number(req.params.id);
 
     const index = wineStats.findIndex(d => d.id === id);
+
     if (index === -1) {
         return res.status(404).json({ error: `No encontrado vino con id: ${id}` });
     }
@@ -451,32 +233,18 @@ app.delete(`${BASE_API_URL}/${RECURSORMP}/:id`, (req, res) => {
     return res.status(200).json({ message: `Vino con id: ${id} eliminado` });
 });
 
-// DELETE borrar toda la colección
 app.delete(`${BASE_API_URL}/${RECURSORMP}`, (req, res) => {
     wineStats = [];
     return res.status(200).json({ message: `Colección ${RECURSORMP} vaciada` });
 });
 
+// =============================================================================
+// 5. ARRANQUE DEL SERVIDOR
+// =============================================================================
 
-
-// 5. Arrancar el servidor (al final del archivo)
 app.listen(port, () => {
-    console.log(`Servidor listo en el puerto ${port}`);
+    console.log(`>>> Servidor SOS2526-29 listo en puerto ${port}`);
+    console.log(`>>> API ALG: http://localhost:${port}/api/v1/natural-disasters`);
+    console.log(`>>> API LCC: http://localhost:${port}/api/v1/citys-stats`);
+    console.log(`>>> API RMP: http://localhost:${port}/api/v1/wine-stats`);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

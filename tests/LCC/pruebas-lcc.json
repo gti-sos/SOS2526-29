@@ -1,0 +1,849 @@
+{
+  "info": {
+    "_postman_id": "0d8fb8d2-5a57-4d48-a7cf-lcc-tests",
+    "name": "LCC - citys-stats tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 DELETE collection - reset",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('DELETE collection devuelve 204', function () {",
+              "    pm.expect(pm.response.code).to.eql(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "02 GET collection empty",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('GET collection devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('La colección vacía devuelve array', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "});",
+              "pm.test('La colección está vacía tras reset', function () {",
+              "    pm.expect(data.length).to.eql(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "03 loadInitialData",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('loadInitialData devuelve 201', function () {",
+              "    pm.expect(pm.response.code).to.eql(201);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('loadInitialData devuelve un array', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "});",
+              "pm.test('Hay al menos 10 elementos', function () {",
+              "    pm.expect(data.length).to.be.at.least(10);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/loadInitialData",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "loadInitialData"
+          ]
+        }
+      }
+    },
+    {
+      "name": "04 GET collection after loadInitialData",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('GET collection devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('La colección devuelve un array', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "});",
+              "pm.test('Hay al menos 10 elementos cargados', function () {",
+              "    pm.expect(data.length).to.be.at.least(10);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "05 GET filter by country",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Filtro por country devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Devuelve array', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "});",
+              "pm.test('Hay resultados para china', function () {",
+              "    pm.expect(data.length).to.be.above(0);",
+              "});",
+              "pm.test('Todos los elementos tienen country=china', function () {",
+              "    data.forEach(function (d) {",
+              "        pm.expect(d.country).to.eql('china');",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}?country=china",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [
+            {
+              "key": "country",
+              "value": "china"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "06 GET filter by city",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Filtro por city devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Devuelve array', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "});",
+              "pm.test('Existe tokyo', function () {",
+              "    pm.expect(data.length).to.be.at.least(1);",
+              "});",
+              "pm.test('Todos los elementos tienen city=tokyo', function () {",
+              "    data.forEach(function (d) {",
+              "        pm.expect(d.city).to.eql('tokyo');",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}?city=tokyo",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [
+            {
+              "key": "city",
+              "value": "tokyo"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "07 GET filter by un_2025_population",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Filtro numérico devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Devuelve array', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "});",
+              "pm.test('Todos tienen el valor pedido', function () {",
+              "    data.forEach(function (d) {",
+              "        pm.expect(d.un_2025_population).to.eql(33412512);",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}?un_2025_population=33412512",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [
+            {
+              "key": "un_2025_population",
+              "value": "33412512"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "08 GET pagination",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Paginación devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Devuelve array', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "});",
+              "pm.test('Devuelve exactamente 2 elementos', function () {",
+              "    pm.expect(data.length).to.eql(2);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}?offset=1&limit=2",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [
+            {
+              "key": "offset",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "09 GET concrete resource",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('GET recurso concreto devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Devuelve objeto', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(data.city).to.eql('shanghai');",
+              "    pm.expect(data.country).to.eql('china');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shanghai/china",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shanghai",
+            "china"
+          ]
+        }
+      }
+    },
+    {
+      "name": "10 POST invalid body",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('POST con JSON incorrecto devuelve 400', function () {",
+              "    pm.expect(pm.response.code).to.eql(400);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"madrid\",\n  \"country\": \"spain\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "11 POST valid resource",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('POST correcto devuelve 201', function () {",
+              "    pm.expect(pm.response.code).to.eql(201);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('El recurso creado tiene los campos correctos', function () {",
+              "    pm.expect(data.city).to.eql('madrid');",
+              "    pm.expect(data.country).to.eql('spain');",
+              "    pm.expect(data.un_2025_population).to.eql(7000000);",
+              "    pm.expect(data._id).to.eql(undefined);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"madrid\",\n  \"country\": \"spain\",\n  \"un_2025_population\": 7000000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "12 POST duplicate resource",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('POST duplicado devuelve 409', function () {",
+              "    pm.expect(pm.response.code).to.eql(409);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"madrid\",\n  \"country\": \"spain\",\n  \"un_2025_population\": 7000000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "13 PUT collection not allowed",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('PUT colección devuelve 405', function () {",
+              "    pm.expect(pm.response.code).to.eql(405);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"madrid\",\n  \"country\": \"spain\",\n  \"un_2025_population\": 7100000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "14 POST concrete resource not allowed",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('POST a recurso concreto devuelve 405', function () {",
+              "    pm.expect(pm.response.code).to.eql(405);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"madrid\",\n  \"country\": \"spain\",\n  \"un_2025_population\": 7100000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/madrid/spain",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "madrid",
+            "spain"
+          ]
+        }
+      }
+    },
+    {
+      "name": "15 PUT mismatch URL and body",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('PUT con URL/body distinto devuelve 400', function () {",
+              "    pm.expect(pm.response.code).to.eql(400);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"barcelona\",\n  \"country\": \"spain\",\n  \"un_2025_population\": 7200000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/madrid/spain",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "madrid",
+            "spain"
+          ]
+        }
+      }
+    },
+    {
+      "name": "16 PUT nonexistent resource",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('PUT a recurso inexistente devuelve 404', function () {",
+              "    pm.expect(pm.response.code).to.eql(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"sevilla\",\n  \"country\": \"spain\",\n  \"un_2025_population\": 1500000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/sevilla/spain",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "sevilla",
+            "spain"
+          ]
+        }
+      }
+    },
+    {
+      "name": "17 PUT valid resource",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('PUT correcto devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('El recurso queda actualizado', function () {",
+              "    pm.expect(data.city).to.eql('madrid');",
+              "    pm.expect(data.country).to.eql('spain');",
+              "    pm.expect(data.un_2025_population).to.eql(7100000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"city\": \"madrid\",\n  \"country\": \"spain\",\n  \"un_2025_population\": 7100000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/madrid/spain",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "madrid",
+            "spain"
+          ]
+        }
+      }
+    },
+    {
+      "name": "18 GET updated resource",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('GET del actualizado devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Se mantiene el valor actualizado', function () {",
+              "    pm.expect(data.un_2025_population).to.eql(7100000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/madrid/spain",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "madrid",
+            "spain"
+          ]
+        }
+      }
+    },
+    {
+      "name": "19 DELETE concrete resource",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('DELETE recurso concreto devuelve 204', function () {",
+              "    pm.expect(pm.response.code).to.eql(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/madrid/spain",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "madrid",
+            "spain"
+          ]
+        }
+      }
+    },
+    {
+      "name": "20 DELETE concrete resource again",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('DELETE inexistente devuelve 404', function () {",
+              "    pm.expect(pm.response.code).to.eql(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/madrid/spain",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "madrid",
+            "spain"
+          ]
+        }
+      }
+    },
+    {
+      "name": "21 GET deleted resource filtered",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Filtro tras borrar devuelve 200', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Ya no existe madrid/spain', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "    pm.expect(data.length).to.eql(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}?city=madrid&country=spain",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [
+            {
+              "key": "city",
+              "value": "madrid"
+            },
+            {
+              "key": "country",
+              "value": "spain"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "22 DELETE collection final cleanup",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('DELETE final devuelve 204', function () {",
+              "    pm.expect(pm.response.code).to.eql(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "23 loadInitialData final restore",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Restauración final devuelve 201', function () {",
+              "    pm.expect(pm.response.code).to.eql(201);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Queda una colección estable al final', function () {",
+              "    pm.expect(Array.isArray(data)).to.eql(true);",
+              "    pm.expect(data.length).to.be.at.least(10);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/loadInitialData",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "loadInitialData"
+          ]
+        }
+      }
+    }
+  ]
+}
