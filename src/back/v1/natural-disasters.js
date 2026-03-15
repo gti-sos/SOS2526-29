@@ -158,3 +158,8 @@ module.exports = function (app, db) {
     app.post(BASE_API_URL + "/:country/:year", (req, res) => res.sendStatus(405));
     app.put(BASE_API_URL, (req, res) => res.sendStatus(405));
 };
+
+
+app.get(BASE_API_URL + "/docs", (req, res) => {
+    res.redirect("https://documenter.getpostman.com/view/TU_ID_DE_POSTMAN");
+});
