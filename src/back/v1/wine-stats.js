@@ -94,7 +94,7 @@ module.exports = (app, db) => {
             for (const field of strFields) {
                 if (req.query[field] !== undefined) {
                     result = result.filter(d =>
-                        d[field] === String(req.query[field]).trim().toLowerCase()
+                        d[field].toLowerCase() === String(req.query[field]).trim().toLowerCase() // 👈
                     );
                 }
             }
