@@ -16,15 +16,23 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
+    "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
+    "test-ALG": "npm run test-natural-disasters",
     "test-online-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/online_env.json",
     "test-LCC": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
     "test-online-LCC": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/online_env.json",
+<<<<<<< HEAD
     "test-RMP": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/local_env.json",
     "test-online-RMP": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/online_env.json",
     "test-local": "start-server-and-test start http://localhost:10000 \"npm run test-ALG && npm run test-RMP && npm run test-LCC\"",
     "test-online": "npm run test-online-ALG && npm run test-online-RMP && npm run test-online-LCC",
     "test": "npm run test-local && npm run test-online"
+=======
+    "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
+    "test-online-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/online_env.json",
+    "test-RMP": "echo \"Rufino: falta añadir tu comando\" && exit 0",
+    "test": "npm run test-ALG && npm run test-RMP && npm run test-LCC"
+>>>>>>> 5094b2f6e0745964a68e632672326f70e3ac877e
   },
   "dependencies": {
     "@seald-io/nedb": "^4.1.2",
