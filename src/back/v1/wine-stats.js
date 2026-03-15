@@ -5,7 +5,7 @@ module.exports = (app, db) => {
 
     const DOCS_URL =
         process.env.RMP_DOCS_URL ||
-        "https://documenter.getpostman.com/view/XXXXXXXX/XXXXXXXXX";
+        "https://documenter.getpostman.com/view/33015692/2sBXigMDpp";
 
     const EXPECTED_FIELDS = ["title", "country", "region", "year", "price", "abv", "unit", "grape", "type", "capacity"];
 
