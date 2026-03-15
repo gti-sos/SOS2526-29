@@ -20,15 +20,18 @@
     "test-online-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/online_env.json",
     "test-LCC": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
     "test-online-LCC": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/online_env.json",
-    "test-RMP": "echo 'Rufino: falta añadir tu comando' && exit 0",
-    "test": "npm run test-ALG && npm run test-RMP && npm run test-LCC"
+    "test-RMP": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/local_env.json",
+    "test-online-RMP": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/online_env.json",
+    "test-local": "start-server-and-test start http://localhost:10000 \"npm run test-ALG && npm run test-RMP && npm run test-LCC\"",
+    "test-online": "npm run test-online-ALG && npm run test-online-RMP && npm run test-online-LCC",
+    "test": "npm run test-local && npm run test-online"
   },
   "dependencies": {
     "@seald-io/nedb": "^4.1.2",
-    "cool-ascii-faces": "^1.3.4",
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "newman": "^6.2.2"
+    "newman": "^6.2.2",
+    "start-server-and-test": "^2.1.5"
   }
 }
