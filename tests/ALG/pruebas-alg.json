@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "9adb84f0-5a35-4579-a20a-c34643803dac",
+    "_postman_id": "f0ea4b89-2e38-4ab2-8677-e0d17aa0f552",
     "name": "Pruebas-API-ALG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "52437562",
-    "_collection_link": "https://go.postman.co/collection/52437562-9adb84f0-5a35-4579-a20a-c34643803dac?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/52437562-f0ea4b89-2e38-4ab2-8677-e0d17aa0f552?source=collection_link"
   },
   "item": [
     {
@@ -50,6 +50,11 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"La lista está vacía (0 elementos)\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.length).to.eql(0);\r",
               "});"
             ],
             "type": "text/javascript",
@@ -84,6 +89,12 @@
             "exec": [
               "pm.test(\"Status code is 201\", function () {\r",
               "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"La lista tiene exactamente 11 elementos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    \r",
+              "    pm.expect(jsonData.length).to.eql(11); \r",
               "});"
             ],
             "type": "text/javascript",
@@ -119,6 +130,12 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"La lista tiene exactamente 11 elementos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    \r",
+              "    pm.expect(jsonData.length).to.eql(11); \r",
               "});"
             ],
             "type": "text/javascript",
@@ -153,6 +170,12 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"La lista tiene exactamente 1 elementos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    \r",
+              "    pm.expect(jsonData.length).to.eql(1); \r",
               "});"
             ],
             "type": "text/javascript",
@@ -530,6 +553,40 @@
       ],
       "request": {
         "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "natural-disasters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete All",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
         "header": [],
         "url": {
           "raw": "{{BASE_URL}}/api/v1/natural-disasters",
