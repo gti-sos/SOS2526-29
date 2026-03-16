@@ -1,0 +1,345 @@
+{
+  "info": {
+    "_postman_id": "8d1ef83f-6dc6-4375-810c-b24b08ed37e4",
+    "name": "wine-stats",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "33015692"
+  },
+  "item": [
+    {
+      "name": "loadInitialData",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats/loadInitialData",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats",
+            "loadInitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "wine-stats",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats?country=spain&type=red&limit=3&offset=1",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats"
+          ],
+          "query": [
+            {
+              "key": "country",
+              "value": "spain"
+            },
+            {
+              "key": "type",
+              "value": "red",
+              "type": "text"
+            },
+            {
+              "key": "limit",
+              "value": "3"
+            },
+            {
+              "key": "offset",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"abv\": 14.5,\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats"
+          ],
+          "query": [
+            {
+              "key": "title",
+              "value": "Rioja bueno",
+              "disabled": true
+            },
+            {
+              "key": "country",
+              "value": "Spain",
+              "disabled": true
+            },
+            {
+              "key": "region",
+              "value": "La Mancha",
+              "disabled": true
+            },
+            {
+              "key": "year",
+              "value": "2021",
+              "disabled": true
+            },
+            {
+              "key": "price",
+              "value": "15",
+              "disabled": true
+            },
+            {
+              "key": "abv",
+              "value": "13.5",
+              "disabled": true
+            },
+            {
+              "key": "unit",
+              "value": "10",
+              "disabled": true
+            },
+            {
+              "key": "grape",
+              "value": "uva",
+              "disabled": true
+            },
+            {
+              "key": "type",
+              "value": "corcho",
+              "disabled": true
+            },
+            {
+              "key": "capacity",
+              "value": "75",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post invalido",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"id\": 2,\r\n        \"title\": \"The Guv'nor, Spain\",\r\n        \"country\": \"spain\",\r\n        \"region\": \"\",\r\n        \"year\": 2026,\r\n        \"price\": 10,\r\n        \"abv\": 14,\r\n        \"unit\": 105,\r\n        \"grape\": \"Tempranillo\",\r\n        \"type\": \"Red\",\r\n        \"capacity\": 75\r\n    }"
+        },
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats/:id",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post ya existente",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"abv\": 14.5,\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats/",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"abv\": 14.5,\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n    }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats/:id",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put invalido",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"abv\": 14.5,\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n    }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats/:id",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete id",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats/:id",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
