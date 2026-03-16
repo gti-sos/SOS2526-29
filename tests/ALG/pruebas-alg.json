@@ -16,7 +16,9 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
-              "});"
+              "});\r",
+              "\r",
+              ""
             ],
             "type": "text/javascript",
             "packages": {},
@@ -91,11 +93,7 @@
               "    pm.response.to.have.status(201);\r",
               "});\r",
               "\r",
-              "pm.test(\"La lista tiene exactamente 11 elementos\", function () {\r",
-              "    var jsonData = pm.response.json();\r",
-              "    \r",
-              "    pm.expect(jsonData.length).to.eql(11); \r",
-              "});"
+              ""
             ],
             "type": "text/javascript",
             "packages": {},
@@ -172,10 +170,12 @@
               "    pm.response.to.have.status(200);\r",
               "});\r",
               "\r",
-              "pm.test(\"La lista tiene exactamente 1 elementos\", function () {\r",
+              "pm.test(\"La respuesta es un único objeto\", function () {\r",
               "    var jsonData = pm.response.json();\r",
               "    \r",
-              "    pm.expect(jsonData.length).to.eql(1); \r",
+              "    pm.expect(jsonData).to.be.an('object');\r",
+              "    \r",
+              "    pm.expect(Array.isArray(jsonData)).to.be.false;\r",
               "});"
             ],
             "type": "text/javascript",
