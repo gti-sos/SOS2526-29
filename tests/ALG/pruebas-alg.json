@@ -567,40 +567,6 @@
         }
       },
       "response": []
-    },
-    {
-      "name": "Delete All",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{BASE_URL}}/api/v1/natural-disasters",
-          "host": [
-            "{{BASE_URL}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "natural-disasters"
-          ]
-        }
-      },
-      "response": []
     }
   ],
   "event": [
