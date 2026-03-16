@@ -7,7 +7,7 @@ module.exports = function (app, db) {
 
     // 1. Redirección a la documentación (Requisito F06)
     app.get(BASE_API_URL + "/docs", (req, res) => {
-        res.redirect("https://documenter.getpostman.com/view/52437562/2sAYX5Kup9"); 
+        res.redirect("https://documenter.getpostman.com/view/52437562/2sBXigNZSu"); 
     });
 
     // 2. Load Initial Data (GET) - Carga 10+ datos si está vacío
