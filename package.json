@@ -20,8 +20,8 @@
   "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
   "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
 
-  "test-ALG": "start-server-and-test start http://localhost:10000/api/v1/natural-disasters \"npm run test-natural-disasters:raw\"",
-  "test-LCC": "start-server-and-test start http://localhost:10000/api/v1/citys-stats \"npm run test-citys-stats:raw\"",
+  "test-ALG": "start-server-and-test start http://localhost:10000/api/v1/natural-disasters \"npm run test-natural-disasters\"",
+  "test-LCC": "start-server-and-test start http://localhost:10000/api/v1/citys-stats \"npm run test-citys-stats\"",
 
   "test-online-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/online_env.json",
   "test-online-LCC": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/online_env.json",
