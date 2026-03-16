@@ -17,8 +17,8 @@
   "scripts": {
   "start": "node index.js",
 
-  "test-natural-disasters:raw": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
-  "test-citys-stats:raw": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
+  "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
+  "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
 
   "test-ALG": "start-server-and-test start http://localhost:10000/api/v1/natural-disasters \"npm run test-natural-disasters:raw\"",
   "test-LCC": "start-server-and-test start http://localhost:10000/api/v1/citys-stats \"npm run test-citys-stats:raw\"",
