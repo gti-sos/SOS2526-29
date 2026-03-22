@@ -3,7 +3,7 @@ module.exports = (app, db) => {
 
     const DOCS_URL =
         process.env.LCC_DOCS_V2_URL ||
-        "https://luiscortescobos18-2627695.postman.co/workspace/Luis-Cortes's-Workspace~3f1c8763-235a-4d56-8df6-2bb7878555f1/collection/52412147-1cafc0b6-f1e8-421e-8003-b1e5f4f58fc0?action=share&source=copy-link&creator=52412147";
+        "https://luiscortescobos18-2627695.postman.co/workspace/3f1c8763-235a-4d56-8df6-2bb7878555f1/documentation/52412147-a212aca4-ba3f-441a-8712-dcb470ae83ba";
 
     const initialData = [
         { city: "jakarta", country: "indonesia", un_2025_population: 41913860 },
