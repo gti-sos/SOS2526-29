@@ -168,8 +168,12 @@
       "request": {
         "method": "DELETE",
         "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"country\": \"italy\",\r\n        \"year\": 1950,\r\n        \"death_count\": 245,\r\n        \"injured_count\": 200,\r\n        \"economic_damage_usd\": 0\r\n    }"
+        },
         "url": {
-          "raw": "{{BASE_URL}}/api/v1/natural-disasters/spain/2025",
+          "raw": "{{BASE_URL}}/api/v1/natural-disasters/afghanistan/2010",
           "host": [
             "{{BASE_URL}}"
           ],
@@ -177,8 +181,8 @@
             "api",
             "v1",
             "natural-disasters",
-            "spain",
-            "2025"
+            "afghanistan",
+            "2010"
           ]
         }
       },
