@@ -1,10 +1,19 @@
 <script>
+  const isViteLocal =
+    window.location.hostname === "localhost" && window.location.port === "5173";
+
+  const API_ORIGIN = isViteLocal
+    ? "http://localhost:10000"
+    : window.location.origin;
+
   const group = {
     name: "SOS2526-29",
     description:
       "Our project analyzes the correlation between natural disasters, city statistics and wine-related data.",
     repository: "https://github.com/gti-sos/SOS2526-29",
-    deployUrl: "https://sos2526-29.onrender.com"
+    deployUrl: isViteLocal
+      ? "http://localhost:10000/#/"
+      : `${window.location.origin}/#/`
   };
 
   const members = [
@@ -12,22 +21,22 @@
       name: "Rufino Moreno Pacheco",
       resource: "wine-stats",
       frontendUrl: "#/wine-stats",
-      apiUrl: "https://sos2526-29.onrender.com/api/v1/wine-stats",
-      docsUrl: "https://sos2526-29.onrender.com/api/v1/wine-stats/docs"
+      apiUrl: `${API_ORIGIN}/api/v1/wine-stats`,
+      docsUrl: `${API_ORIGIN}/api/v1/wine-stats/docs`
     },
     {
       name: "Luis Cortes Cobos",
       resource: "citys-stats",
       frontendUrl: "#/citys-stats",
-      apiUrl: "https://sos2526-29.onrender.com/api/v2/citys-stats",
-      docsUrl: "https://sos2526-29.onrender.com/api/v2/citys-stats/docs"
+      apiUrl: `${API_ORIGIN}/api/v2/citys-stats`,
+      docsUrl: `${API_ORIGIN}/api/v2/citys-stats/docs`
     },
     {
       name: "Alberto Lirola Gomez",
       resource: "natural-disasters",
       frontendUrl: "#/natural-disasters",
-      apiUrl: "https://sos2526-29.onrender.com/api/v1/natural-disasters",
-      docsUrl: "https://sos2526-29.onrender.com/api/v1/natural-disasters/docs"
+      apiUrl: `${API_ORIGIN}/api/v1/natural-disasters`,
+      docsUrl: `${API_ORIGIN}/api/v1/natural-disasters/docs`
     }
   ];
 </script>
