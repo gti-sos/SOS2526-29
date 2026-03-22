@@ -8,6 +8,28 @@
   "item": [
     {
       "name": "loadInitialData",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"La lista tiene exactamente 10 elementos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    \r",
+              "    // Cambia el 5 por el número exacto de elementos que insertas\r",
+              "    pm.expect(jsonData.length).to.eql(10); \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -28,6 +50,28 @@
     },
     {
       "name": "wine-stats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"La lista tiene exactamente 10 elementos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    \r",
+              "    // Cambia el 5 por el número exacto de elementos que insertas\r",
+              "    pm.expect(jsonData.length).to.eql(10); \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -47,6 +91,22 @@
     },
     {
       "name": "id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -67,8 +127,7 @@
             },
             {
               "key": "type",
-              "value": "red",
-              "type": "text"
+              "value": "red"
             },
             {
               "key": "limit",
@@ -85,6 +144,22 @@
     },
     {
       "name": "post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -164,7 +239,119 @@
       "response": []
     },
     {
+      "name": "post json incorrecto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"abv\": 14.5,\r\n    \"d\":\"slkñs\",\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats"
+          ],
+          "query": [
+            {
+              "key": "title",
+              "value": "Rioja bueno",
+              "disabled": true
+            },
+            {
+              "key": "country",
+              "value": "Spain",
+              "disabled": true
+            },
+            {
+              "key": "region",
+              "value": "La Mancha",
+              "disabled": true
+            },
+            {
+              "key": "year",
+              "value": "2021",
+              "disabled": true
+            },
+            {
+              "key": "price",
+              "value": "15",
+              "disabled": true
+            },
+            {
+              "key": "abv",
+              "value": "13.5",
+              "disabled": true
+            },
+            {
+              "key": "unit",
+              "value": "10",
+              "disabled": true
+            },
+            {
+              "key": "grape",
+              "value": "uva",
+              "disabled": true
+            },
+            {
+              "key": "type",
+              "value": "corcho",
+              "disabled": true
+            },
+            {
+              "key": "capacity",
+              "value": "75",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "post invalido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -195,6 +382,23 @@
     },
     {
       "name": "post ya existente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {\r",
+              "    pm.response.to.have.status(409);\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
@@ -224,12 +428,81 @@
     },
     {
       "name": "put",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [],
         "body": {
           "mode": "raw",
           "raw": "{\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"abv\": 14.5,\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n    }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats/:id",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put json incorrecto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"skk\":\"kssds\",\r\n    \"abv\": 14.5,\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n    }",
           "options": {
             "raw": {
               "language": "json"
@@ -259,12 +532,29 @@
     },
     {
       "name": "put invalido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"abv\": 14.5,\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n    }",
+          "raw": "{\r\n    \"id\":4,\r\n    \"title\": \"Marqués de Riscadl Rioja Reserva 2018/19\",\r\n    \"country\": \"spain\",\r\n    \"region\": \"rioja and navarra\",\r\n    \"year\": 2019,\r\n    \"price\": 17.99,\r\n    \"abv\": 14.5,\r\n    \"unit\": 109,\r\n    \"grape\": \"Tempranillo\",\r\n    \"type\": \"Red\",\r\n    \"capacity\": 75\r\n    }",
           "options": {
             "raw": {
               "language": "json"
@@ -294,6 +584,21 @@
     },
     {
       "name": "delete id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {\r",
+              "    pm.response.to.have.status(204);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "DELETE",
         "header": [],
@@ -319,7 +624,57 @@
       "response": []
     },
     {
+      "name": "delete json incorrecto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/api/v1/wine-stats/spain",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "wine-stats",
+            "spain"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "delete",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {\r",
+              "    pm.response.to.have.status(204);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "DELETE",
         "header": [],
