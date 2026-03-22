@@ -15,23 +15,21 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-  "start": "node index.js",
-
-  "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
-  "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
-  "test-wine-stats": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/local_env.json",
-
-  "test-ALG": "start-server-and-test start http://localhost:10000/api/v1/natural-disasters \"npm run test-natural-disasters\"",
-  "test-LCC": "start-server-and-test start http://localhost:10000/api/v1/citys-stats \"npm run test-citys-stats\"",
-  "test-RMP": "start-server-and-test start http://localhost:10000/api/v1/wine-stats \"npm run test-wine-stats\"",
-  "test-online-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/online_env.json",
-  "test-online-LCC": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/online_env.json",
-
-  "test": "npm run test-ALG && npm run test-RMP && npm run test-LCC"
-},
+    "start": "node index.js",
+    "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
+    "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
+    "test-wine-stats": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/local_env.json",
+    "test-ALG": "start-server-and-test start http://localhost:10000/api/v1/natural-disasters \"npm run test-natural-disasters\"",
+    "test-LCC": "start-server-and-test start http://localhost:10000/api/v1/citys-stats \"npm run test-citys-stats\"",
+    "test-RMP": "start-server-and-test start http://localhost:10000/api/v1/wine-stats \"npm run test-wine-stats\"",
+    "test-online-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/online_env.json",
+    "test-online-LCC": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/online_env.json",
+    "test": "npm run test-ALG && npm run test-RMP && npm run test-LCC"
+  },
   "dependencies": {
     "@seald-io/nedb": "^4.1.2",
     "cool-ascii-faces": "^1.3.4",
+    "cors": "^2.8.6",
     "express": "^5.2.1"
   },
   "devDependencies": {

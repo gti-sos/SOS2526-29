@@ -1,11 +1,15 @@
 const express = require("express");
 const path = require("path");
 const Datastore = require("@seald-io/nedb");
+const cors = require("cors");
 
 const app = express();
 const port = process.env.PORT || 10000;
 
+app.use(cors());
 app.use(express.json());
+
+
 
 // =============================================================================
 // 1. CONFIGURACIÓN DE BASES DE DATOS
@@ -41,6 +45,9 @@ naturalDisastersAPI(app, db_ND);
 const citysStatsAPI = require("./src/back/v1/citys-stats");
 citysStatsAPI(app, db_LCC);
 
+const citysStatsAPIV2 = require("./src/back/v2/citys-stats");
+citysStatsAPIV2(app, db_LCC);
+
 // --- API de Rufino (RMP) ---
 // Cuando Rufino la modularice:
 const wineStatsAPI = require("./src/back/v1/wine-stats");
@@ -68,4 +75,6 @@ app.listen(port, () => {
     console.log(`>>> API ALG: http://localhost:${port}/api/v1/natural-disasters`);
     console.log(`>>> API LCC: http://localhost:${port}/api/v1/citys-stats`);
     console.log(`>>> API RMP: http://localhost:${port}/api/v1/wine-stats`);
+
+    console.log(`>>> API LCC v2: http://localhost:${port}/api/v2/citys-stats`);
 });
