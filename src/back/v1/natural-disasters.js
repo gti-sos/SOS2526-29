@@ -7,7 +7,7 @@ module.exports = function (app, db) {
 
     // 1. Redirección a la documentación (Requisito F06)
     app.get(BASE_API_URL + "/docs", (req, res) => {
-        res.redirect("https://documenter.getpostman.com/view/52437562/2sAYX5Kup9"); 
+        res.redirect("https://documenter.getpostman.com/view/52437562/2sBXigNZbk"); 
     });
 
     // 2. Load Initial Data (GET) - Carga 10+ datos si está vacío
@@ -158,3 +158,5 @@ module.exports = function (app, db) {
     app.post(BASE_API_URL + "/:country/:year", (req, res) => res.sendStatus(405));
     app.put(BASE_API_URL, (req, res) => res.sendStatus(405));
 };
+
+//test workflow
