@@ -16,8 +16,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build" :"cd frontend-group && npm run build",
-    "dev-front" : "cd frontend-group && npm run dev -- --open",
+    "build": "cd frontend-group && npm run build",
+    "dev-front": "cd frontend-group && npm run dev -- --open",
     "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
     "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
     "test-wine-stats": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/local_env.json",

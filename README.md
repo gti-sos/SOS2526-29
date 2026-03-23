@@ -15,4 +15,5 @@
   - https://sos2526-29.onrender.com/api/v1/wine-stats/docs (developed by Rufino Moreno Pacheco)
   - https://sos2526-29.onrender.com/api/v1/citys-stats/docs (developed by Luis Cortes Cobos - v1)
   - https://sos2526-29.onrender.com/api/v2/citys-stats/docs (developed by Luis Cortes Cobos - v2)
-  - https://sos2526-29.onrender.com/api/v1/natural-disasters/docs (developed by Alberto Lirola Gomez)
+  - https://sos2526-29.onrender.com/api/v1/natural-disasters/docs (developed by Alberto Lirola Gomez - v1)
+  - https://sos2526-29.onrender.com/api/v2/natural-disasters/docs (developed by ALbero Lirola Gomez - v2)
