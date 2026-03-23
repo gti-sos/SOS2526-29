@@ -1,7 +1,9 @@
 <script>
+  import { onMount } from "svelte";
   import { push } from "svelte-spa-router";
   import {
     getAllWineStats,
+    createWineStat,
     deleteAllWineStats,
     deleteWineStat
   } from "../services/wine-stats.js";
@@ -14,11 +16,25 @@
   let vinos = [];
   let mensaje = "";
   let tipoMensaje = "ok";
+  let mostrarFormulario = false;
+
+  let nuevoVino = {
+    title: "", country: "", region: "", year: 0,
+    price: 0, abv: 0, unit: 0, grape: "", type: "", capacity: 75
+  };
 
   function mostrarMensaje(texto, tipo = "ok") {
     mensaje = texto;
     tipoMensaje = tipo;
     setTimeout(() => (mensaje = ""), 4000);
+  }
+
+  function resetFormulario() {
+    nuevoVino = {
+      title: "", country: "", region: "", year: 0,
+      price: 0, abv: 0, unit: 0, grape: "", type: "", capacity: 75
+    };
+    mostrarFormulario = false;
   }
 
   async function cargarVinos() {
@@ -42,6 +58,17 @@
       }
     } catch (e) {
       mostrarMensaje("No se pudo conectar con el servidor.", "error");
+    }
+  }
+
+  async function añadirVino() {
+    try {
+      await createWineStat(nuevoVino);
+      mostrarMensaje(`Vino "${nuevoVino.title}" añadido correctamente.`);
+      resetFormulario();
+      cargarVinos();
+    } catch (e) {
+      mostrarMensaje(e.message, "error");
     }
   }
 
@@ -71,7 +98,7 @@
     push(`/wine-stats/editar/${id}`);
   }
 
-  cargarVinos();
+  onMount(cargarVinos);
 </script>
 
 <svelte:head>
@@ -85,10 +112,35 @@
     <div class="mensaje {tipoMensaje === 'error' ? 'error' : 'ok'}">{mensaje}</div>
   {/if}
 
+  {#if mostrarFormulario}
+    <section class="card">
+      <h2>➕ Añadir nuevo vino</h2>
+      <div class="form-grid">
+        <label>Título<input bind:value={nuevoVino.title} placeholder="Nombre del vino" /></label>
+        <label>País<input bind:value={nuevoVino.country} placeholder="spain, france..." /></label>
+        <label>Región<input bind:value={nuevoVino.region} placeholder="Rioja, Penedès..." /></label>
+        <label>Año<input type="number" bind:value={nuevoVino.year} /></label>
+        <label>Precio (€)<input type="number" bind:value={nuevoVino.price} /></label>
+        <label>Graduación (%)<input type="number" bind:value={nuevoVino.abv} /></label>
+        <label>Unidades<input type="number" bind:value={nuevoVino.unit} /></label>
+        <label>Uva<input bind:value={nuevoVino.grape} placeholder="Tempranillo..." /></label>
+        <label>Tipo<input bind:value={nuevoVino.type} placeholder="Red, White, Rosé..." /></label>
+        <label>Capacidad (cl)<input type="number" bind:value={nuevoVino.capacity} /></label>
+      </div>
+      <div class="botones-form">
+        <button class="btn-primary" on:click={añadirVino}>💾 Guardar vino</button>
+        <button class="btn-cancel" on:click={resetFormulario}>Cancelar</button>
+      </div>
+    </section>
+  {/if}
+
   <section class="card">
     <div class="list-header">
       <h2>Lista de vinos ({vinos.length})</h2>
       <div class="acciones">
+        <button class="btn-add" on:click={() => mostrarFormulario = !mostrarFormulario}>
+          {mostrarFormulario ? "✖ Cerrar formulario" : "➕ Añadir vino"}
+        </button>
         <button class="btn-secondary" on:click={cargarVinos}>🔄 Actualizar</button>
         <button class="btn-init" on:click={cargarDatosIniciales}>📦 Cargar datos iniciales</button>
         <button class="btn-danger" on:click={borrarTodos}>🗑️ Eliminar todos</button>
@@ -142,6 +194,11 @@
   h1 { font-size: 2rem; margin-bottom: 24px; color: #000000; }
   h2 { margin-top: 0; margin-bottom: 16px; color: #f5f7fb; }
   .card { background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  label { display: flex; flex-direction: column; font-size: 0.85rem; color: #9ca3af; gap: 4px; }
+  input { padding: 8px 10px; border-radius: 8px; border: 1px solid #374151; background: #1f2937; color: #f5f7fb; font-size: 0.95rem; }
+  input:focus { outline: none; border-color: #2563eb; }
+  .botones-form { display: flex; gap: 12px; margin-top: 4px; }
   .list-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
   .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
   .tabla-wrapper { overflow-x: auto; }
@@ -154,6 +211,8 @@
   .mensaje { padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-weight: 500; }
   .mensaje.ok { background: #065f46; color: #6ee7b7; }
   .mensaje.error { background: #7f1d1d; color: #fca5a5; }
+  .btn-add { background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+  .btn-add:hover { background: #15803d; }
   .btn-secondary { background: #374151; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
   .btn-secondary:hover { background: #4b5563; }
   .btn-init { background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
@@ -164,4 +223,8 @@
   .btn-edit:hover { background: #b45309; }
   .btn-danger-sm { background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
   .btn-danger-sm:hover { background: #b91c1c; }
+  .btn-primary { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-cancel { background: #374151; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  .btn-cancel:hover { background: #4b5563; }
 </style>

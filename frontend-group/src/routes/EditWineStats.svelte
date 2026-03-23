@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from "svelte";
   import { pop } from "svelte-spa-router";
   import { getOneWineStat, updateWineStat } from "../services/wine-stats.js";
 
@@ -37,7 +38,7 @@
     }
   }
 
-  cargarVino();
+  onMount(cargarVino);
 </script>
 
 <svelte:head>
