@@ -30,9 +30,12 @@
 
     async function cargarDatos(query = "") {
         try {
-            disasters = await getDisasters(query);
+            const data = await getDisasters(query);
+            disasters = data;
+            return data.length; // <--- Devolvemos la longitud
         } catch (e) {
             mostrarMensaje(e.message, "error");
+            return -1; // <--- Indicamos que hubo un error
         }
     }
 
@@ -90,6 +93,8 @@
     }
 
     // Función para manejar la búsqueda (Requisito del profesor)
+    
+
     async function buscar() {
         let queryParams = [];
         if (searchCountry) queryParams.push(`country=${searchCountry}`);
@@ -97,34 +102,28 @@
         
         let queryString = queryParams.length > 0 ? "?" + queryParams.join("&") : "";
         
-        try {
-            await cargarDatos(queryString);
-            
-            if (disasters.length === 0) {
-                // Construimos el mensaje de error personalizado
-                let errorMsg = "No se han encontrado registros";
-                
-                if (searchCountry && searchYear) {
-                    errorMsg += ` para el país "${searchCountry}" en el año ${searchYear}.`;
-                } else if (searchCountry) {
-                    errorMsg += ` para el país "${searchCountry}".`;
-                } else if (searchYear) {
-                    errorMsg += ` para el año ${searchYear}.`;
-                } else {
-                    errorMsg += " con los criterios introducidos.";
-                }
-                
-                mostrarMensaje(errorMsg, "error");
+        // Ejecutamos la carga y guardamos el número de resultados
+        const numResultados = await cargarDatos(queryString);
+        
+        if (numResultados === 0) {
+            let errorMsg = "No se han encontrado registros";
+            if (searchCountry && searchYear) {
+                errorMsg += ` para el país "${searchCountry}" en el año ${searchYear}.`;
+            } else if (searchCountry) {
+                errorMsg += ` para el país "${searchCountry}".`;
+            } else if (searchYear) {
+                errorMsg += ` para el año ${searchYear}.`;
             } else {
-                // Mensaje de éxito opcional
-                let successMsg = `Se han encontrado ${disasters.length} resultados`;
-                if (searchCountry) successMsg += ` para "${searchCountry}"`;
-                if (searchYear) successMsg += ` del año ${searchYear}`;
-                mostrarMensaje(successMsg, "ok");
+                errorMsg += " con los criterios introducidos.";
             }
-        } catch (e) {
-            mostrarMensaje("Error al conectar con la base de datos", "error");
+            mostrarMensaje(errorMsg, "error");
+        } else if (numResultados > 0) {
+            let successMsg = `Se han encontrado ${numResultados} resultados`;
+            if (searchCountry) successMsg += ` para "${searchCountry}"`;
+            if (searchYear) successMsg += ` del año ${searchYear}`;
+            mostrarMensaje(successMsg, "ok");
         }
+        // Si numResultados es -1, no hacemos nada porque cargarDatos ya mostró su propio error
     }
 
     function limpiarBusqueda() {
