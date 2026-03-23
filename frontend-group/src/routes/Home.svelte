@@ -35,8 +35,8 @@
       name: "Alberto Lirola Gomez",
       resource: "natural-disasters",
       frontendUrl: "#/natural-disasters",
-      apiUrl: `${API_ORIGIN}/api/v1/natural-disasters`,
-      docsUrl: `${API_ORIGIN}/api/v1/natural-disasters/docs`
+      apiUrl: `${API_ORIGIN}/api/v2/natural-disasters`,
+      docsUrl: `${API_ORIGIN}/api/v2/natural-disasters/docs`
     }
   ];
 </script>
