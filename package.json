@@ -32,7 +32,8 @@
     "@seald-io/nedb": "^4.1.2",
     "cool-ascii-faces": "^1.3.4",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "svelte": "^5.54.1"
   },
   "devDependencies": {
     "newman": "^6.2.2",
