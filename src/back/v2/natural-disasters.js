@@ -56,7 +56,7 @@ module.exports = function (app, db) {
         let query = {};
         
         // Búsquedas (Filtering) - Convertimos a número lo que deba ser número
-        if (req.query.country) query.country = req.query.country;
+        if (req.query.country) query.country = new RegExp(req.query.country, 'i');
         if (req.query.year) query.year = parseInt(req.query.year);
         if (req.query.death_count) query.death_count = parseInt(req.query.death_count);
         if (req.query.injured_count) query.injured_count = parseInt(req.query.injured_count);
