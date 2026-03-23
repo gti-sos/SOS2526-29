@@ -90,13 +90,41 @@
     }
 
     // Función para manejar la búsqueda (Requisito del profesor)
-    function buscar() {
+    async function buscar() {
         let queryParams = [];
         if (searchCountry) queryParams.push(`country=${searchCountry}`);
         if (searchYear) queryParams.push(`year=${searchYear}`);
         
         let queryString = queryParams.length > 0 ? "?" + queryParams.join("&") : "";
-        cargarDatos(queryString);
+        
+        try {
+            await cargarDatos(queryString);
+            
+            if (disasters.length === 0) {
+                // Construimos el mensaje de error personalizado
+                let errorMsg = "No se han encontrado registros";
+                
+                if (searchCountry && searchYear) {
+                    errorMsg += ` para el país "${searchCountry}" en el año ${searchYear}.`;
+                } else if (searchCountry) {
+                    errorMsg += ` para el país "${searchCountry}".`;
+                } else if (searchYear) {
+                    errorMsg += ` para el año ${searchYear}.`;
+                } else {
+                    errorMsg += " con los criterios introducidos.";
+                }
+                
+                mostrarMensaje(errorMsg, "error");
+            } else {
+                // Mensaje de éxito opcional
+                let successMsg = `Se han encontrado ${disasters.length} resultados`;
+                if (searchCountry) successMsg += ` para "${searchCountry}"`;
+                if (searchYear) successMsg += ` del año ${searchYear}`;
+                mostrarMensaje(successMsg, "ok");
+            }
+        } catch (e) {
+            mostrarMensaje("Error al conectar con la base de datos", "error");
+        }
     }
 
     function limpiarBusqueda() {
