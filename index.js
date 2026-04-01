@@ -38,8 +38,11 @@ const db_RMP = new Datastore({
 // =============================================================================
 
 // --- API de Alberto (ALG) ---
-const naturalDisastersAPI = require("./src/back/v1/natural-disasters");
-naturalDisastersAPI(app, db_ND);
+const naturalDisastersAPIV1 = require("./src/back/v1/natural-disasters");
+naturalDisastersAPIV1(app, db_ND);
+
+const naturalDisastersAPIV2 = require("./src/back/v2/natural-disasters");
+naturalDisastersAPIV2(app, db_ND);
 
 // --- API de Luis (LCC) ---
 const citysStatsAPI = require("./src/back/v1/citys-stats");
@@ -77,4 +80,5 @@ app.listen(port, () => {
     console.log(`>>> API RMP: http://localhost:${port}/api/v1/wine-stats`);
 
     console.log(`>>> API LCC v2: http://localhost:${port}/api/v2/citys-stats`);
+    console.log(`>>> API ALG v2: http://localhost:${port}/api/v2/natural-disasters`);
 });

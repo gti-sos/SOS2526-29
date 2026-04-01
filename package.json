@@ -16,6 +16,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "build": "cd frontend-group && npm run build",
+    "dev-front": "cd frontend-group && npm run dev -- --open",
     "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
     "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
     "test-citys-stats-v2": "newman run ./tests/LCC/pruebas-lcc-v2.json -e ./tests/LCC/local_env_v2.json",
@@ -34,7 +36,8 @@
     "@seald-io/nedb": "^4.1.2",
     "cool-ascii-faces": "^1.3.4",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "svelte": "^5.54.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",
