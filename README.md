@@ -16,3 +16,34 @@
   - https://sos2526-29.onrender.com/api/v1/citys-stats/docs (developed by Luis Cortes Cobos - v1)
   - https://sos2526-29.onrender.com/api/v2/citys-stats/docs (developed by Luis Cortes Cobos - v2)
   - https://sos2526-29.onrender.com/api/v1/natural-disasters/docs (developed by Alberto Lirola Gomez)
+
+## Parte LCC: city-stats
+
+- **Descripcion breve**: `city-stats` gestiona estadisticas de poblacion estimada para ciudades y paises.
+- **Frontend desplegado**: https://sos2526-29.onrender.com/#/citys-stats
+- **API v1**: https://sos2526-29.onrender.com/api/v1/citys-stats
+- **API v2**: https://sos2526-29.onrender.com/api/v2/citys-stats
+- **Documentacion Postman v1**: https://sos2526-29.onrender.com/api/v1/citys-stats/docs
+- **Documentacion Postman v2**: https://sos2526-29.onrender.com/api/v2/citys-stats/docs
+- **Fuente de datos asociada**: TODO_D02_LCC
+
+### Ejecutar en local
+
+1. `npm install`
+2. `npm --prefix frontend-group install`
+3. `npm start`
+
+El backend y el frontend compilado quedan disponibles en `http://localhost:10000`.
+
+Si quieres trabajar con el frontend de `city-stats` en modo desarrollo:
+
+1. `cd frontend-group`
+2. `npm exec vite -- --configLoader native`
+
+### Probar la parte LCC
+
+- API v1: `npm run test-citys-stats`
+- API v2: `npm run test-citys-stats-v2`
+- E2E Playwright: `npm run test-LCC-e2e`
+- Documentacion online v1: `npm run test-online-LCC`
+- Documentacion online v2: `npm run test-online-LCC-v2`

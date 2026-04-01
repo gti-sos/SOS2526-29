@@ -18,12 +18,16 @@
     "start": "node index.js",
     "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
     "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
+    "test-citys-stats-v2": "newman run ./tests/LCC/pruebas-lcc-v2.json -e ./tests/LCC/local_env_v2.json",
     "test-wine-stats": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/local_env.json",
     "test-ALG": "start-server-and-test start http://localhost:10000/api/v1/natural-disasters \"npm run test-natural-disasters\"",
     "test-LCC": "start-server-and-test start http://localhost:10000/api/v1/citys-stats \"npm run test-citys-stats\"",
+    "test-LCC-v2": "start-server-and-test start http://localhost:10000/api/v2/citys-stats \"npm run test-citys-stats-v2\"",
+    "test-LCC-e2e": "playwright test -c tests/LCC/playwright.config.js",
     "test-RMP": "start-server-and-test start http://localhost:10000/api/v1/wine-stats \"npm run test-wine-stats\"",
     "test-online-ALG": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/online_env.json",
     "test-online-LCC": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/online_env.json",
+    "test-online-LCC-v2": "newman run ./tests/LCC/pruebas-lcc-v2.json -e ./tests/LCC/online_env_v2.json",
     "test": "npm run test-ALG && npm run test-RMP && npm run test-LCC"
   },
   "dependencies": {
@@ -33,6 +37,7 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "newman": "^6.2.2",
     "start-server-and-test": "^2.1.5"
   }

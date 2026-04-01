@@ -9,7 +9,7 @@
   const group = {
     name: "SOS2526-29",
     description:
-      "Our project analyzes the correlation between natural disasters, city statistics and wine-related data.",
+      "Nuestro proyecto analiza la relacion entre desastres naturales, estadisticas de ciudades y datos sobre vino.",
     repository: "https://github.com/gti-sos/SOS2526-29",
     deployUrl: isViteLocal
       ? "http://localhost:10000/#/"
@@ -25,8 +25,9 @@
       docsUrl: `${API_ORIGIN}/api/v1/wine-stats/docs`
     },
     {
-      name: "Luis Cortes Cobos",
-      resource: "citys-stats",
+      name: "Luis Cortes Cobos (LCC)",
+      resource: "city-stats",
+      source: "TODO_D02_LCC",
       frontendUrl: "#/citys-stats",
       apiUrl: `${API_ORIGIN}/api/v2/citys-stats`,
       docsUrl: `${API_ORIGIN}/api/v2/citys-stats/docs`
@@ -42,7 +43,7 @@
 </script>
 
 <svelte:head>
-  <title>SOS2526-29</title>
+  <title>SOS2526-29 | Inicio</title>
 </svelte:head>
 
 <div class="page">
@@ -64,6 +65,9 @@
         <article class="card">
           <h3>{member.name}</h3>
           <p><strong>Fuente de datos / recurso:</strong> {member.resource}</p>
+          {#if member.source}
+            <p><strong>Fuente de datos asociada:</strong> {member.source}</p>
+          {/if}
 
           <div class="buttons">
             <a href={member.frontendUrl}>Frontend</a>
@@ -97,7 +101,6 @@
   }
 
   .hero h1,
-  .hero h2,
   .hero p,
   .members h2,
   .card h3,

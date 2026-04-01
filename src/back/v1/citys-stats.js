@@ -43,7 +43,14 @@ module.exports = (app, db) => {
         const country = String(body.country).trim().toLowerCase();
         const un_2025_population = Number(body.un_2025_population);
 
-        if (!city || !country || !Number.isFinite(un_2025_population)) return null;
+        if (
+            !city ||
+            !country ||
+            !Number.isInteger(un_2025_population) ||
+            un_2025_population <= 0
+        ) {
+            return null;
+        }
 
         return { city, country, un_2025_population };
     }

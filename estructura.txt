@@ -1,0 +1,1544 @@
+Listado de rutas de carpetas para el volumen Acer
+El número de serie del volumen es 2873-0460
+C:.
++---.github
+|   \---workflows
++---frontend-group
+|   +---.vscode
+|   +---dist
+|   |   \---assets
+|   +---node_modules
+|   |   +---.bin
+|   |   +---.vite
+|   |   |   \---deps
+|   |   +---.vite-temp
+|   |   +---@jridgewell
+|   |   |   +---gen-mapping
+|   |   |   |   +---dist
+|   |   |   |   |   \---types
+|   |   |   |   +---src
+|   |   |   |   \---types
+|   |   |   +---remapping
+|   |   |   |   +---dist
+|   |   |   |   +---src
+|   |   |   |   \---types
+|   |   |   +---resolve-uri
+|   |   |   |   \---dist
+|   |   |   |       \---types
+|   |   |   +---sourcemap-codec
+|   |   |   |   +---dist
+|   |   |   |   +---src
+|   |   |   |   \---types
+|   |   |   \---trace-mapping
+|   |   |       +---dist
+|   |   |       +---src
+|   |   |       \---types
+|   |   +---@oxc-project
+|   |   |   \---types
+|   |   +---@rolldown
+|   |   |   +---binding-win32-x64-msvc
+|   |   |   \---pluginutils
+|   |   |       \---dist
+|   |   |           \---filter
+|   |   +---@sveltejs
+|   |   |   +---acorn-typescript
+|   |   |   \---vite-plugin-svelte
+|   |   |       +---src
+|   |   |       |   +---plugins
+|   |   |       |   |   \---inspector
+|   |   |       |   |       \---runtime
+|   |   |       |   +---types
+|   |   |       |   \---utils
+|   |   |       \---types
+|   |   +---@types
+|   |   |   +---estree
+|   |   |   \---trusted-types
+|   |   |       \---lib
+|   |   +---@typescript-eslint
+|   |   |   \---types
+|   |   |       \---dist
+|   |   |           \---generated
+|   |   +---acorn
+|   |   |   +---bin
+|   |   |   \---dist
+|   |   +---aria-query
+|   |   |   \---lib
+|   |   |       +---etc
+|   |   |       |   \---roles
+|   |   |       |       +---abstract
+|   |   |       |       +---dpub
+|   |   |       |       +---graphics
+|   |   |       |       \---literal
+|   |   |       \---util
+|   |   +---axobject-query
+|   |   |   \---lib
+|   |   |       +---etc
+|   |   |       |   \---objects
+|   |   |       \---util
+|   |   +---clsx
+|   |   |   \---dist
+|   |   +---deepmerge
+|   |   |   \---dist
+|   |   +---detect-libc
+|   |   |   \---lib
+|   |   +---devalue
+|   |   |   +---src
+|   |   |   \---types
+|   |   +---esm-env
+|   |   +---esrap
+|   |   |   +---src
+|   |   |   |   \---languages
+|   |   |   |       +---ts
+|   |   |   |       \---tsx
+|   |   |   \---types
+|   |   +---fdir
+|   |   |   \---dist
+|   |   +---is-reference
+|   |   |   +---src
+|   |   |   \---types
+|   |   +---lightningcss
+|   |   |   \---node
+|   |   +---lightningcss-win32-x64-msvc
+|   |   +---locate-character
+|   |   |   +---src
+|   |   |   \---types
+|   |   +---magic-string
+|   |   |   \---dist
+|   |   +---nanoid
+|   |   |   +---async
+|   |   |   +---bin
+|   |   |   +---non-secure
+|   |   |   \---url-alphabet
+|   |   +---obug
+|   |   |   \---dist
+|   |   +---picocolors
+|   |   +---picomatch
+|   |   |   \---lib
+|   |   +---postcss
+|   |   |   \---lib
+|   |   +---regexparam
+|   |   |   \---dist
+|   |   +---rolldown
+|   |   |   +---bin
+|   |   |   \---dist
+|   |   |       \---shared
+|   |   +---source-map-js
+|   |   |   \---lib
+|   |   +---svelte
+|   |   |   +---compiler
+|   |   |   +---src
+|   |   |   |   +---animate
+|   |   |   |   +---attachments
+|   |   |   |   +---compiler
+|   |   |   |   |   +---migrate
+|   |   |   |   |   +---phases
+|   |   |   |   |   |   +---1-parse
+|   |   |   |   |   |   |   +---read
+|   |   |   |   |   |   |   +---state
+|   |   |   |   |   |   |   \---utils
+|   |   |   |   |   |   +---2-analyze
+|   |   |   |   |   |   |   +---css
+|   |   |   |   |   |   |   +---utils
+|   |   |   |   |   |   |   \---visitors
+|   |   |   |   |   |   |       \---shared
+|   |   |   |   |   |   |           \---a11y
+|   |   |   |   |   |   \---3-transform
+|   |   |   |   |   |       +---client
+|   |   |   |   |   |       |   +---transform-template
+|   |   |   |   |   |       |   \---visitors
+|   |   |   |   |   |       |       \---shared
+|   |   |   |   |   |       +---css
+|   |   |   |   |   |       +---server
+|   |   |   |   |   |       |   \---visitors
+|   |   |   |   |   |       |       \---shared
+|   |   |   |   |   |       \---shared
+|   |   |   |   |   +---preprocess
+|   |   |   |   |   +---print
+|   |   |   |   |   \---utils
+|   |   |   |   +---easing
+|   |   |   |   +---events
+|   |   |   |   +---internal
+|   |   |   |   |   +---client
+|   |   |   |   |   |   +---dev
+|   |   |   |   |   |   +---dom
+|   |   |   |   |   |   |   +---blocks
+|   |   |   |   |   |   |   +---elements
+|   |   |   |   |   |   |   |   \---bindings
+|   |   |   |   |   |   |   \---legacy
+|   |   |   |   |   |   \---reactivity
+|   |   |   |   |   +---flags
+|   |   |   |   |   +---server
+|   |   |   |   |   |   \---blocks
+|   |   |   |   |   \---shared
+|   |   |   |   +---legacy
+|   |   |   |   +---motion
+|   |   |   |   +---reactivity
+|   |   |   |   |   \---window
+|   |   |   |   +---server
+|   |   |   |   +---store
+|   |   |   |   |   \---shared
+|   |   |   |   \---transition
+|   |   |   \---types
+|   |   |       \---compiler
+|   |   +---svelte-spa-router
+|   |   |   \---.changeset
+|   |   +---tinyglobby
+|   |   |   \---dist
+|   |   +---vite
+|   |   |   +---bin
+|   |   |   +---dist
+|   |   |   |   +---client
+|   |   |   |   \---node
+|   |   |   |       \---chunks
+|   |   |   +---misc
+|   |   |   \---types
+|   |   |       \---internal
+|   |   +---vitefu
+|   |   |   \---src
+|   |   \---zimmerframe
+|   |       +---src
+|   |       \---types
+|   +---public
+|   \---src
+|       +---assets
+|       +---lib
+|       +---routes
+|       \---services
++---node_modules
+|   +---.bin
+|   +---@colors
+|   |   \---colors
+|   |       +---examples
+|   |       +---lib
+|   |       |   +---custom
+|   |       |   +---maps
+|   |       |   \---system
+|   |       \---themes
+|   +---@faker-js
+|   |   \---faker
+|   |       +---.github
+|   |       +---dist
+|   |       +---lib
+|   |       |   +---image_providers
+|   |       |   \---locales
+|   |       |       +---af_ZA
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---ar
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---date
+|   |       |       |   +---name
+|   |       |       |   +---phone_number
+|   |       |       |   +---team
+|   |       |       |   \---vehicle
+|   |       |       +---az
+|   |       |       |   +---address
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---cz
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---de
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---de_AT
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---de_CH
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---el
+|   |       |       |   +---address
+|   |       |       |   +---app
+|   |       |       |   +---business
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---credit_card
+|   |       |       |   +---finance
+|   |       |       |   +---hacker
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   +---phone_number
+|   |       |       |   \---team
+|   |       |       +---en
+|   |       |       |   +---address
+|   |       |       |   +---animal
+|   |       |       |   +---app
+|   |       |       |   +---business
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---database
+|   |       |       |   +---date
+|   |       |       |   +---finance
+|   |       |       |   |   \---credit_card
+|   |       |       |   +---hacker
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---music
+|   |       |       |   +---name
+|   |       |       |   +---phone_number
+|   |       |       |   +---system
+|   |       |       |   +---team
+|   |       |       |   \---vehicle
+|   |       |       +---en_AU
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---en_AU_ocker
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---en_BORK
+|   |       |       |   \---lorem
+|   |       |       +---en_CA
+|   |       |       |   +---address
+|   |       |       |   +---internet
+|   |       |       |   \---phone_number
+|   |       |       +---en_GB
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---internet
+|   |       |       |   \---phone_number
+|   |       |       +---en_GH
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---en_IE
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---internet
+|   |       |       |   \---phone_number
+|   |       |       +---en_IND
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---en_NG
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---en_US
+|   |       |       |   +---address
+|   |       |       |   +---internet
+|   |       |       |   \---phone_number
+|   |       |       +---en_ZA
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---es
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---es_MX
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   +---phone_number
+|   |       |       |   \---team
+|   |       |       +---fa
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---finance
+|   |       |       |   |   \---credit_card
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   +---phone_number
+|   |       |       |   \---vehicle
+|   |       |       +---fi
+|   |       |       |   \---name
+|   |       |       +---fr
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---fr_BE
+|   |       |       |   +---adresses
+|   |       |       |   +---cell_phone
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---fr_CA
+|   |       |       |   +---address
+|   |       |       |   +---internet
+|   |       |       |   \---phone_number
+|   |       |       +---fr_CH
+|   |       |       |   +---address
+|   |       |       |   +---internet
+|   |       |       |   \---phone_number
+|   |       |       +---ge
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---he
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---date
+|   |       |       |   +---lorem
+|   |       |       |   +---music
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---hr
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---hy
+|   |       |       |   +---address
+|   |       |       |   +---commerce
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---id_ID
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---it
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---ja
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---ko
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---lv
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---nb_NO
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---ne
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---nl
+|   |       |       |   +---address
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---hacker
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---nl_BE
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---pl
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---pt_BR
+|   |       |       |   +---address
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---pt_PT
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---ro
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---ru
+|   |       |       |   +---address
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---hacker
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---sk
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---sv
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---commerce
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   +---phone_number
+|   |       |       |   \---team
+|   |       |       +---tr
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---uk
+|   |       |       |   +---address
+|   |       |       |   +---company
+|   |       |       |   +---internet
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---vi
+|   |       |       |   +---address
+|   |       |       |   +---cell_phone
+|   |       |       |   +---company
+|   |       |       |   +---date
+|   |       |       |   +---internet
+|   |       |       |   +---lorem
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---zh_CN
+|   |       |       |   +---address
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       +---zh_TW
+|   |       |       |   +---address
+|   |       |       |   +---name
+|   |       |       |   \---phone_number
+|   |       |       \---zu_ZA
+|   |       |           +---address
+|   |       |           +---cell_phone
+|   |       |           +---company
+|   |       |           +---internet
+|   |       |           +---name
+|   |       |           \---phone_number
+|   |       +---locale
+|   |       \---vendor
+|   +---@hapi
+|   |   +---address
+|   |   |   +---dist
+|   |   |   +---esm
+|   |   |   \---src
+|   |   +---formula
+|   |   |   \---lib
+|   |   +---hoek
+|   |   |   \---lib
+|   |   +---pinpoint
+|   |   |   \---lib
+|   |   +---tlds
+|   |   |   \---dist
+|   |   |       +---commonjs
+|   |   |       \---esm
+|   |   \---topo
+|   |       \---lib
+|   +---@postman
+|   |   +---form-data
+|   |   |   +---lib
+|   |   |   \---node_modules
+|   |   |       +---mime-db
+|   |   |       \---mime-types
+|   |   +---tough-cookie
+|   |   |   \---lib
+|   |   \---tunnel-agent
+|   +---@seald-io
+|   |   +---binary-search-tree
+|   |   |   \---lib
+|   |   \---nedb
+|   |       +---browser-version
+|   |       |   +---lib
+|   |       |   \---out
+|   |       \---lib
+|   +---@standard-schema
+|   |   \---spec
+|   |       \---dist
+|   +---accepts
+|   +---agent-base
+|   |   \---dist
+|   +---ajv
+|   |   +---dist
+|   |   +---lib
+|   |   |   +---compile
+|   |   |   +---dot
+|   |   |   +---dotjs
+|   |   |   \---refs
+|   |   \---scripts
+|   +---ansi-regex
+|   +---arg
+|   +---asn1
+|   |   \---lib
+|   |       \---ber
+|   +---assert-plus
+|   +---async
+|   |   +---dist
+|   |   \---internal
+|   +---asynckit
+|   |   \---lib
+|   +---available-typed-arrays
+|   |   +---.github
+|   |   \---test
+|   +---aws-sign2
+|   +---aws4
+|   +---axios
+|   |   +---dist
+|   |   |   +---browser
+|   |   |   +---esm
+|   |   |   \---node
+|   |   \---lib
+|   |       +---adapters
+|   |       +---cancel
+|   |       +---core
+|   |       +---defaults
+|   |       +---env
+|   |       |   \---classes
+|   |       +---helpers
+|   |       \---platform
+|   |           +---browser
+|   |           |   \---classes
+|   |           +---common
+|   |           \---node
+|   |               \---classes
+|   +---base64-js
+|   +---bcrypt-pbkdf
+|   +---bluebird
+|   |   \---js
+|   |       +---browser
+|   |       \---main
+|   +---body-parser
+|   |   \---lib
+|   |       \---types
+|   +---brotli
+|   |   +---build
+|   |   +---dec
+|   |   \---enc
+|   +---bytes
+|   +---call-bind
+|   |   +---.github
+|   |   \---test
+|   +---call-bind-apply-helpers
+|   |   +---.github
+|   |   \---test
+|   +---call-bound
+|   |   +---.github
+|   |   \---test
+|   +---caseless
+|   +---chardet
+|   |   \---lib
+|   |       +---encoding
+|   |       \---fs
+|   +---charset
+|   |   \---coverage
+|   |       \---lcov-report
+|   |           \---charset
+|   +---check-more-types
+|   |   \---dist
+|   +---cli-progress
+|   |   +---lib
+|   |   \---presets
+|   +---cli-table3
+|   |   \---src
+|   +---colors
+|   |   +---examples
+|   |   +---lib
+|   |   |   +---custom
+|   |   |   +---maps
+|   |   |   \---system
+|   |   \---themes
+|   +---combined-stream
+|   |   \---lib
+|   +---commander
+|   |   +---lib
+|   |   \---typings
+|   +---content-disposition
+|   +---content-type
+|   +---cookie
+|   +---cookie-signature
+|   +---cool-ascii-faces
+|   +---core-util-is
+|   |   \---lib
+|   +---cors
+|   |   \---lib
+|   +---cross-spawn
+|   |   \---lib
+|   |       \---util
+|   +---csv-parse
+|   |   \---lib
+|   |       +---browser
+|   |       \---es5
+|   +---dashdash
+|   |   +---etc
+|   |   \---lib
+|   +---debug
+|   |   \---src
+|   +---define-data-property
+|   |   +---.github
+|   |   \---test
+|   +---delayed-stream
+|   |   \---lib
+|   +---depd
+|   |   \---lib
+|   |       \---browser
+|   +---des.js
+|   |   +---lib
+|   |   |   \---des
+|   |   \---test
+|   +---dunder-proto
+|   |   +---.github
+|   |   \---test
+|   +---duplexer
+|   |   \---test
+|   +---ecc-jsbn
+|   |   \---lib
+|   +---ee-first
+|   +---emoji-regex
+|   |   \---es2015
+|   +---encodeurl
+|   +---es-define-property
+|   |   +---.github
+|   |   \---test
+|   +---es-errors
+|   |   +---.github
+|   |   \---test
+|   +---es-object-atoms
+|   |   +---.github
+|   |   \---test
+|   +---es-set-tostringtag
+|   |   \---test
+|   +---escape-html
+|   +---etag
+|   +---event-stream
+|   |   +---examples
+|   |   \---test
+|   |       \---helper
+|   +---execa
+|   |   \---lib
+|   +---express
+|   |   \---lib
+|   +---extend
+|   +---extsprintf
+|   |   \---lib
+|   +---fast-deep-equal
+|   |   \---es6
+|   +---fast-json-stable-stringify
+|   |   +---.github
+|   |   +---benchmark
+|   |   +---example
+|   |   \---test
+|   +---file-type
+|   +---filesize
+|   |   +---dist
+|   |   \---types
+|   +---finalhandler
+|   +---flatted
+|   |   +---.github
+|   |   |   \---workflows
+|   |   +---cjs
+|   |   +---esm
+|   |   \---php
+|   +---follow-redirects
+|   +---for-each
+|   |   +---.github
+|   |   \---test
+|   +---forever-agent
+|   +---form-data
+|   |   +---lib
+|   |   \---node_modules
+|   |       +---mime-db
+|   |       \---mime-types
+|   +---forwarded
+|   +---fresh
+|   +---from
+|   |   \---test
+|   +---function-bind
+|   |   +---.github
+|   |   \---test
+|   +---generator-function
+|   |   +---.github
+|   |   \---test
+|   +---get-intrinsic
+|   |   +---.github
+|   |   \---test
+|   +---get-proto
+|   |   +---.github
+|   |   \---test
+|   +---get-stream
+|   +---getpass
+|   |   \---lib
+|   +---gopd
+|   |   +---.github
+|   |   \---test
+|   +---handlebars
+|   |   +---bin
+|   |   +---dist
+|   |   |   +---amd
+|   |   |   |   \---handlebars
+|   |   |   |       +---compiler
+|   |   |   |       +---decorators
+|   |   |   |       +---helpers
+|   |   |   |       \---internal
+|   |   |   \---cjs
+|   |   |       \---handlebars
+|   |   |           +---compiler
+|   |   |           +---decorators
+|   |   |           +---helpers
+|   |   |           \---internal
+|   |   +---lib
+|   |   |   \---handlebars
+|   |   |       +---compiler
+|   |   |       +---decorators
+|   |   |       +---helpers
+|   |   |       \---internal
+|   |   \---types
+|   +---har-schema
+|   |   \---lib
+|   +---har-validator
+|   |   \---lib
+|   +---has-property-descriptors
+|   |   +---.github
+|   |   \---test
+|   +---has-symbols
+|   |   +---.github
+|   |   \---test
+|   |       \---shams
+|   +---has-tostringtag
+|   |   +---.github
+|   |   \---test
+|   |       \---shams
+|   +---hasown
+|   |   \---.github
+|   +---http-errors
+|   +---http-reasons
+|   +---http-signature
+|   |   \---lib
+|   +---httpntlm
+|   |   +---node_modules
+|   |   \---test
+|   +---httpreq
+|   |   \---lib
+|   +---human-signals
+|   |   \---build
+|   |       \---src
+|   +---iconv-lite
+|   |   +---encodings
+|   |   |   \---tables
+|   |   +---lib
+|   |   |   \---helpers
+|   |   \---types
+|   +---immediate
+|   |   +---dist
+|   |   \---lib
+|   +---inherits
+|   +---ip-address
+|   |   +---dist
+|   |   |   +---v4
+|   |   |   \---v6
+|   |   \---src
+|   |       +---v4
+|   |       \---v6
+|   +---ipaddr.js
+|   |   \---lib
+|   +---is-arguments
+|   |   +---.github
+|   |   \---test
+|   +---is-callable
+|   |   +---.github
+|   |   \---test
+|   +---is-fullwidth-code-point
+|   +---is-generator-function
+|   |   \---test
+|   +---is-promise
+|   +---is-regex
+|   |   \---test
+|   +---is-stream
+|   +---is-typed-array
+|   |   +---.github
+|   |   \---test
+|   +---is-typedarray
+|   +---isarray
+|   +---isexe
+|   |   \---test
+|   +---isstream
+|   +---joi
+|   |   +---dist
+|   |   \---lib
+|   |       \---types
+|   +---jose
+|   |   \---dist
+|   |       +---browser
+|   |       |   +---jwe
+|   |       |   |   +---compact
+|   |       |   |   +---flattened
+|   |       |   |   \---general
+|   |       |   +---jwk
+|   |       |   +---jwks
+|   |       |   +---jws
+|   |       |   |   +---compact
+|   |       |   |   +---flattened
+|   |       |   |   \---general
+|   |       |   +---jwt
+|   |       |   +---key
+|   |       |   +---lib
+|   |       |   +---runtime
+|   |       |   \---util
+|   |       +---node
+|   |       |   +---cjs
+|   |       |   |   +---jwe
+|   |       |   |   |   +---compact
+|   |       |   |   |   +---flattened
+|   |       |   |   |   \---general
+|   |       |   |   +---jwk
+|   |       |   |   +---jwks
+|   |       |   |   +---jws
+|   |       |   |   |   +---compact
+|   |       |   |   |   +---flattened
+|   |       |   |   |   \---general
+|   |       |   |   +---jwt
+|   |       |   |   +---key
+|   |       |   |   +---lib
+|   |       |   |   +---runtime
+|   |       |   |   \---util
+|   |       |   \---esm
+|   |       |       +---jwe
+|   |       |       |   +---compact
+|   |       |       |   +---flattened
+|   |       |       |   \---general
+|   |       |       +---jwk
+|   |       |       +---jwks
+|   |       |       +---jws
+|   |       |       |   +---compact
+|   |       |       |   +---flattened
+|   |       |       |   \---general
+|   |       |       +---jwt
+|   |       |       +---key
+|   |       |       +---lib
+|   |       |       +---runtime
+|   |       |       \---util
+|   |       \---types
+|   |           +---jwe
+|   |           |   +---compact
+|   |           |   +---flattened
+|   |           |   \---general
+|   |           +---jwk
+|   |           +---jwks
+|   |           +---jws
+|   |           |   +---compact
+|   |           |   +---flattened
+|   |           |   \---general
+|   |           +---jwt
+|   |           +---key
+|   |           \---util
+|   +---js-md4
+|   |   +---build
+|   |   +---doc
+|   |   |   +---fonts
+|   |   |   +---scripts
+|   |   |   |   \---prettify
+|   |   |   \---styles
+|   |   +---src
+|   |   \---tests
+|   +---js-sha512
+|   |   +---build
+|   |   \---src
+|   +---jsbn
+|   +---json-schema
+|   |   \---lib
+|   +---json-schema-traverse
+|   |   \---spec
+|   |       \---fixtures
+|   +---json-stringify-safe
+|   |   \---test
+|   +---jsprim
+|   |   \---lib
+|   +---lazy-ass
+|   |   \---test
+|   +---lie
+|   |   +---dist
+|   |   \---lib
+|   +---liquid-json
+|   |   +---lib
+|   |   +---npm
+|   |   +---test
+|   |   |   \---unit
+|   |   \---vendor
+|   +---localforage
+|   |   +---build
+|   |   |   \---es5src
+|   |   |       +---drivers
+|   |   |       \---utils
+|   |   +---dist
+|   |   +---src
+|   |   |   +---drivers
+|   |   |   \---utils
+|   |   \---typings
+|   +---lodash
+|   |   \---fp
+|   +---lru-cache
+|   +---map-stream
+|   |   +---examples
+|   |   \---test
+|   +---math-intrinsics
+|   |   +---.github
+|   |   +---constants
+|   |   \---test
+|   +---media-typer
+|   +---merge-descriptors
+|   +---merge-stream
+|   +---mime-db
+|   +---mime-format
+|   +---mime-types
+|   +---mimic-fn
+|   +---minimalistic-assert
+|   +---minimist
+|   |   +---.github
+|   |   +---example
+|   |   \---test
+|   +---mkdirp
+|   |   \---dist
+|   |       +---cjs
+|   |       |   \---src
+|   |       \---mjs
+|   +---ms
+|   +---negotiator
+|   |   \---lib
+|   +---neo-async
+|   +---newman
+|   |   +---bin
+|   |   +---docker
+|   |   |   \---images
+|   |   |       +---alpine
+|   |   |       \---ubuntu
+|   |   +---lib
+|   |   |   +---config
+|   |   |   +---node-version-check
+|   |   |   +---print
+|   |   |   +---reporters
+|   |   |   |   +---cli
+|   |   |   |   +---json
+|   |   |   |   \---junit
+|   |   |   \---run
+|   |   \---node_modules
+|   |       \---.bin
+|   +---node-forge
+|   |   +---dist
+|   |   +---flash
+|   |   |   \---swf
+|   |   \---lib
+|   +---node-oauth1
+|   |   +---npm
+|   |   \---test
+|   |       \---unit
+|   +---npm-run-path
+|   +---oauth-sign
+|   +---object-assign
+|   +---object-hash
+|   |   +---dist
+|   |   \---test
+|   +---object-inspect
+|   |   +---.github
+|   |   +---example
+|   |   \---test
+|   |       \---browser
+|   +---on-finished
+|   +---once
+|   +---onetime
+|   +---parse-ms
+|   +---parseurl
+|   +---path-key
+|   +---path-to-regexp
+|   |   \---dist
+|   +---pause-stream
+|   |   \---test
+|   +---performance-now
+|   |   +---lib
+|   |   +---src
+|   |   \---test
+|   |       \---scripts
+|   +---possible-typed-array-names
+|   |   +---.github
+|   |   \---test
+|   +---postman-collection
+|   |   +---lib
+|   |   |   +---collection
+|   |   |   +---content-info
+|   |   |   +---superstring
+|   |   |   \---url-pattern
+|   |   +---node_modules
+|   |   |   +---.bin
+|   |   |   +---iconv-lite
+|   |   |   |   +---.github
+|   |   |   |   +---.idea
+|   |   |   |   |   +---codeStyles
+|   |   |   |   |   \---inspectionProfiles
+|   |   |   |   +---encodings
+|   |   |   |   |   \---tables
+|   |   |   |   \---lib
+|   |   |   +---mime-db
+|   |   |   +---mime-types
+|   |   |   \---semver
+|   |   |       +---bin
+|   |   |       +---classes
+|   |   |       +---functions
+|   |   |       +---internal
+|   |   |       \---ranges
+|   |   \---types
+|   +---postman-collection-transformer
+|   |   +---bin
+|   |   +---lib
+|   |   |   +---common
+|   |   |   +---converters
+|   |   |   |   +---v1.0.0
+|   |   |   |   +---v2.0.0
+|   |   |   |   \---v2.1.0
+|   |   |   \---normalizers
+|   |   \---node_modules
+|   |       +---.bin
+|   |       +---commander
+|   |       |   +---lib
+|   |       |   \---typings
+|   |       \---semver
+|   |           +---bin
+|   |           +---classes
+|   |           +---functions
+|   |           +---internal
+|   |           \---ranges
+|   +---postman-request
+|   |   +---lib
+|   |   |   +---autohttp
+|   |   |   \---http2
+|   |   \---node_modules
+|   |       +---mime-db
+|   |       +---mime-types
+|   |       +---qs
+|   |       |   +---.github
+|   |       |   +---dist
+|   |       |   +---lib
+|   |       |   \---test
+|   |       \---safe-buffer
+|   +---postman-runtime
+|   |   +---dist
+|   |   +---lib
+|   |   |   +---authorizer
+|   |   |   +---backpack
+|   |   |   +---requester
+|   |   |   |   \---browser
+|   |   |   +---runner
+|   |   |   |   \---extensions
+|   |   |   \---visualizer
+|   |   \---node_modules
+|   |       +---aws4
+|   |       |   \---.github
+|   |       +---http-signature
+|   |       |   \---lib
+|   |       +---mime-db
+|   |       +---mime-types
+|   |       +---postman-request
+|   |       |   \---lib
+|   |       +---qs
+|   |       |   +---.github
+|   |       |   +---dist
+|   |       |   +---lib
+|   |       |   \---test
+|   |       \---safe-buffer
+|   +---postman-sandbox
+|   |   +---.cache
+|   |   +---lib
+|   |   |   +---bundle
+|   |   |   +---sandbox
+|   |   |   \---vendor
+|   |   \---types
+|   |       \---sandbox
+|   +---postman-url-encoder
+|   |   +---encoder
+|   |   \---parser
+|   +---pretty-ms
+|   +---process-nextick-args
+|   +---proxy-addr
+|   +---proxy-from-env
+|   +---ps-tree
+|   |   \---bin
+|   +---psl
+|   |   +---data
+|   |   +---dist
+|   |   \---types
+|   +---punycode
+|   +---qs
+|   |   +---.github
+|   |   +---dist
+|   |   +---lib
+|   |   \---test
+|   +---querystringify
+|   +---range-parser
+|   +---raw-body
+|   +---readable-stream
+|   |   +---doc
+|   |   |   \---wg-meetings
+|   |   \---lib
+|   |       \---internal
+|   |           \---streams
+|   +---requires-port
+|   +---router
+|   |   \---lib
+|   +---rxjs
+|   |   +---ajax
+|   |   +---dist
+|   |   |   +---bundles
+|   |   |   +---cjs
+|   |   |   |   +---ajax
+|   |   |   |   +---fetch
+|   |   |   |   +---internal
+|   |   |   |   |   +---ajax
+|   |   |   |   |   +---observable
+|   |   |   |   |   |   \---dom
+|   |   |   |   |   +---operators
+|   |   |   |   |   +---scheduled
+|   |   |   |   |   +---scheduler
+|   |   |   |   |   +---symbol
+|   |   |   |   |   +---testing
+|   |   |   |   |   \---util
+|   |   |   |   +---operators
+|   |   |   |   +---testing
+|   |   |   |   \---webSocket
+|   |   |   +---esm
+|   |   |   |   +---ajax
+|   |   |   |   +---fetch
+|   |   |   |   +---internal
+|   |   |   |   |   +---ajax
+|   |   |   |   |   +---observable
+|   |   |   |   |   |   \---dom
+|   |   |   |   |   +---operators
+|   |   |   |   |   +---scheduled
+|   |   |   |   |   +---scheduler
+|   |   |   |   |   +---symbol
+|   |   |   |   |   +---testing
+|   |   |   |   |   \---util
+|   |   |   |   +---operators
+|   |   |   |   +---testing
+|   |   |   |   \---webSocket
+|   |   |   +---esm5
+|   |   |   |   +---ajax
+|   |   |   |   +---fetch
+|   |   |   |   +---internal
+|   |   |   |   |   +---ajax
+|   |   |   |   |   +---observable
+|   |   |   |   |   |   \---dom
+|   |   |   |   |   +---operators
+|   |   |   |   |   +---scheduled
+|   |   |   |   |   +---scheduler
+|   |   |   |   |   +---symbol
+|   |   |   |   |   +---testing
+|   |   |   |   |   \---util
+|   |   |   |   +---operators
+|   |   |   |   +---testing
+|   |   |   |   \---webSocket
+|   |   |   \---types
+|   |   |       +---ajax
+|   |   |       +---fetch
+|   |   |       +---internal
+|   |   |       |   +---ajax
+|   |   |       |   +---observable
+|   |   |       |   |   \---dom
+|   |   |       |   +---operators
+|   |   |       |   +---scheduled
+|   |   |       |   +---scheduler
+|   |   |       |   +---symbol
+|   |   |       |   +---testing
+|   |   |       |   \---util
+|   |   |       +---operators
+|   |   |       +---testing
+|   |   |       \---webSocket
+|   |   +---fetch
+|   |   +---operators
+|   |   +---src
+|   |   |   +---ajax
+|   |   |   +---fetch
+|   |   |   +---internal
+|   |   |   |   +---ajax
+|   |   |   |   +---observable
+|   |   |   |   |   \---dom
+|   |   |   |   +---operators
+|   |   |   |   +---scheduled
+|   |   |   |   +---scheduler
+|   |   |   |   +---symbol
+|   |   |   |   +---testing
+|   |   |   |   \---util
+|   |   |   +---operators
+|   |   |   +---testing
+|   |   |   \---webSocket
+|   |   +---testing
+|   |   \---webSocket
+|   +---safe-buffer
+|   +---safe-regex-test
+|   |   +---.github
+|   |   \---test
+|   +---safer-buffer
+|   +---semver
+|   |   +---bin
+|   |   +---classes
+|   |   +---functions
+|   |   +---internal
+|   |   \---ranges
+|   +---send
+|   +---serialised-error
+|   |   +---.idea
+|   |   +---node_modules
+|   |   |   +---.bin
+|   |   |   \---uuid
+|   |   |       +---bin
+|   |   |       \---lib
+|   |   \---tests
+|   +---serve-static
+|   +---set-function-length
+|   |   \---.github
+|   +---setprototypeof
+|   |   \---test
+|   +---shebang-command
+|   +---shebang-regex
+|   +---side-channel
+|   |   +---.github
+|   |   \---test
+|   +---side-channel-list
+|   |   +---.github
+|   |   \---test
+|   +---side-channel-map
+|   |   +---.github
+|   |   \---test
+|   +---side-channel-weakmap
+|   |   +---.github
+|   |   \---test
+|   +---signal-exit
+|   +---smart-buffer
+|   |   +---build
+|   |   +---docs
+|   |   \---typings
+|   +---socks
+|   |   +---build
+|   |   |   +---client
+|   |   |   \---common
+|   |   +---docs
+|   |   |   \---examples
+|   |   |       +---javascript
+|   |   |       \---typescript
+|   |   \---typings
+|   |       +---client
+|   |       \---common
+|   +---socks-proxy-agent
+|   |   \---dist
+|   +---source-map
+|   |   +---dist
+|   |   \---lib
+|   +---split
+|   |   +---examples
+|   |   \---test
+|   +---sshpk
+|   |   +---bin
+|   |   +---lib
+|   |   |   \---formats
+|   |   \---man
+|   |       \---man1
+|   +---stack-trace
+|   |   \---lib
+|   +---start-server-and-test
+|   |   +---node_modules
+|   |   |   \---bluebird
+|   |   |       \---js
+|   |   |           +---browser
+|   |   |           \---release
+|   |   \---src
+|   |       \---bin
+|   +---statuses
+|   +---stream-combiner
+|   |   \---test
+|   +---stream-length
+|   |   \---lib
+|   +---stream-spigot
+|   |   \---test
+|   +---string-width
+|   +---string_decoder
+|   |   +---lib
+|   |   \---node_modules
+|   |       \---safe-buffer
+|   +---strip-ansi
+|   +---strip-final-newline
+|   +---strip-json-comments
+|   +---teleport-javascript
+|   |   +---cjs
+|   |   \---esm
+|   +---through
+|   |   \---test
+|   +---toidentifier
+|   +---tslib
+|   |   \---modules
+|   +---tweetnacl
+|   +---type-is
+|   +---uglify-js
+|   |   +---bin
+|   |   +---lib
+|   |   \---tools
+|   +---underscore
+|   |   +---amd
+|   |   +---cjs
+|   |   \---modules
+|   +---universalify
+|   +---unpipe
+|   +---uri-js
+|   |   \---dist
+|   |       +---es5
+|   |       \---esnext
+|   |           \---schemes
+|   +---url-parse
+|   |   \---dist
+|   +---util
+|   |   \---support
+|   +---util-deprecate
+|   +---uuid
+|   |   \---dist
+|   |       +---bin
+|   |       +---esm-browser
+|   |       +---esm-node
+|   |       \---umd
+|   +---uvm
+|   |   +---firmware
+|   |   \---lib
+|   +---vary
+|   +---verror
+|   |   +---lib
+|   |   \---node_modules
+|   |       \---core-util-is
+|   |           \---lib
+|   +---wait-on
+|   |   +---.github
+|   |   |   \---workflows
+|   |   +---bin
+|   |   +---lib
+|   |   \---node_modules
+|   |       \---lodash
+|   |           \---fp
+|   +---which
+|   |   \---bin
+|   +---which-typed-array
+|   |   +---.github
+|   |   \---test
+|   +---word-wrap
+|   +---wordwrap
+|   |   +---example
+|   |   \---test
+|   +---wrappy
+|   +---xmlbuilder
+|   |   +---.vscode
+|   |   +---lib
+|   |   +---perf
+|   |   |   \---basic
+|   |   \---typings
+|   +---xtend
+|   \---yallist
++---public
+|   \---assets
++---src
+|   \---back
+|       +---v1
+|       \---v2
+\---tests
+    +---ALG
+    +---LCC
+    \---RMP

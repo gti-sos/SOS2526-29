@@ -1,46 +1,151 @@
 <script>
   import { onMount } from "svelte";
-  
-  import { getOneCityStat, updateCityStat } from "../services/citysStatsApi";
+  import {
+    createCityStat,
+    deleteCityStat,
+    getOneCityStat,
+    updateCityStat
+  } from "../services/citysStatsApi";
 
   export let params = {};
 
-  let form = {
+  const emptyForm = () => ({
     city: "",
     country: "",
     un_2025_population: ""
-  };
+  });
 
+  let form = emptyForm();
+  let originalKey = { city: "", country: "" };
   let message = "";
   let error = "";
+  let loading = true;
+
+  function clearFeedback() {
+    message = "";
+    error = "";
+  }
+
+  function parsePositiveInteger(value, fieldLabel) {
+    const trimmed = String(value ?? "").trim();
+
+    if (!trimmed) {
+      throw new Error(`Complete el campo "${fieldLabel}".`);
+    }
+
+    const parsed = Number(trimmed);
+
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      throw new Error(`"${fieldLabel}" debe ser un numero entero mayor que 0.`);
+    }
+
+    return parsed;
+  }
+
+  function validateForm() {
+    const city = String(form.city ?? "").trim();
+    const country = String(form.country ?? "").trim();
+    const un_2025_population = parsePositiveInteger(
+      form.un_2025_population,
+      "Poblacion estimada en 2025"
+    );
+
+    if (!city) {
+      throw new Error("Indique una ciudad.");
+    }
+
+    if (!country) {
+      throw new Error("Indique un pais.");
+    }
+
+    return {
+      city,
+      country,
+      un_2025_population
+    };
+  }
+
+  function isSameResource(payload) {
+    return (
+      payload.city.trim().toLowerCase() === originalKey.city &&
+      payload.country.trim().toLowerCase() === originalKey.country
+    );
+  }
+
+  function updateRoute(city, country) {
+    window.history.replaceState(
+      {},
+      "",
+      `#/citys-stats/editar/${encodeURIComponent(city)}/${encodeURIComponent(country)}`
+    );
+  }
 
   async function loadResource() {
+    loading = true;
+    error = "";
+
     try {
       const data = await getOneCityStat(params.city, params.country);
+
       form = {
         city: data.city,
         country: data.country,
         un_2025_population: data.un_2025_population
       };
+
+      originalKey = {
+        city: data.city,
+        country: data.country
+      };
     } catch (e) {
-      error = `No existe un registro para ${params.city} (${params.country}).`;
+      error = e.message || "No hemos encontrado el registro solicitado.";
+    } finally {
+      loading = false;
     }
   }
 
   async function handleUpdate() {
-    message = "";
-    error = "";
+    clearFeedback();
 
     try {
-      await updateCityStat(params.city, params.country, {
-        city: form.city,
-        country: form.country,
-        un_2025_population: Number(form.un_2025_population)
-      });
+      const payload = validateForm();
 
-      message = `El registro ${form.city} (${form.country}) se ha actualizado correctamente.`;
+      if (isSameResource(payload)) {
+        const updated = await updateCityStat(
+          originalKey.city,
+          originalKey.country,
+          payload
+        );
+
+        form = {
+          city: updated.city,
+          country: updated.country,
+          un_2025_population: updated.un_2025_population
+        };
+
+        message = "Los cambios se han guardado correctamente.";
+        return;
+      }
+
+      const created = await createCityStat(payload);
+      await deleteCityStat(originalKey.city, originalKey.country);
+
+      form = {
+        city: created.city,
+        country: created.country,
+        un_2025_population: created.un_2025_population
+      };
+
+      originalKey = {
+        city: created.city,
+        country: created.country
+      };
+
+      updateRoute(created.city, created.country);
+      message =
+        "Se ha actualizado el registro y se ha guardado con la nueva ciudad o pais.";
     } catch (e) {
-      error = `No se pudo actualizar el registro: ${e.message}`;
+      error = e.message || "No se pudieron guardar los cambios.";
     }
   }
 
@@ -48,105 +153,246 @@
 </script>
 
 <svelte:head>
-  <title>Editar ciudad</title>
+  <title>City-stats | Editar registro</title>
 </svelte:head>
 
-<div class="container">
-  <div class="topbar">
-    <a href="#/citys-stats">Volver al listado</a>
-  </div>
-
-  <h1>Editar registro</h1>
-  <p>Modifica la información del recurso seleccionado.</p>
-
-  {#if message}
-    <div class="message success">{message}</div>
-  {/if}
-
-  {#if error}
-    <div class="message error">{error}</div>
-  {/if}
-
-  <section class="panel">
-    <div class="form-grid">
-      <input bind:value={form.city} placeholder="Ciudad" />
-      <input bind:value={form.country} placeholder="País" />
-      <input bind:value={form.un_2025_population} type="number" placeholder="Población estimada en 2025" />
+<div class="page-shell">
+  <div class="page">
+    <div class="topbar">
+      <a href="#/citys-stats" class="ghost-link">Volver al listado</a>
     </div>
 
-    <button on:click={handleUpdate}>Guardar cambios</button>
-  </section>
+    <section class="panel hero-panel">
+      <p class="eyebrow">Edicion separada</p>
+      <h1>Editar registro</h1>
+      <p class="subtitle">
+        Aqui puedes actualizar la ciudad, el pais o la poblacion estimada sin volver a la lista principal.
+      </p>
+    </section>
+
+    {#if message}
+      <div class="message success" role="status" data-testid="edit-success">{message}</div>
+    {/if}
+
+    {#if error}
+      <div class="message error" role="alert" data-testid="edit-error">{error}</div>
+    {/if}
+
+    <section class="panel">
+      {#if loading}
+        <p class="state-text">Se esta cargando el registro seleccionado...</p>
+      {:else if error && !originalKey.city}
+        <div class="empty-box">
+          <p>No hemos podido abrir este registro.</p>
+          <a href="#/citys-stats" class="ghost-link full-width">Volver al listado</a>
+        </div>
+      {:else}
+        <form class="grid-form" on:submit|preventDefault={handleUpdate}>
+          <label>
+            <span>Ciudad</span>
+            <input bind:value={form.city} placeholder="Ejemplo: madrid" data-testid="edit-city" />
+          </label>
+
+          <label>
+            <span>Pais</span>
+            <input bind:value={form.country} placeholder="Ejemplo: spain" data-testid="edit-country" />
+          </label>
+
+          <label>
+            <span>Poblacion estimada en 2025</span>
+            <input
+              bind:value={form.un_2025_population}
+              type="number"
+              min="1"
+              step="1"
+              placeholder="Ejemplo: 7100000"
+              data-testid="edit-population"
+            />
+          </label>
+
+          <div class="form-footer">
+            <button type="submit" data-testid="edit-submit">Guardar cambios</button>
+          </div>
+        </form>
+      {/if}
+    </section>
+  </div>
 </div>
 
 <style>
   :global(body) {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f4f7fb;
-    color: #111827;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(224, 242, 254, 0.8), transparent 28%),
+      radial-gradient(circle at right center, rgba(255, 237, 213, 0.75), transparent 22%),
+      linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    color: #1f2937;
   }
 
-  .container {
-    max-width: 900px;
+  .page-shell {
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+    box-sizing: border-box;
+  }
+
+  .page {
+    max-width: 920px;
     margin: 0 auto;
-    padding: 24px;
   }
 
   .topbar {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
 
-  .topbar a {
+  .ghost-link,
+  button,
+  input {
+    font: inherit;
+  }
+
+  .ghost-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(31, 41, 55, 0.12);
+    background: rgba(255, 255, 255, 0.82);
     text-decoration: none;
-    color: white;
-    background: #2563eb;
-    padding: 8px 12px;
-    border-radius: 8px;
-    display: inline-block;
+    color: #0f172a;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+  }
+
+  .full-width {
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .panel {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(12px);
+    padding: 24px;
+    margin-bottom: 18px;
   }
 
-  .form-grid {
-    display: grid;
-    gap: 12px;
+  .hero-panel {
+    margin-bottom: 20px;
+  }
+
+  .eyebrow {
+    margin: 0 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #0284c7;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: #0f172a;
+  }
+
+  .subtitle {
+    margin: 12px 0 0;
+    color: #475569;
+  }
+
+  .message {
     margin-bottom: 16px;
+    padding: 14px 18px;
+    border-radius: 18px;
+    border: 1px solid transparent;
+  }
+
+  .success {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #065f46;
+  }
+
+  .error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+  }
+
+  .grid-form {
+    display: grid;
+    gap: 18px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #334155;
+    font-weight: 600;
+  }
+
+  label span {
+    font-size: 0.95rem;
   }
 
   input {
-    padding: 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
+    border: 1px solid #d8dee9;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 13px 14px;
+    box-sizing: border-box;
+  }
+
+  input:focus {
+    outline: 2px solid rgba(14, 165, 233, 0.18);
+    border-color: #38bdf8;
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: flex-start;
   }
 
   button {
     border: none;
-    background: #2563eb;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #0f766e 0%, #0ea5e9 100%);
     color: white;
-    padding: 10px 14px;
-    border-radius: 8px;
+    padding: 12px 18px;
     cursor: pointer;
+    box-shadow: 0 14px 28px rgba(14, 116, 144, 0.18);
   }
 
-  .message {
-    padding: 12px 14px;
-    border-radius: 10px;
-    margin-bottom: 16px;
+  .state-text,
+  .empty-box p {
+    margin: 0;
+    color: #64748b;
   }
 
-  .success {
-    background: #dcfce7;
-    color: #166534;
+  .empty-box {
+    display: grid;
+    gap: 14px;
   }
 
-  .error {
-    background: #fee2e2;
-    color: #991b1b;
+  @media (max-width: 640px) {
+    .page-shell {
+      padding-inline: 12px;
+    }
+
+    .panel {
+      padding: 18px;
+      border-radius: 20px;
+    }
+
+    .ghost-link,
+    button {
+      width: 100%;
+      box-sizing: border-box;
+    }
   }
 </style>
