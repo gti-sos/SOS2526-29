@@ -26,19 +26,15 @@ jobs:
         run: npm test
 
       - name: Install frontend dependencies
-        run: npm --prefix frontend-group install
+        working-directory: frontend-group
+        run: npm install
 
       - name: Run LCC API v2 tests
         run: npm run test-LCC-v2
 
       - name: Build frontend for LCC
-        run: npm --prefix frontend-group exec vite build -- --configLoader native
-
-      - name: Copy frontend build into public
-        run: |
-          rm -rf public
-          mkdir -p public
-          cp -a frontend-group/dist/. public/
+        working-directory: frontend-group
+        run: npm exec vite build -- --configLoader native
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
