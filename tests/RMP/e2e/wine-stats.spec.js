@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-const BASE_URL = 'http://localhost:10000';
+const BASE_URL = 'https://sos2526-29.onrender.com';
 
 test.describe('Wine Stats - Frontend', () => {
   test.describe.configure({ mode: 'serial' }); 
