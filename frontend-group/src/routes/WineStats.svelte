@@ -26,8 +26,9 @@
   function mostrarMensaje(texto, tipo = "ok") {
     mensaje = texto;
     tipoMensaje = tipo;
-    setTimeout(() => (mensaje = ""), 4000);
+    setTimeout(() => (mensaje = ""), 10000);  // ← suficiente para Playwright
   }
+
 
   function resetFormulario() {
     nuevoVino = {

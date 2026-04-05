@@ -142,3 +142,10 @@ vite.config.ts.timestamp-*
 # Ignorar las bases de datos locales
 src/back/*.db
 *.db
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
