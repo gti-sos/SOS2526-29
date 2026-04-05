@@ -15,6 +15,21 @@ test.beforeEach(async ({ request, page }) => {
   await page.goto("/#/citys-stats");
 });
 
+test("la portada del grupo muestra correctamente la parte de LCC", async ({ page }) => {
+  await page.goto("/#/");
+
+  const lccCard = page.getByTestId("member-citys-stats");
+
+  await expect(lccCard).toContainText("Luis Cortes Cobos");
+  await expect(lccCard).toContainText("Recurso de la API: citys-stats");
+  await expect(lccCard).toContainText("Fuente de datos asociada: citys-stats");
+  await expect(lccCard.getByTestId("frontend-citys-stats")).toHaveAttribute("href", "#/citys-stats");
+  await expect(lccCard.getByTestId("api-v1-citys-stats")).toHaveAttribute("href", /\/api\/v1\/citys-stats$/);
+  await expect(lccCard.getByTestId("api-v2-citys-stats")).toHaveAttribute("href", /\/api\/v2\/citys-stats$/);
+  await expect(lccCard.getByTestId("docs-v1-citys-stats")).toHaveAttribute("href", /\/api\/v1\/citys-stats\/docs$/);
+  await expect(lccCard.getByTestId("docs-v2-citys-stats")).toHaveAttribute("href", /\/api\/v2\/citys-stats\/docs$/);
+});
+
 test("lista los registros disponibles", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Estadisticas de ciudades" })).toBeVisible();
   await expect(page.getByTestId("row-tokyo-japan")).toBeVisible();

@@ -36,7 +36,7 @@
 
 El backend y el frontend compilado quedan disponibles en `http://localhost:10000`.
 
-Si quieres trabajar con el frontend de `city-stats` en modo desarrollo:
+Si quieres trabajar con el frontend de `citys-stats` en modo desarrollo:
 
 1. `cd frontend-group`
 2. `npm exec vite -- --configLoader native`

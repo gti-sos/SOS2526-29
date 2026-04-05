@@ -22,24 +22,80 @@
       resource: "wine-stats",
       source: "wine-stats",
       frontendUrl: "#/wine-stats",
-      apiUrl: `${API_ORIGIN}/api/v1/wine-stats`,
-      docsUrl: `${API_ORIGIN}/api/v1/wine-stats/docs`
+      apiLinks: [
+        {
+          id: "api-v1-wine-stats",
+          label: "API v1",
+          url: `${API_ORIGIN}/api/v1/wine-stats`
+        }
+      ],
+      docsLinks: [
+        {
+          id: "docs-v1-wine-stats",
+          label: "Documentacion Postman v1",
+          url: `${API_ORIGIN}/api/v1/wine-stats/docs`
+        }
+      ]
     },
     {
       name: "Luis Cortes Cobos (LCC)",
       resource: "citys-stats",
       source: "citys-stats",
       frontendUrl: "#/citys-stats",
-      apiUrl: `${API_ORIGIN}/api/v2/citys-stats`,
-      docsUrl: `${API_ORIGIN}/api/v2/citys-stats/docs`
+      apiLinks: [
+        {
+          id: "api-v1-citys-stats",
+          label: "API v1",
+          url: `${API_ORIGIN}/api/v1/citys-stats`
+        },
+        {
+          id: "api-v2-citys-stats",
+          label: "API v2",
+          url: `${API_ORIGIN}/api/v2/citys-stats`
+        }
+      ],
+      docsLinks: [
+        {
+          id: "docs-v1-citys-stats",
+          label: "Documentacion Postman v1",
+          url: `${API_ORIGIN}/api/v1/citys-stats/docs`
+        },
+        {
+          id: "docs-v2-citys-stats",
+          label: "Documentacion Postman v2",
+          url: `${API_ORIGIN}/api/v2/citys-stats/docs`
+        }
+      ]
     },
     {
       name: "Alberto Lirola Gomez",
       resource: "natural-disasters",
       source: "natural-disasters",
       frontendUrl: "#/natural-disasters",
-      apiUrl: `${API_ORIGIN}/api/v2/natural-disasters`,
-      docsUrl: `${API_ORIGIN}/api/v2/natural-disasters/docs`
+      apiLinks: [
+        {
+          id: "api-v1-natural-disasters",
+          label: "API v1",
+          url: `${API_ORIGIN}/api/v1/natural-disasters`
+        },
+        {
+          id: "api-v2-natural-disasters",
+          label: "API v2",
+          url: `${API_ORIGIN}/api/v2/natural-disasters`
+        }
+      ],
+      docsLinks: [
+        {
+          id: "docs-v1-natural-disasters",
+          label: "Documentacion Postman v1",
+          url: `${API_ORIGIN}/api/v1/natural-disasters/docs`
+        },
+        {
+          id: "docs-v2-natural-disasters",
+          label: "Documentacion Postman v2",
+          url: `${API_ORIGIN}/api/v2/natural-disasters/docs`
+        }
+      ]
     }
   ];
 </script>
@@ -64,15 +120,35 @@
 
     <div class="grid">
       {#each members as member}
-        <article class="card">
+        <article class="card" data-testid={`member-${member.resource}`}>
           <h3>{member.name}</h3>
           <p><strong>Recurso de la API:</strong> {member.resource}</p>
           <p><strong>Fuente de datos asociada:</strong> {member.source}</p>
 
           <div class="buttons">
-            <a href={member.frontendUrl}>Frontend</a>
-            <a href={member.apiUrl} target="_blank" rel="noreferrer">API base</a>
-            <a href={member.docsUrl} target="_blank" rel="noreferrer">Documentación Postman</a>
+            <a href={member.frontendUrl} data-testid={`frontend-${member.resource}`}>Frontend</a>
+
+            {#each member.apiLinks as link}
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noreferrer"
+                data-testid={link.id}
+              >
+                {link.label}
+              </a>
+            {/each}
+
+            {#each member.docsLinks as link}
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noreferrer"
+                data-testid={link.id}
+              >
+                {link.label}
+              </a>
+            {/each}
           </div>
         </article>
       {/each}
