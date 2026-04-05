@@ -3,7 +3,7 @@ module.exports = (app, db) => {
 
     const DOCS_URL =
         process.env.LCC_DOCS_URL ||
-        "https://documenter.getpostman.com/view/52412147/2sBXigMDkS";
+        "https://documenter.getpostman.com/view/52412147/2sBXiqEUAt";
 
     const initialData = [
         { city: "jakarta", country: "indonesia", un_2025_population: 41913860 },
