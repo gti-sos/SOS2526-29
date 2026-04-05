@@ -20,14 +20,15 @@
     {
       name: "Rufino Moreno Pacheco",
       resource: "wine-stats",
+      source: "wine-stats",
       frontendUrl: "#/wine-stats",
       apiUrl: `${API_ORIGIN}/api/v1/wine-stats`,
       docsUrl: `${API_ORIGIN}/api/v1/wine-stats/docs`
     },
     {
       name: "Luis Cortes Cobos (LCC)",
-      resource: "city-stats",
-      source: "TODO_D02_LCC",
+      resource: "citys-stats",
+      source: "citys-stats",
       frontendUrl: "#/citys-stats",
       apiUrl: `${API_ORIGIN}/api/v2/citys-stats`,
       docsUrl: `${API_ORIGIN}/api/v2/citys-stats/docs`
@@ -35,6 +36,7 @@
     {
       name: "Alberto Lirola Gomez",
       resource: "natural-disasters",
+      source: "natural-disasters",
       frontendUrl: "#/natural-disasters",
       apiUrl: `${API_ORIGIN}/api/v2/natural-disasters`,
       docsUrl: `${API_ORIGIN}/api/v2/natural-disasters/docs`
@@ -64,10 +66,8 @@
       {#each members as member}
         <article class="card">
           <h3>{member.name}</h3>
-          <p><strong>Fuente de datos / recurso:</strong> {member.resource}</p>
-          {#if member.source}
-            <p><strong>Fuente de datos asociada:</strong> {member.source}</p>
-          {/if}
+          <p><strong>Recurso de la API:</strong> {member.resource}</p>
+          <p><strong>Fuente de datos asociada:</strong> {member.source}</p>
 
           <div class="buttons">
             <a href={member.frontendUrl}>Frontend</a>

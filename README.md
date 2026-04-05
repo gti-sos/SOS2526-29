@@ -18,15 +18,15 @@
   - https://sos2526-29.onrender.com/api/v1/natural-disasters/docs (developed by Alberto Lirola Gomez - v1)
   - https://sos2526-29.onrender.com/api/v2/natural-disasters/docs (developed by ALbero Lirola Gomez - v2)
 
-## Parte LCC: city-stats
+## Parte LCC: citys-stats
 
-- **Descripcion breve**: `city-stats` gestiona estadisticas de poblacion estimada para ciudades y paises.
+- **Descripcion breve**: `citys-stats` gestiona estadisticas de poblacion estimada para ciudades y paises.
 - **Frontend desplegado**: https://sos2526-29.onrender.com/#/citys-stats
 - **API v1**: https://sos2526-29.onrender.com/api/v1/citys-stats
 - **API v2**: https://sos2526-29.onrender.com/api/v2/citys-stats
 - **Documentacion Postman v1**: https://sos2526-29.onrender.com/api/v1/citys-stats/docs
 - **Documentacion Postman v2**: https://sos2526-29.onrender.com/api/v2/citys-stats/docs
-- **Fuente de datos asociada**: TODO_D02_LCC
+- **Fuente de datos asociada**: citys-stats
 
 ### Ejecutar en local
 

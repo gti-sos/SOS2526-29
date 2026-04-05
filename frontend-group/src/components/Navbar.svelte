@@ -1,9 +1,8 @@
 <nav>
-  <a href="#/">Inicio</a>
-  <a href="#/about">About</a>
-  <a href="#/wine-stats">Wine Stats</a>
-  <a href="#/citys-stats">City Stats</a>
-  <a href="#/natural-disasters">Natural Disasters</a>
+  <a href="#/">Portada</a>
+  <a href="#/wine-stats">Vinos</a>
+  <a href="#/citys-stats">Ciudades</a>
+  <a href="#/natural-disasters">Desastres naturales</a>
 </nav>
 
 <style>
