@@ -17,18 +17,24 @@
   let mensaje = "";
   let tipoMensaje = "ok";
   let mostrarFormulario = false;
+  let mostrarBuscador = false;
 
   let nuevoVino = {
     title: "", country: "", region: "", year: 0,
     price: 0, abv: 0, unit: 0, grape: "", type: "", capacity: 75
   };
 
+  let filtros = {
+    title: "", country: "", region: "", year: "",
+    price: "", abv: "", unit: "", grape: "", type: "",
+    capacity: "", id: "", offset: "", limit: ""
+  };
+
   function mostrarMensaje(texto, tipo = "ok") {
     mensaje = texto;
     tipoMensaje = tipo;
-    setTimeout(() => (mensaje = ""), 10000);  // ← suficiente para Playwright
+    setTimeout(() => (mensaje = ""), 10000);
   }
-
 
   function resetFormulario() {
     nuevoVino = {
@@ -38,11 +44,45 @@
     mostrarFormulario = false;
   }
 
+  function resetFiltros() {
+    filtros = {
+      title: "", country: "", region: "", year: "",
+      price: "", abv: "", unit: "", grape: "", type: "",
+      capacity: "", id: "", offset: "", limit: ""
+    };
+  }
+
   async function cargarVinos() {
     try {
       vinos = await getAllWineStats();
     } catch (e) {
       mostrarMensaje(e.message, "error");
+    }
+  }
+
+  async function buscarVinos() {
+    try {
+      const params = new URLSearchParams();
+      for (const [key, value] of Object.entries(filtros)) {
+        if (value !== "" && value !== null) {
+          params.append(key, value);
+        }
+      }
+      const url = `${API_BASE}?${params.toString()}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        const data = await res.json();
+        mostrarMensaje(data.error || "Error al buscar vinos.", "error");
+        return;
+      }
+      vinos = await res.json();
+      if (vinos.length === 0) {
+        mostrarMensaje("No se encontraron vinos con esos criterios.", "error");
+      } else {
+        mostrarMensaje(`Se encontraron ${vinos.length} vino(s).`);
+      }
+    } catch (e) {
+      mostrarMensaje("No se pudo conectar con el servidor.", "error");
     }
   }
 
@@ -135,6 +175,31 @@
     </section>
   {/if}
 
+  {#if mostrarBuscador}
+    <section class="card">
+      <h2>🔍 Buscar vinos</h2>
+      <div class="form-grid">
+        <label>ID<input type="number" bind:value={filtros.id} placeholder="1, 2..." /></label>
+        <label>Título<input bind:value={filtros.title} placeholder="The Guv'nor..." /></label>
+        <label>País<input bind:value={filtros.country} placeholder="spain..." /></label>
+        <label>Región<input bind:value={filtros.region} placeholder="rioja..." /></label>
+        <label>Año<input type="number" bind:value={filtros.year} placeholder="2022" /></label>
+        <label>Precio (€)<input type="number" bind:value={filtros.price} placeholder="9.99" /></label>
+        <label>Graduación (%)<input type="number" bind:value={filtros.abv} placeholder="14" /></label>
+        <label>Unidades<input type="number" bind:value={filtros.unit} placeholder="100" /></label>
+        <label>Uva<input bind:value={filtros.grape} placeholder="Tempranillo..." /></label>
+        <label>Tipo<input bind:value={filtros.type} placeholder="Red, White..." /></label>
+        <label>Capacidad (cl)<input type="number" bind:value={filtros.capacity} placeholder="75" /></label>
+        <label>Desde el resultado nº (offset)<input type="number" bind:value={filtros.offset} placeholder="0" /></label>
+        <label>Máximo de resultados (limit)<input type="number" bind:value={filtros.limit} placeholder="10" /></label>
+      </div>
+      <div class="botones-form">
+        <button class="btn-primary" on:click={buscarVinos}>🔍 Buscar</button>
+        <button class="btn-cancel" on:click={() => { resetFiltros(); cargarVinos(); }}>✖ Limpiar y ver todos</button>
+      </div>
+    </section>
+  {/if}
+
   <section class="card">
     <div class="list-header">
       <h2>Lista de vinos ({vinos.length})</h2>
@@ -142,7 +207,9 @@
         <button class="btn-add" on:click={() => mostrarFormulario = !mostrarFormulario}>
           {mostrarFormulario ? "✖ Cerrar formulario" : "➕ Añadir vino"}
         </button>
-        <button class="btn-secondary" on:click={cargarVinos}>🔄 Actualizar</button>
+        <button class="btn-search" on:click={() => mostrarBuscador = !mostrarBuscador}>
+          {mostrarBuscador ? "✖ Cerrar buscador" : "🔍 Buscar"}
+        </button>
         <button class="btn-init" on:click={cargarDatosIniciales}>📦 Cargar datos iniciales</button>
         <button class="btn-danger" on:click={borrarTodos}>🗑️ Eliminar todos</button>
       </div>
@@ -199,7 +266,7 @@
   label { display: flex; flex-direction: column; font-size: 0.85rem; color: #9ca3af; gap: 4px; }
   input { padding: 8px 10px; border-radius: 8px; border: 1px solid #374151; background: #1f2937; color: #f5f7fb; font-size: 0.95rem; }
   input:focus { outline: none; border-color: #2563eb; }
-  .botones-form { display: flex; gap: 12px; margin-top: 4px; }
+  .botones-form { display: flex; gap: 12px; margin-top: 4px; flex-wrap: wrap; }
   .list-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
   .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
   .tabla-wrapper { overflow-x: auto; }
@@ -214,18 +281,11 @@
   .mensaje.error { background: #7f1d1d; color: #fca5a5; }
   .btn-add { background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
   .btn-add:hover { background: #15803d; }
-  .btn-secondary { background: #374151; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
-  .btn-secondary:hover { background: #4b5563; }
+  .btn-search { background: #0369a1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+  .btn-search:hover { background: #075985; }
   .btn-init { background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
   .btn-init:hover { background: #6d28d9; }
-  .btn-danger { background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
-  .btn-danger:hover { background: #b91c1c; }
-  .btn-edit { background: #d97706; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-  .btn-edit:hover { background: #b45309; }
-  .btn-danger-sm { background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-  .btn-danger-sm:hover { background: #b91c1c; }
-  .btn-primary { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
-  .btn-primary:hover { background: #1d4ed8; }
+  .btn-danger { background: #374151; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
   .btn-cancel { background: #374151; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
   .btn-cancel:hover { background: #4b5563; }
 </style>
