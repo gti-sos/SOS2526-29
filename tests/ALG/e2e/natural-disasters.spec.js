@@ -53,8 +53,8 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
     // Rellenamos el formulario
     await page.getByPlaceholder('País (ej: spain)').fill('TestLandia');
     await page.locator('.form-grid input[type="number"]').first().fill('2050'); 
-    await page.getByPlaceholder('Nº Muertes').fill('100');
-    await page.getByPlaceholder('Nº Heridos').fill('50');
+    await page.getByPlaceholder('Nº Muertes', { exact: true }).fill('100');
+    await page.getByPlaceholder('Nº Heridos', { exact: true }).fill('50');
     await page.getByPlaceholder('Daños economicos').fill('1000');
 
     // Hacemos clic en el botón de guardar

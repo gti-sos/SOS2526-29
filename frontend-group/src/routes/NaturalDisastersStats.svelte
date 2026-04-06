@@ -23,6 +23,10 @@
     let searchYear = "";
     let searchFrom = ""; // NUEVO: Año de inicio
     let searchTo = "";   // NUEVO: Año de fin
+    let searchDeathCount = "";
+    let searchInjuredCount = "";
+    let searchEconomicDamage = "";
+    let limitResults = 10;
 
     function mostrarMensaje(texto, tipo = "ok") {
         mensaje = texto;
@@ -99,16 +103,27 @@
 
     async function buscar() {
         let queryParams = [];
-        if (searchCountry) queryParams.push(`country=${searchCountry}`);
-        if (searchYear) queryParams.push(`year=${searchYear}`);
-        if (searchFrom) queryParams.push(`from=${searchFrom}`); // NUEVO
-        if (searchTo) queryParams.push(`to=${searchTo}`);
+        
+        // 1. Filtros originales
+        if (searchCountry !== "" && searchCountry !== null) queryParams.push(`country=${searchCountry}`);
+        if (searchYear !== "" && searchYear !== null) queryParams.push(`year=${searchYear}`);
+        if (searchFrom !== "" && searchFrom !== null) queryParams.push(`from=${searchFrom}`); 
+        if (searchTo !== "" && searchTo !== null) queryParams.push(`to=${searchTo}`);
+        
+        // 2. NUEVOS filtros añadidos
+        if (searchDeathCount !== "" && searchDeathCount !== null) queryParams.push(`death_count=${searchDeathCount}`);
+        if (searchInjuredCount !== "" && searchInjuredCount !== null) queryParams.push(`injured_count=${searchInjuredCount}`);
+        if (searchEconomicDamage !== "" && searchEconomicDamage !== null) queryParams.push(`economic_damage_usd=${searchEconomicDamage}`);
+        
+        // 3. Límite de paginación
+        if (limitResults) queryParams.push(`limit=${limitResults}`);
         
         let queryString = queryParams.length > 0 ? "?" + queryParams.join("&") : "";
         
         // Ejecutamos la carga y guardamos el número de resultados
         const numResultados = await cargarDatos(queryString);
         
+        // Lógica de mensajes (se queda igual que la tenías)
         if (numResultados === 0) {
             let errorMsg = "No se han encontrado registros";
             if (searchCountry && searchYear) {
@@ -127,7 +142,6 @@
             if (searchYear) successMsg += ` del año ${searchYear}`;
             mostrarMensaje(successMsg, "ok");
         }
-        // Si numResultados es -1, no hacemos nada porque cargarDatos ya mostró su propio error
     }
 
     function limpiarBusqueda() {
@@ -135,6 +149,9 @@
         searchYear = "";
         searchFrom = ""; // Limpiar también los nuevos
         searchTo = "";
+        searchDeathCount = "";
+        searchInjuredCount = "";
+        searchEconomicDamage = "";
         cargarDatos();
     }
 
@@ -173,10 +190,20 @@
                 <input bind:value={searchYear} type="number" placeholder="Buscar año exacto..." />
                 <input bind:value={searchFrom} type="number" placeholder="Desde año (ej: 2000)" />
                 <input bind:value={searchTo} type="number" placeholder="Hasta año (ej: 2020)" />
+                
+                <input bind:value={searchDeathCount} type="number" placeholder="Nº Muertes exactas" />
+                <input bind:value={searchInjuredCount} type="number" placeholder="Nº Heridos exactos" />
+                <input bind:value={searchEconomicDamage} type="number" placeholder="Daños económicos..." />
             </div>
-            <div class="botones-busqueda">
+            
+            <div class="botones-busqueda" style="margin-top: 15px; align-items: center;">
                 <button class="btn-primary" on:click={buscar}>Buscar</button>
                 <button class="btn-secondary" on:click={limpiarBusqueda}>Limpiar</button>
+                
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                    <span style="color: #9ca3af;">Límite:</span>
+                    <input bind:value={limitResults} type="number" min="1" max="100" style="width: 70px; padding: 6px;" />
+                </div>
             </div>
         </section>
     </div>
