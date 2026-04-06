@@ -1,5 +1,3 @@
-
-
 import { test, expect } from '@playwright/test';
 
 // Cambia el puerto si tu servidor local usa otro distinto al 10000
@@ -13,12 +11,48 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
     await expect(page.locator('h1')).toContainText('Gestión de Desastres Naturales');
   });
 
+  test('5. Listar todos los registros', async ({ page }) => {
+    await page.goto(BASE_URL);
+    
+    // Pulsamos "Cargar Iniciales" por si la base de datos se quedó vacía en el test anterior
+    await page.getByRole('button', { name: '📦 Cargar Iniciales' }).click();
+    
+    // Pulsamos el botón recargar para asegurar que carga la lista completa
+    await page.getByRole('button', { name: '🔄 Recargar' }).click();
+    
+    // Verificamos que la tabla se muestra y tiene al menos una fila renderizada
+    await expect(page.locator('table tbody tr').first()).toBeVisible();
+  });
+
+  
+
+  
+
+  test('4. Borrar un registro', async ({ page }) => {
+    await page.goto(BASE_URL);
+    
+    // Aceptamos la ventana de "confirm" de JavaScript automáticamente
+    page.on('dialog', dialog => dialog.accept());
+
+    // Buscamos el primer botón de borrar de la tabla y lo pulsamos
+    const deleteButton = page.locator('.btn-danger-sm').first();
+    await deleteButton.click();
+
+    // Verificamos que sale el mensaje de eliminado
+    await expect(page.locator('.mensaje.ok')).toContainText('eliminado');
+  });
+
+  // ==========================================
+  // NUEVOS TESTS AÑADIDOS
+  // ==========================================
+
+
   test('2. Crear un nuevo registro', async ({ page }) => {
     await page.goto(BASE_URL);
     
-    // Rellenamos el formulario usando los placeholders que pusiste en el HTML
+    // Rellenamos el formulario
     await page.getByPlaceholder('País (ej: spain)').fill('TestLandia');
-    await page.locator('.form-grid input[type="number"]').first().fill('2050'); // El primer input de año
+    await page.locator('.form-grid input[type="number"]').first().fill('2050'); 
     await page.getByPlaceholder('Nº Muertes').fill('100');
     await page.getByPlaceholder('Nº Heridos').fill('50');
     await page.getByPlaceholder('Daños economicos').fill('1000');
@@ -29,6 +63,21 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
     // Verificamos que sale el mensaje verde de éxito
     await expect(page.locator('.mensaje.ok')).toContainText('creado correctamente');
   });
+  
+
+  test('6. Editar un registro', async ({ page }) => {
+    await page.goto(BASE_URL);
+    
+    // Esperamos a que el primer botón de editar esté visible y lo pulsamos
+    const editButton = page.locator('.btn-edit').first();
+    await expect(editButton).toBeVisible();
+    await editButton.click();
+
+    // Verificamos que la URL ha cambiado y nos ha llevado a la vista separada de edición
+    await expect(page).toHaveURL(/.*\/editar\/.*/);
+  });
+
+  
 
   test('3. Buscar un registro', async ({ page }) => {
     await page.goto(BASE_URL);
@@ -41,18 +90,22 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
     await expect(page.locator('.mensaje.ok')).toContainText('Se han encontrado');
   });
 
-  test('4. Borrar un registro', async ({ page }) => {
+  test('7. Borrar todos los registros', async ({ page }) => {
     await page.goto(BASE_URL);
     
-    // Playwright necesita que le digamos que acepte la ventana de "confirm" de JavaScript automáticamente
+    // Aceptamos la alerta de confirmación ("¿Estás 100% seguro...?")
     page.on('dialog', dialog => dialog.accept());
-
-    // Buscamos el primer botón de borrar de la tabla y lo pulsamos
-    const deleteButton = page.locator('.btn-danger-sm').first();
-    await deleteButton.click();
-
-    // Verificamos que sale el mensaje de eliminado
-    await expect(page.locator('.mensaje.ok')).toContainText('eliminado');
+    
+    // Hacemos clic en el botón de borrar todos
+    await page.getByRole('button', { name: '🗑️ Borrar Todos' }).click();
+    
+    // Verificamos que sale el mensaje de éxito que programaste
+    await expect(page.locator('.mensaje.ok')).toContainText('pulverizados');
+    
+    // Verificamos que aparece el texto de que la tabla está vacía
+    await expect(page.locator('.vacio')).toBeVisible();
   });
+
+  
 
 });
