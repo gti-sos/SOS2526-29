@@ -51,13 +51,23 @@ module.exports = function (app, db) {
     });
 
     // 3. GET a la colección completa (Búsquedas + Paginación)
+    // 3. GET a la colección completa (Búsquedas + Paginación)
     app.get(BASE_API_URL, (req, res) => {
 
         let query = {};
         
         // Búsquedas (Filtering) - Convertimos a número lo que deba ser número
         if (req.query.country) query.country = new RegExp(req.query.country, 'i');
-        if (req.query.year) query.year = parseInt(req.query.year);
+        
+        // Lógica mejorada para el Año (Exacto o por Rangos)
+        if (req.query.year) {
+            query.year = parseInt(req.query.year);
+        } else if (req.query.from || req.query.to) {
+            query.year = {};
+            if (req.query.from) query.year.$gte = parseInt(req.query.from);
+            if (req.query.to) query.year.$lte = parseInt(req.query.to);
+        }
+
         if (req.query.death_count) query.death_count = parseInt(req.query.death_count);
         if (req.query.injured_count) query.injured_count = parseInt(req.query.injured_count);
         if (req.query.economic_damage_usd) query.economic_damage_usd = parseInt(req.query.economic_damage_usd);
@@ -68,12 +78,12 @@ module.exports = function (app, db) {
 
         console.log("Query enviada a NeDB:", query); // <-- CHIVATO 1
 
-    db.find(query).skip(offset).limit(limit).exec((err, docs) => {
-        console.log(`Registros encontrados en la DB: ${docs.length}`); // <-- CHIVATO 2
-        docs.forEach(d => delete d._id);
-        res.json(docs);
+        db.find(query).skip(offset).limit(limit).exec((err, docs) => {
+            console.log(`Registros encontrados en la DB: ${docs.length}`); // <-- CHIVATO 2
+            docs.forEach(d => delete d._id);
+            res.json(docs);
+        });
     });
-});
 
     // 4. POST a la colección (Crear recurso)
     app.post(BASE_API_URL, (req, res) => {

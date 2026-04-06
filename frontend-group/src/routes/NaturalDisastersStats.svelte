@@ -21,6 +21,8 @@
     // Buscador
     let searchCountry = "";
     let searchYear = "";
+    let searchFrom = ""; // NUEVO: Año de inicio
+    let searchTo = "";   // NUEVO: Año de fin
 
     function mostrarMensaje(texto, tipo = "ok") {
         mensaje = texto;
@@ -99,6 +101,8 @@
         let queryParams = [];
         if (searchCountry) queryParams.push(`country=${searchCountry}`);
         if (searchYear) queryParams.push(`year=${searchYear}`);
+        if (searchFrom) queryParams.push(`from=${searchFrom}`); // NUEVO
+        if (searchTo) queryParams.push(`to=${searchTo}`);
         
         let queryString = queryParams.length > 0 ? "?" + queryParams.join("&") : "";
         
@@ -129,6 +133,8 @@
     function limpiarBusqueda() {
         searchCountry = "";
         searchYear = "";
+        searchFrom = ""; // Limpiar también los nuevos
+        searchTo = "";
         cargarDatos();
     }
 
@@ -164,7 +170,9 @@
             <h2>🔍 Buscar registros</h2>
             <div class="form-grid">
                 <input bind:value={searchCountry} placeholder="Buscar por país..." />
-                <input bind:value={searchYear} type="number" placeholder="Buscar por año..." />
+                <input bind:value={searchYear} type="number" placeholder="Buscar año exacto..." />
+                <input bind:value={searchFrom} type="number" placeholder="Desde año (ej: 2000)" />
+                <input bind:value={searchTo} type="number" placeholder="Hasta año (ej: 2020)" />
             </div>
             <div class="botones-busqueda">
                 <button class="btn-primary" on:click={buscar}>Buscar</button>
