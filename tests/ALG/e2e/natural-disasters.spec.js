@@ -11,7 +11,7 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
     await expect(page.locator('h1')).toContainText('Gestión de Desastres Naturales');
   });
 
-  test('5. Listar todos los registros', async ({ page }) => {
+  test('2. Listar todos los registros', async ({ page }) => {
     await page.goto(BASE_URL);
     
     // Pulsamos "Cargar Iniciales" por si la base de datos se quedó vacía en el test anterior
@@ -24,11 +24,7 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
     await expect(page.locator('table tbody tr').first()).toBeVisible();
   });
 
-  
-
-  
-
-  test('4. Borrar un registro', async ({ page }) => {
+  test('3. Borrar un registro', async ({ page }) => {
     await page.goto(BASE_URL);
     
     // Aceptamos la ventana de "confirm" de JavaScript automáticamente
@@ -42,12 +38,8 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
     await expect(page.locator('.mensaje.ok')).toContainText('eliminado');
   });
 
-  // ==========================================
-  // NUEVOS TESTS AÑADIDOS
-  // ==========================================
 
-
-  test('2. Crear un nuevo registro', async ({ page }) => {
+  test('4. Crear un nuevo registro', async ({ page }) => {
     await page.goto(BASE_URL);
     
     // Rellenamos el formulario
@@ -65,7 +57,7 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
   });
   
 
-  test('6. Editar un registro', async ({ page }) => {
+  test('5. Editar un registro', async ({ page }) => {
     await page.goto(BASE_URL);
     
     // Esperamos a que el primer botón de editar esté visible y lo pulsamos
@@ -79,7 +71,7 @@ test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
 
   
 
-  test('3. Buscar un registro', async ({ page }) => {
+  test('6. Buscar un registro', async ({ page }) => {
     await page.goto(BASE_URL);
     
     // Rellenamos el buscador
