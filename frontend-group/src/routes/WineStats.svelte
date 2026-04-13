@@ -27,7 +27,8 @@
   let filtros = {
     title: "", country: "", region: "", year: "",
     price: "", abv: "", unit: "", grape: "", type: "",
-    capacity: "", id: "", offset: "", limit: ""
+    capacity: "", id: "", offset: "", limit: "",
+    yearDesde: "", yearHasta: ""
   };
 
   function mostrarMensaje(texto, tipo = "ok") {
@@ -48,7 +49,8 @@
     filtros = {
       title: "", country: "", region: "", year: "",
       price: "", abv: "", unit: "", grape: "", type: "",
-      capacity: "", id: "", offset: "", limit: ""
+      capacity: "", id: "", offset: "", limit: "",
+      yearDesde: "", yearHasta: ""
     };
   }
 
@@ -64,7 +66,7 @@
     try {
       const params = new URLSearchParams();
       for (const [key, value] of Object.entries(filtros)) {
-        if (value !== "" && value !== null) {
+        if (value !== "" && value !== null && key !== "yearDesde" && key !== "yearHasta") {
           params.append(key, value);
         }
       }
@@ -75,7 +77,16 @@
         mostrarMensaje(data.error || "Error al buscar vinos.", "error");
         return;
       }
-      vinos = await res.json();
+      let resultado = await res.json();
+
+      if (filtros.yearDesde !== "") {
+        resultado = resultado.filter(v => v.year >= Number(filtros.yearDesde));
+      }
+      if (filtros.yearHasta !== "") {
+        resultado = resultado.filter(v => v.year <= Number(filtros.yearHasta));
+      }
+
+      vinos = resultado;
       if (vinos.length === 0) {
         mostrarMensaje("No se encontraron vinos con esos criterios.", "error");
       } else {
@@ -183,7 +194,9 @@
         <label>Título<input bind:value={filtros.title} placeholder="The Guv'nor..." /></label>
         <label>País<input bind:value={filtros.country} placeholder="spain..." /></label>
         <label>Región<input bind:value={filtros.region} placeholder="rioja..." /></label>
-        <label>Año<input type="number" bind:value={filtros.year} placeholder="2022" /></label>
+        <label>Año exacto<input type="number" bind:value={filtros.year} placeholder="2022" /></label>
+        <label>Año desde<input type="number" bind:value={filtros.yearDesde} placeholder="2015" /></label>
+        <label>Año hasta<input type="number" bind:value={filtros.yearHasta} placeholder="2023" /></label>
         <label>Precio (€)<input type="number" bind:value={filtros.price} placeholder="9.99" /></label>
         <label>Graduación (%)<input type="number" bind:value={filtros.abv} placeholder="14" /></label>
         <label>Unidades<input type="number" bind:value={filtros.unit} placeholder="100" /></label>
@@ -256,7 +269,6 @@
     {/if}
   </section>
 </div>
-
 <style>
   .page { max-width: 1200px; margin: 0 auto; padding: 24px 16px; color: #f5f7fb; }
   h1 { font-size: 2rem; margin-bottom: 24px; color: #000000; }

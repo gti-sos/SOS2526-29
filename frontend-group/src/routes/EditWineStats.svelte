@@ -28,15 +28,15 @@
   }
 
   async function guardarCambios() {
-    const id = Number(params.id);
-    try {
-      await updateWineStat(id, vino);
-      mostrarMensaje("Vino actualizado correctamente.");
-      setTimeout(() => pop(), 1500);
-    } catch (e) {
-      mostrarMensaje(e.message, "error");
-    }
+  const id = Number(params.id);
+  try {
+    await updateWineStat(id, vino);
+    mostrarMensaje("Vino actualizado correctamente.");
+    setTimeout(() => pop(), 3000); // ← 3 segundos para que el usuario vea el mensaje
+  } catch (e) {
+    mostrarMensaje(e.message, "error");
   }
+}
 
   onMount(cargarVino);
 </script>
