@@ -51,7 +51,6 @@ module.exports = function (app, db) {
     });
 
     // 3. GET a la colección completa (Búsquedas + Paginación)
-    // 3. GET a la colección completa (Búsquedas + Paginación)
     app.get(BASE_API_URL, (req, res) => {
 
         let query = {};
@@ -76,10 +75,10 @@ module.exports = function (app, db) {
         let offset = parseInt(req.query.offset) || 0;
         let limit = parseInt(req.query.limit) || 100;
 
-        console.log("Query enviada a NeDB:", query); // <-- CHIVATO 1
+        console.log("Query enviada a NeDB:", query); 
 
         db.find(query).skip(offset).limit(limit).exec((err, docs) => {
-            console.log(`Registros encontrados en la DB: ${docs.length}`); // <-- CHIVATO 2
+            console.log(`Registros encontrados en la DB: ${docs.length}`); 
             docs.forEach(d => delete d._id);
             res.json(docs);
         });
