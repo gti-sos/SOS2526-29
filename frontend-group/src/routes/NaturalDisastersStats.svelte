@@ -13,7 +13,7 @@
 
     let disasters = [];
     let mensaje = "";
-    let tipoMensaje = "ok"; // 'ok' o 'error'
+    let tipoMensaje = "ok"; 
 
     // Formulario de creación
     let form = { country: "", year: "", death_count: "", injured_count: "", economic_damage_usd: "" };
@@ -21,23 +21,27 @@
     // Buscador
     let searchCountry = "";
     let searchYear = "";
-    let searchFrom = ""; // NUEVO: Año de inicio
-    let searchTo = "";   // NUEVO: Año de fin
+    let searchFrom = ""; 
+    let searchTo = "";   
+    let searchDeathCount = "";
+    let searchInjuredCount = "";
+    let searchEconomicDamage = "";
+    let limitResults = "";
 
     function mostrarMensaje(texto, tipo = "ok") {
         mensaje = texto;
         tipoMensaje = tipo;
-        setTimeout(() => (mensaje = ""), 4500); // El mensaje desaparece solo
+        setTimeout(() => (mensaje = ""), 4500); 
     }
 
     async function cargarDatos(query = "") {
         try {
             const data = await getDisasters(query);
             disasters = data;
-            return data.length; // <--- Devolvemos la longitud
+            return data.length; 
         } catch (e) {
             mostrarMensaje(e.message, "error");
-            return -1; // <--- Indicamos que hubo un error
+            return -1; 
         }
     }
 
@@ -45,7 +49,7 @@
         try {
             await loadInitialData();
             mostrarMensaje("Datos iniciales cargados con éxito.");
-            cargarDatos(); // Recargamos la tabla automáticamente
+            cargarDatos(); 
         } catch (e) {
             mostrarMensaje(e.message, "error");
         }
@@ -99,16 +103,25 @@
 
     async function buscar() {
         let queryParams = [];
-        if (searchCountry) queryParams.push(`country=${searchCountry}`);
-        if (searchYear) queryParams.push(`year=${searchYear}`);
-        if (searchFrom) queryParams.push(`from=${searchFrom}`); // NUEVO
-        if (searchTo) queryParams.push(`to=${searchTo}`);
+        
+        // 1. Filtros de búsqueda
+        if (searchCountry !== "" && searchCountry !== null) queryParams.push(`country=${searchCountry}`);
+        if (searchYear !== "" && searchYear !== null) queryParams.push(`year=${searchYear}`);
+        if (searchFrom !== "" && searchFrom !== null) queryParams.push(`from=${searchFrom}`); 
+        if (searchTo !== "" && searchTo !== null) queryParams.push(`to=${searchTo}`);
+        if (searchDeathCount !== "" && searchDeathCount !== null) queryParams.push(`death_count=${searchDeathCount}`);
+        if (searchInjuredCount !== "" && searchInjuredCount !== null) queryParams.push(`injured_count=${searchInjuredCount}`);
+        if (searchEconomicDamage !== "" && searchEconomicDamage !== null) queryParams.push(`economic_damage_usd=${searchEconomicDamage}`);
+        
+        // 2. Límite de paginación
+        if (limitResults) queryParams.push(`limit=${limitResults}`);
         
         let queryString = queryParams.length > 0 ? "?" + queryParams.join("&") : "";
         
         // Ejecutamos la carga y guardamos el número de resultados
         const numResultados = await cargarDatos(queryString);
         
+        // Lógica de mensajes (se queda igual que la tenías)
         if (numResultados === 0) {
             let errorMsg = "No se han encontrado registros";
             if (searchCountry && searchYear) {
@@ -127,14 +140,17 @@
             if (searchYear) successMsg += ` del año ${searchYear}`;
             mostrarMensaje(successMsg, "ok");
         }
-        // Si numResultados es -1, no hacemos nada porque cargarDatos ya mostró su propio error
     }
 
     function limpiarBusqueda() {
         searchCountry = "";
         searchYear = "";
-        searchFrom = ""; // Limpiar también los nuevos
+        searchFrom = ""; 
         searchTo = "";
+        searchDeathCount = "";
+        searchInjuredCount = "";
+        searchEconomicDamage = "";
+        limitResults = "";
         cargarDatos();
     }
 
@@ -173,10 +189,20 @@
                 <input bind:value={searchYear} type="number" placeholder="Buscar año exacto..." />
                 <input bind:value={searchFrom} type="number" placeholder="Desde año (ej: 2000)" />
                 <input bind:value={searchTo} type="number" placeholder="Hasta año (ej: 2020)" />
+                
+                <input bind:value={searchDeathCount} type="number" placeholder="Nº Muertes exactas" />
+                <input bind:value={searchInjuredCount} type="number" placeholder="Nº Heridos exactos" />
+                <input bind:value={searchEconomicDamage} type="number" placeholder="Daños económicos..." />
             </div>
-            <div class="botones-busqueda">
+            
+            <div class="botones-busqueda" style="margin-top: 15px; align-items: center;">
                 <button class="btn-primary" on:click={buscar}>Buscar</button>
                 <button class="btn-secondary" on:click={limpiarBusqueda}>Limpiar</button>
+                
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                    <span style="color: #9ca3af;">Límite:</span>
+                    <input bind:value={limitResults} type="number" min="1" max="100" style="width: 70px; padding: 6px;" />
+                </div>
             </div>
         </section>
     </div>
@@ -230,8 +256,8 @@
 <style>
     /* Estilos basados en el tema de tus compañeros para mantener consistencia */
     .page { max-width: 1200px; margin: 0 auto; padding: 24px; color: #f5f7fb; }
-    h1 { font-size: 2rem; margin-bottom: 5px; color: #f5f7fb; }
-    h2 { margin-top: 0; font-size: 1.2rem; margin-bottom: 16px; border-bottom: 1px solid #374151; padding-bottom: 8px;}
+    h1 { font-size: 2rem; margin-bottom: 5px; color: #1c48c9; }
+    h2 { margin-top: 0; font-size: 1.2rem; color:#f5f7fb; margin-bottom: 16px; border-bottom: 1px solid #333333; padding-bottom: 8px;}
     p { margin-bottom: 24px; color: #9ca3af; }
     
     .paneles-superiores { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px; }
