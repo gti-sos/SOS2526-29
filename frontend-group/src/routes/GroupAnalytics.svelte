@@ -10,6 +10,8 @@
   let loading = true;
   let error = "";
   let metrics = [];
+  let chartContainer2;
+  let chart2;
 
   const formatter = new Intl.NumberFormat("es-ES", {
     maximumFractionDigits: 0
@@ -60,79 +62,74 @@
     }));
   }
 
-  function renderChart() {
-    if (!chartContainer) return;
+ function renderChart() {
+  if (!chartContainer || !chartContainer2) return;
 
-    chart?.destroy();
+  chart?.destroy();
+  chart2?.destroy();
 
-    chart = Highcharts.chart(chartContainer, {
-      chart: {
-        type: "column",
-        backgroundColor: "transparent"
-      },
-      title: {
-        text: "Vista integrada del grupo"
-      },
-      subtitle: {
-        text: "Comparacion combinada de las APIs de LCC, ALG y RMP"
-      },
-      accessibility: {
-        enabled: true,
-        description:
-          "Grafico de columnas que combina datos de las tres APIs del grupo. Cada serie representa a un miembro y muestra registros disponibles y un indicador principal normalizado."
-      },
-      xAxis: {
-        categories: ["Registros", "Indicador 0-100"],
-        title: {
-          text: "Medida"
-        }
-      },
-      yAxis: {
-        min: 0,
-        title: {
-          text: "Valor"
-        }
-      },
-      tooltip: {
-        formatter() {
-          const pointIndex = this.point.index;
-          const metric = metrics.find((item) => item.name === this.series.name);
+  const colors = ["#0f766e", "#dc2626", "#7c3aed"];
 
-          if (!metric) {
-            return `<strong>${this.series.name}</strong>: ${formatter.format(this.y)}`;
-          }
-
-          if (pointIndex === 0) {
-            return `<strong>${metric.name}</strong><br/>Registros: ${formatter.format(metric.records)}`;
-          }
-
-          return `<strong>${metric.name}</strong><br/>${metric.indicatorName}: ${formatter.format(metric.indicator)}<br/>Indice normalizado: ${this.y}`;
-        }
-      },
-      plotOptions: {
-        column: {
-          borderRadius: 3,
-          dataLabels: {
-            enabled: true
-          }
-        },
-        series: {
-          pointPadding: 0.08,
-          groupPadding: 0.12
-        }
-      },
-      series: metrics.map((metric) => ({
-        name: metric.name,
-        data: [metric.records, metric.index],
-        accessibility: {
-          description: `${metric.name}. ${metric.records} registros. ${metric.indicatorName}: ${metric.indicator}.`
-        }
-      })),
-      credits: {
-        enabled: false
+  // GRÁFICO 1 — Número de registros
+  chart = Highcharts.chart(chartContainer, {
+    chart: { type: "bar", backgroundColor: "transparent" },
+    title: { text: "Registros por API", align: "left" },
+    subtitle: { text: "Número total de recursos en cada colección", align: "left" },
+    accessibility: { enabled: true, description: "Gráfico de barras con el número de registros de cada API." },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    xAxis: {
+      categories: metrics.map(m => m.name),
+      title: { text: null }
+    },
+    yAxis: { min: 0, title: { text: "Registros" } },
+    tooltip: {
+      formatter() {
+        const metric = metrics[this.point.index];
+        return `<b>${metric.name}</b><br/>Registros: <b>${formatter.format(metric.records)}</b>`;
       }
-    });
-  }
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        dataLabels: { enabled: true, format: "{y}" },
+        colorByPoint: true,
+        colors
+      }
+    },
+    series: [{ name: "Registros", data: metrics.map(m => m.records) }]
+  });
+
+  // GRÁFICO 2 — Indicador principal normalizado
+  chart2 = Highcharts.chart(chartContainer2, {
+    chart: { type: "bar", backgroundColor: "transparent" },
+    title: { text: "Indicador principal normalizado (0-100)", align: "left" },
+    subtitle: { text: "Comparación relativa del indicador principal de cada API", align: "left" },
+    accessibility: { enabled: true, description: "Gráfico de barras con el indicador normalizado de cada API." },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    xAxis: {
+      categories: metrics.map(m => m.name),
+      title: { text: null }
+    },
+    yAxis: { min: 0, max: 100, title: { text: "Índice (0-100)" } },
+    tooltip: {
+      formatter() {
+        const metric = metrics[this.point.index];
+        return `<b>${metric.name}</b><br/>${metric.indicatorName}: <b>${formatter.format(metric.indicator)}</b><br/>Índice: <b>${metric.index}</b>`;
+      }
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        dataLabels: { enabled: true, format: "{y}" },
+        colorByPoint: true,
+        colors
+      }
+    },
+    series: [{ name: "Índice", data: metrics.map(m => m.index) }]
+  });
+}
 
   async function loadAnalytics() {
     loading = true;
@@ -160,6 +157,7 @@
 
   onDestroy(() => {
     chart?.destroy();
+    chart2?.destroy();
   });
 </script>
 
@@ -185,10 +183,15 @@
     <p class="state" role="status">Cargando datos de analytics...</p>
   {:else if error}
     <div class="message error" role="alert">{error}</div>
-  {:else}
+    {:else}
     <section class="chart-panel" aria-labelledby="group-chart-title">
-      <h2 id="group-chart-title">Widget Highcharts integrado</h2>
+      <h2 id="group-chart-title">Registros por API</h2>
       <div class="chart-frame" bind:this={chartContainer}></div>
+    </section>
+
+    <section class="chart-panel" aria-labelledby="group-chart-title-2">
+      <h2 id="group-chart-title-2">Indicador principal normalizado</h2>
+      <div class="chart-frame" bind:this={chartContainer2}></div>
     </section>
 
     <section class="metric-grid" aria-label="Resumen de metricas integradas">
