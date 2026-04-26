@@ -11,6 +11,9 @@
   import GroupAnalytics from "./routes/GroupAnalytics.svelte";
   import CitysStatsAnalytics from "./routes/CitysStatsAnalytics.svelte";
   import CitysStatsMapAnalytics from "./routes/CitysStatsMapAnalytics.svelte";
+  import WineStatsAnalytics from "./routes/WineStatsAnalytics.svelte";
+
+
 
   const routes = {
     "/": Home,
@@ -24,7 +27,9 @@
     "/analytics/citys-stats": CitysStatsAnalytics,
     "/analytics/citys-stats/map": CitysStatsMapAnalytics,
     "/analytics/city-stats": CitysStatsAnalytics,
-    "/analytics/city-stats/map": CitysStatsMapAnalytics
+    "/analytics/city-stats/map": CitysStatsMapAnalytics,
+    "/analytics/wine-stats": WineStatsAnalytics
+    
   };
 
   const directRoutes = {
@@ -32,7 +37,8 @@
     "/analytics/citys-stats": CitysStatsAnalytics,
     "/analytics/citys-stats/map": CitysStatsMapAnalytics,
     "/analytics/city-stats": CitysStatsAnalytics,
-    "/analytics/city-stats/map": CitysStatsMapAnalytics
+    "/analytics/city-stats/map": CitysStatsMapAnalytics,
+    "/analytics/wine-stats": WineStatsAnalytics 
   };
 
   const directPath = window.location.hash.startsWith("#/") ? "" : window.location.pathname;
