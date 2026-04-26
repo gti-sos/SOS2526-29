@@ -4,6 +4,7 @@
   <a href="/#/citys-stats">Ciudades</a>
   <a href="/#/natural-disasters">Desastres naturales</a>
   <a href="/analytics">Analytics</a>
+  <a href="/integrations/citys-stats">Integraciones</a>
 </nav>
 
 <style>
