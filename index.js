@@ -74,7 +74,9 @@ app.get([
     "/analytics/citys-stats",
     "/analytics/citys-stats/map",
     "/analytics/city-stats",
-    "/analytics/city-stats/map"
+    "/analytics/city-stats/map",
+    "/integrations/citys-stats",
+    "/integrations/city-stats"
 ], (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });

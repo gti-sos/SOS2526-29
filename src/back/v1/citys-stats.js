@@ -55,6 +55,304 @@ module.exports = (app, db) => {
         return { city, country, un_2025_population };
     }
 
+    function cleanSearchTerm(value) {
+        return String(value ?? "").trim().replace(/[-_]+/g, " ");
+    }
+
+    function parseLimit(value, fallback, max) {
+        if (value === undefined) return fallback;
+
+        const limit = Number(value);
+
+        if (!Number.isInteger(limit) || limit < 1 || limit > max) {
+            return null;
+        }
+
+        return limit;
+    }
+
+    const worldBankPopulationCache = new Map();
+
+    function findAll() {
+        return new Promise((resolve, reject) => {
+            db.find({}, (err, docs) => {
+                if (err) return reject(err);
+                resolve(docs.map(clean));
+            });
+        });
+    }
+
+    async function fetchJson(url, sourceName, timeoutMs = 20000) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    Accept: "application/json",
+                    "User-Agent": "SOS2526-29 citys-stats integration"
+                },
+                signal: controller.signal
+            });
+
+            const text = await response.text();
+            let data = null;
+
+            try {
+                data = text ? JSON.parse(text) : null;
+            } catch {
+                throw new Error(`${sourceName} did not return JSON`);
+            }
+
+            if (!response.ok) {
+                const reason = data?.message || data?.error || response.statusText;
+                throw new Error(`${sourceName} returned ${response.status}: ${reason}`);
+            }
+
+            return data;
+        } catch (err) {
+            if (err.name === "AbortError") {
+                throw new Error(`${sourceName} request timed out`);
+            }
+
+            throw err;
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
+
+    async function getGeocoding(city, country = "") {
+        const params = new URLSearchParams({
+            name: cleanSearchTerm(city),
+            count: "10",
+            language: "en",
+            format: "json"
+        });
+
+        const data = await fetchJson(
+            `https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`,
+            "Open-Meteo Geocoding API"
+        );
+
+        const results = Array.isArray(data?.results) ? data.results : [];
+        const countrySearch = cleanSearchTerm(country).toLowerCase();
+        const match = results.find((item) =>
+            countrySearch && String(item.country ?? "").toLowerCase() === countrySearch
+        ) || results[0];
+
+        if (!match) return null;
+
+        return {
+            source: "Open-Meteo Geocoding API",
+            matchedName: match.name,
+            country: match.country,
+            countryCode: match.country_code,
+            latitude: match.latitude,
+            longitude: match.longitude,
+            elevation: match.elevation ?? null,
+            timezone: match.timezone ?? null,
+            population: match.population ?? null
+        };
+    }
+
+    async function getCountryInfo(country) {
+        const fields = [
+            "name",
+            "capital",
+            "region",
+            "subregion",
+            "population",
+            "area",
+            "cca2",
+            "cca3",
+            "flags",
+            "maps"
+        ].join(",");
+
+        const data = await fetchJson(
+            `https://restcountries.com/v3.1/name/${encodeURIComponent(cleanSearchTerm(country))}?fields=${fields}`,
+            "REST Countries API"
+        );
+
+        const target = cleanSearchTerm(country).toLowerCase();
+        const items = Array.isArray(data) ? data : [data];
+        const item = items.find((countryItem) =>
+            String(countryItem.name?.common ?? "").toLowerCase() === target
+        ) || items.find((countryItem) =>
+            String(countryItem.name?.official ?? "").toLowerCase() === target
+        ) || items[0];
+
+        if (!item) return null;
+
+        return {
+            source: "REST Countries API",
+            name: item.name?.common ?? null,
+            officialName: item.name?.official ?? null,
+            capital: Array.isArray(item.capital) ? item.capital.join(", ") : null,
+            region: item.region ?? null,
+            subregion: item.subregion ?? null,
+            population: item.population ?? null,
+            area: item.area ?? null,
+            cca2: item.cca2 ?? null,
+            cca3: item.cca3 ?? null,
+            flagPng: item.flags?.png ?? null,
+            flagSvg: item.flags?.svg ?? null,
+            googleMaps: item.maps?.googleMaps ?? null
+        };
+    }
+
+    async function getWorldBankPopulation(countryCode) {
+        const code = String(countryCode ?? "").trim().toUpperCase();
+
+        if (worldBankPopulationCache.has(code)) {
+            return worldBankPopulationCache.get(code);
+        }
+
+        const params = new URLSearchParams({
+            format: "json",
+            mrv: "1"
+        });
+
+        const data = await fetchJson(
+            `https://api.worldbank.org/v2/country/${encodeURIComponent(code)}/indicator/SP.POP.TOTL?${params.toString()}`,
+            "World Bank Indicators API",
+            60000
+        );
+
+        const rows = Array.isArray(data) && Array.isArray(data[1]) ? data[1] : [];
+        const row = rows.find((item) => item?.value !== null && item?.value !== undefined) || rows[0];
+
+        const normalized = normalizeWorldBankRow(row, code);
+
+        if (normalized) {
+            worldBankPopulationCache.set(code, normalized);
+        }
+
+        return normalized;
+    }
+
+    function normalizeWorldBankRow(row, fallbackCode) {
+        if (!row) return null;
+
+        return {
+            source: "World Bank Indicators API",
+            indicator: row.indicator?.value ?? "Population, total",
+            country: row.country?.value ?? null,
+            countryCode: row.countryiso3code ?? fallbackCode,
+            date: row.date ?? null,
+            value: row.value ?? null
+        };
+    }
+
+    async function getWorldBankPopulations(countryCodes) {
+        const uniqueCodes = [...new Set(countryCodes
+            .map((countryCode) => String(countryCode ?? "").trim().toUpperCase())
+            .filter(Boolean)
+        )];
+
+        if (uniqueCodes.length === 0) return new Map();
+
+        const missingCodes = uniqueCodes.filter((code) => !worldBankPopulationCache.has(code));
+
+        if (missingCodes.length > 0) {
+            const params = new URLSearchParams({
+                format: "json",
+                mrv: "1",
+                per_page: "100"
+            });
+
+            const data = await fetchJson(
+                `https://api.worldbank.org/v2/country/${missingCodes.join(";")}/indicator/SP.POP.TOTL?${params.toString()}`,
+                "World Bank Indicators API",
+                60000
+            );
+
+            const rows = Array.isArray(data) && Array.isArray(data[1]) ? data[1] : [];
+
+            rows.forEach((row) => {
+                const normalized = normalizeWorldBankRow(row, row?.countryiso3code);
+                if (normalized?.countryCode && normalized.value !== null && normalized.value !== undefined) {
+                    worldBankPopulationCache.set(normalized.countryCode, normalized);
+                }
+            });
+        }
+
+        const byCode = new Map();
+        uniqueCodes.forEach((code) => {
+            if (worldBankPopulationCache.has(code)) {
+                byCode.set(code, worldBankPopulationCache.get(code));
+            }
+        });
+
+        return byCode;
+    }
+
+    async function safeExternal(source, task) {
+        try {
+            return { source, data: await task(), error: null };
+        } catch (err) {
+            return { source, data: null, error: err.message };
+        }
+    }
+
+    async function buildIntegratedCityBase(item) {
+        const [geocodingResult, countryResult] = await Promise.all([
+            safeExternal("Open-Meteo Geocoding API", () => getGeocoding(item.city, item.country)),
+            safeExternal("REST Countries API", () => getCountryInfo(item.country))
+        ]);
+
+        return {
+            item,
+            geocodingResult,
+            countryResult
+        };
+    }
+
+    function buildIntegratedCity(base, worldBankByCode, worldBankBatchError) {
+        const code = base.countryResult.data?.cca3;
+        let worldBankResult;
+
+        if (!code) {
+            worldBankResult = {
+                source: "World Bank Indicators API",
+                data: null,
+                error: "Country ISO3 code not available"
+            };
+        } else if (worldBankBatchError) {
+            worldBankResult = {
+                source: "World Bank Indicators API",
+                data: null,
+                error: worldBankBatchError
+            };
+        } else {
+            const data = worldBankByCode.get(code) ?? null;
+            worldBankResult = {
+                source: "World Bank Indicators API",
+                data,
+                error: data ? null : "World Bank data not found"
+            };
+        }
+
+        return {
+            city: base.item.city,
+            country: base.item.country,
+            un_2025_population: base.item.un_2025_population,
+            geocoding: base.geocodingResult.data,
+            countryInfo: base.countryResult.data,
+            worldBankPopulation: worldBankResult.data,
+            integrationErrors: [
+                base.geocodingResult,
+                base.countryResult,
+                worldBankResult
+            ]
+                .filter((result) => result.error)
+                .map((result) => ({
+                    source: result.source,
+                    error: result.error
+                }))
+        };
+    }
+
     app.get(`${BASE_API_URL}/docs`, (req, res) => {
         res.redirect(DOCS_URL);
     });
@@ -123,6 +421,111 @@ module.exports = (app, db) => {
 
             return res.status(200).json(result.slice(offset, offset + limit));
         });
+    });
+
+    app.get(`${BASE_API_URL}/top-cities`, async (req, res) => {
+        const limit = parseLimit(req.query.limit, 5, 20);
+
+        if (limit === null) {
+            return res.status(400).json({ error: "Invalid limit" });
+        }
+
+        try {
+            const result = (await findAll())
+                .sort((a, b) => Number(b.un_2025_population) - Number(a.un_2025_population))
+                .slice(0, limit);
+
+            return res.status(200).json(result);
+        } catch {
+            return res.sendStatus(500);
+        }
+    });
+
+    app.get(`${BASE_API_URL}/integrations/geocoding/:city`, async (req, res) => {
+        try {
+            const result = await getGeocoding(req.params.city, req.query.country);
+
+            if (!result) {
+                return res.status(404).json({ error: "City not found in external API" });
+            }
+
+            return res.status(200).json(result);
+        } catch (err) {
+            return res.status(502).json({ error: err.message });
+        }
+    });
+
+    app.get(`${BASE_API_URL}/integrations/country/:country`, async (req, res) => {
+        try {
+            const result = await getCountryInfo(req.params.country);
+
+            if (!result) {
+                return res.status(404).json({ error: "Country not found in external API" });
+            }
+
+            return res.status(200).json(result);
+        } catch (err) {
+            return res.status(502).json({ error: err.message });
+        }
+    });
+
+    app.get(`${BASE_API_URL}/integrations/world-bank/:countryCode`, async (req, res) => {
+        try {
+            const result = await getWorldBankPopulation(req.params.countryCode);
+
+            if (!result) {
+                return res.status(404).json({ error: "World Bank data not found" });
+            }
+
+            return res.status(200).json(result);
+        } catch (err) {
+            return res.status(502).json({ error: err.message });
+        }
+    });
+
+    app.get(`${BASE_API_URL}/integrations/summary`, async (req, res) => {
+        const limit = parseLimit(req.query.limit, 5, 10);
+
+        if (limit === null) {
+            return res.status(400).json({ error: "Invalid limit" });
+        }
+
+        try {
+            const topCities = (await findAll())
+                .sort((a, b) => Number(b.un_2025_population) - Number(a.un_2025_population))
+                .slice(0, limit);
+
+            const integrationBases = await Promise.all(topCities.map(buildIntegratedCityBase));
+            const countryCodes = integrationBases
+                .map((base) => base.countryResult.data?.cca3)
+                .filter(Boolean);
+
+            let worldBankByCode = new Map();
+            let worldBankBatchError = null;
+
+            try {
+                worldBankByCode = await getWorldBankPopulations(countryCodes);
+            } catch (err) {
+                worldBankBatchError = err.message;
+            }
+
+            const integrations = integrationBases.map((base) =>
+                buildIntegratedCity(base, worldBankByCode, worldBankBatchError)
+            );
+
+            return res.status(200).json({
+                localResource: `${BASE_API_URL}/top-cities`,
+                externalApis: [
+                    "Open-Meteo Geocoding API",
+                    "REST Countries API",
+                    "World Bank Indicators API"
+                ],
+                count: integrations.length,
+                items: integrations
+            });
+        } catch {
+            return res.sendStatus(500);
+        }
     });
 
     app.get(`${BASE_API_URL}/:city/:country`, (req, res) => {
