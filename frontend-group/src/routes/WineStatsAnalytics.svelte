@@ -207,7 +207,8 @@
         Puedes hacer zoom arrastrando sobre cualquier gráfico.
       </p>
     </div>
-    <a class="btn-back" href="#/wine-stats">← Volver a Wine Stats</a>
+    <a class="btn-back" href="/#/analytics/wine-stats/map">🗺️ Ver mapa</a>
+    <a class="btn-back" href="/#/wine-stats"> Volver a Wine Stats</a>
   </header>
 
   {#if loading}
@@ -311,7 +312,20 @@
     margin-bottom: 12px;
     border-bottom: 1px solid #f1f5f9;
   }
+  .header-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 
+  .primary-link.gray {
+    background: #374151;
+  }
+
+  .primary-link.gray:hover {
+    background: #1f2937;
+  }
   .resumen {
     background: white;
     border: 1px solid #d9e0ea;

@@ -22,6 +22,7 @@
       resource: "wine-stats",
       source: "wine-stats",
       frontendUrl: "#/wine-stats",
+      analyticsUrl: "#/analytics/wine-stats",
       apiLinks: [
         {
           id: "api-v1-wine-stats",
@@ -42,6 +43,7 @@
       resource: "citys-stats",
       source: "citys-stats",
       frontendUrl: "#/citys-stats",
+      analyticsUrl: "#/analytics/citys-stats",
       apiLinks: [
         {
           id: "api-v1-citys-stats",
@@ -72,6 +74,7 @@
       resource: "natural-disasters",
       source: "natural-disasters",
       frontendUrl: "#/natural-disasters",
+      analyticsUrl: "#/analytics/natural-disasters",
       apiLinks: [
         {
           id: "api-v1-natural-disasters",
@@ -108,7 +111,6 @@
   <header class="hero">
     <h1>{group.name}</h1>
     <p>{group.description}</p>
-
     <div class="group-links">
       <a href={group.repository} target="_blank" rel="noreferrer">Repositorio GitHub</a>
       <a href={group.deployUrl} target="_blank" rel="noreferrer">Despliegue del grupo</a>
@@ -117,7 +119,6 @@
 
   <section class="members">
     <h2>Componentes del equipo</h2>
-
     <div class="grid">
       {#each members as member}
         <article class="card" data-testid={`member-${member.resource}`}>
@@ -128,24 +129,18 @@
           <div class="buttons">
             <a href={member.frontendUrl} data-testid={`frontend-${member.resource}`}>Frontend</a>
 
+            <a href={member.analyticsUrl} data-testid={`analytics-${member.resource}`} class="btn-analytics">
+              Analytics
+            </a>
+
             {#each member.apiLinks as link}
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noreferrer"
-                data-testid={link.id}
-              >
+              <a href={link.url} target="_blank" rel="noreferrer" data-testid={link.id}>
                 {link.label}
               </a>
             {/each}
 
             {#each member.docsLinks as link}
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noreferrer"
-                data-testid={link.id}
-              >
+              <a href={link.url} target="_blank" rel="noreferrer" data-testid={link.id}>
                 {link.label}
               </a>
             {/each}
@@ -155,7 +150,6 @@
     </div>
   </section>
 </div>
-
 <style>
   :global(body) {
     margin: 0;
@@ -213,6 +207,13 @@
     padding: 10px 14px;
     border-radius: 10px;
     display: inline-block;
+  }
+  .btn-analytics {
+    background: #7c3aed;
+    color: white;
+  }
+  .btn-analytics:hover {
+    background: #6d28d9;
   }
 
   a:hover {

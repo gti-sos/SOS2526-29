@@ -13,6 +13,8 @@
   import CitysStatsMapAnalytics from "./routes/CitysStatsMapAnalytics.svelte";
   import WineStatsAnalytics from "./routes/WineStatsAnalytics.svelte";
   import CitysStatsIntegrations from "./routes/CitysStatsIntegrations.svelte";
+  import WineStatsMapAnalytics from "./routes/WineStatsMapAnalytics.svelte";
+
 
   const routes = {
     "/": Home,
@@ -29,7 +31,8 @@
     "/analytics/city-stats/map": CitysStatsMapAnalytics,
     "/analytics/wine-stats": WineStatsAnalytics,
     "/integrations/citys-stats": CitysStatsIntegrations,
-    "/integrations/city-stats": CitysStatsIntegrations
+    "/integrations/city-stats": CitysStatsIntegrations,
+    "/analytics/wine-stats/map": WineStatsMapAnalytics
   };
 
   const directRoutes = {
@@ -40,7 +43,8 @@
     "/analytics/city-stats/map": CitysStatsMapAnalytics,
     "/integrations/citys-stats": CitysStatsIntegrations,
     "/integrations/city-stats": CitysStatsIntegrations,
-    "/analytics/wine-stats": WineStatsAnalytics 
+    "/analytics/wine-stats": WineStatsAnalytics,
+    "/analytics/wine-stats/map": WineStatsMapAnalytics
   };
 
   const directPath = window.location.hash.startsWith("#/") ? "" : window.location.pathname;

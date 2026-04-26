@@ -168,13 +168,17 @@
 </svelte:head>
 
 <main class="analytics-page">
-  <header class="analytics-header">
+    <header class="analytics-header">
     <div>
       <p class="eyebrow">SOS2526-29</p>
       <h1>Analytics del grupo</h1>
       <p class="subtitle">Datos combinados de citys-stats, natural-disasters y wine-stats.</p>
     </div>
-    <a class="primary-link" href="/analytics/citys-stats">Ver citys-stats</a>
+    <div class="header-links">
+      <a class="primary-link" href="/analytics/wine-stats">📊 Wine Stats</a>
+      <a class="primary-link" href="/analytics/citys-stats">📊 Citys Stats</a>
+      <a class="primary-link" href="/analytics/natural-disasters">📊 Natural Disasters</a>
+    </div>
   </header>
 
   {#if loading}
@@ -255,6 +259,12 @@
     color: #0f172a;
     font-size: 1.2rem;
     margin-bottom: 14px;
+  }
+    .header-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   h3 {
