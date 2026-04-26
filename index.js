@@ -69,6 +69,16 @@ app.get("/about", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+app.get([
+    "/analytics",
+    "/analytics/citys-stats",
+    "/analytics/citys-stats/map",
+    "/analytics/city-stats",
+    "/analytics/city-stats/map"
+], (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 // =============================================================================
 // 5. ARRANQUE DEL SERVIDOR
 // =============================================================================

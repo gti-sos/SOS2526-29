@@ -8,6 +8,9 @@
   import Navbar from "./components/Navbar.svelte";
   import NaturalDisasters from "./routes/NaturalDisastersStats.svelte";
   import EditNaturalDisasters from "./routes/EditNaturalDisasters.svelte";
+  import GroupAnalytics from "./routes/GroupAnalytics.svelte";
+  import CitysStatsAnalytics from "./routes/CitysStatsAnalytics.svelte";
+  import CitysStatsMapAnalytics from "./routes/CitysStatsMapAnalytics.svelte";
 
   const routes = {
     "/": Home,
@@ -16,9 +19,29 @@
     "/wine-stats" : WineStats,
     "/wine-stats/editar/:id": EditWineStats,
     "/natural-disasters": NaturalDisasters,
-    "/natural-disasters/editar/:country/:year": EditNaturalDisasters
+    "/natural-disasters/editar/:country/:year": EditNaturalDisasters,
+    "/analytics": GroupAnalytics,
+    "/analytics/citys-stats": CitysStatsAnalytics,
+    "/analytics/citys-stats/map": CitysStatsMapAnalytics,
+    "/analytics/city-stats": CitysStatsAnalytics,
+    "/analytics/city-stats/map": CitysStatsMapAnalytics
   };
+
+  const directRoutes = {
+    "/analytics": GroupAnalytics,
+    "/analytics/citys-stats": CitysStatsAnalytics,
+    "/analytics/citys-stats/map": CitysStatsMapAnalytics,
+    "/analytics/city-stats": CitysStatsAnalytics,
+    "/analytics/city-stats/map": CitysStatsMapAnalytics
+  };
+
+  const directPath = window.location.hash.startsWith("#/") ? "" : window.location.pathname;
+  const DirectRoute = directRoutes[directPath] || null;
 </script>
 <Navbar />
 
-<Router {routes} />
+{#if DirectRoute}
+  <svelte:component this={DirectRoute} />
+{:else}
+  <Router {routes} />
+{/if}
