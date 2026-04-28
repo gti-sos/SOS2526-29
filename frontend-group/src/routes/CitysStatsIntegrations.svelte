@@ -1,25 +1,38 @@
 <script>
+  // onDestroy limpia la grafica; tick espera a que Svelte actualice el DOM.
   import { onDestroy, onMount, tick } from "svelte";
+  // Servicio que pide el resumen integrado al backend.
   import { getCitysStatsIntegrationSummary } from "../services/citysStatsIntegrations";
 
+  // Libreria Highcharts cargada de forma dinamica.
   let Highcharts;
+  // Contenedor HTML de la grafica.
   let chartContainer;
+  // Objeto de grafica.
   let chart;
+  // Resumen completo devuelto por el backend.
   let summary = null;
+  // Lista de ciudades integradas.
   let items = [];
+  // Estado de carga.
   let loading = true;
+  // Mensaje de error.
   let error = "";
+  // Numero de ciudades que se piden al resumen.
   let selectedLimit = 5;
 
+  // Formateador normal para numeros grandes.
   const formatter = new Intl.NumberFormat("es-ES", {
     maximumFractionDigits: 0
   });
 
+  // Formateador compacto, por ejemplo 1,2 M.
   const compactFormatter = new Intl.NumberFormat("es-ES", {
     notation: "compact",
     maximumFractionDigits: 1
   });
 
+  // Enlaces a las APIs externas que usa esta integracion.
   const apiLinks = [
     {
       name: "Open-Meteo",
@@ -38,6 +51,7 @@
     }
   ];
 
+  // Convierte textos como south-korea en South Korea.
   function titleCase(value) {
     return String(value ?? "")
       .split(/[-\s]+/)
@@ -46,23 +60,28 @@
       .join(" ");
   }
 
+  // Convierte a numero o devuelve null si no se puede.
   function numberOrNull(value) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : null;
   }
 
+  // Lee la poblacion local de citys-stats.
   function localPopulation(item) {
     return numberOrNull(item.un_2025_population) ?? 0;
   }
 
+  // Lee la poblacion devuelta por Open-Meteo.
   function geocodingPopulation(item) {
     return numberOrNull(item.geocoding?.population);
   }
 
+  // Lee la poblacion del pais segun World Bank.
   function worldBankPopulation(item) {
     return numberOrNull(item.worldBankPopulation?.value);
   }
 
+  // Carga Highcharts cuando se va a pintar la grafica.
   async function loadHighcharts() {
     if (Highcharts) return Highcharts;
 
@@ -74,6 +93,7 @@
     return Highcharts;
   }
 
+  // Dibuja la grafica comparativa de poblaciones.
   function renderChart() {
     if (!chartContainer || !Highcharts || items.length === 0) return;
 
@@ -147,6 +167,7 @@
     });
   }
 
+  // Carga los datos integrados y actualiza la grafica.
   async function loadIntegrations() {
     loading = true;
     error = "";
@@ -164,8 +185,10 @@
     }
   }
 
+  // Al abrir la pantalla, cargamos las integraciones.
   onMount(loadIntegrations);
 
+  // Al salir, destruimos la grafica para no dejar memoria ocupada.
   onDestroy(() => {
     chart?.destroy();
   });

@@ -1,11 +1,14 @@
 <script>
+  // Comprobamos si el frontend se esta ejecutando con Vite en local.
   const isViteLocal =
     window.location.hostname === "localhost" && window.location.port === "5173";
 
+  // API_ORIGIN apunta al backend real cuando usamos Vite.
   const API_ORIGIN = isViteLocal
     ? "http://localhost:10000"
     : window.location.origin;
 
+  // Informacion general del grupo.
   const group = {
     name: "SOS2526-29",
     description:
@@ -16,6 +19,7 @@
       : `${window.location.origin}/#/`
   };
 
+  // Lista de miembros y enlaces asociados a cada recurso.
   const members = [
     {
       name: "Rufino Moreno Pacheco",

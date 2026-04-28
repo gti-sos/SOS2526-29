@@ -1,5 +1,7 @@
 <script>
+  // onMount ejecuta codigo cuando la pantalla se abre.
   import { onMount } from "svelte";
+  // Funciones del servicio que llaman a la API de citys-stats.
   import {
     createCityStat,
     deleteAllCitysStats,
@@ -8,6 +10,7 @@
     loadInitialCitysStats
   } from "../services/citysStatsApi";
 
+  // Opciones del desplegable de ordenacion.
   const sortOptions = [
     { value: "", label: "Sin orden especial" },
     { value: "city", label: "Ciudad (A-Z)" },
@@ -18,12 +21,14 @@
     { value: "-un_2025_population", label: "Poblacion (mayor a menor)" }
   ];
 
+  // Devuelve un formulario de creacion vacio.
   const emptyCreateForm = () => ({
     city: "",
     country: "",
     un_2025_population: ""
   });
 
+  // Devuelve un formulario de busqueda vacio.
   const emptySearchForm = () => ({
     q: "",
     city: "",
@@ -34,25 +39,35 @@
     offset: ""
   });
 
+  // Lista de registros que se muestra en la tabla.
   let citysStats = [];
+  // Datos del formulario para crear registros.
   let createForm = emptyCreateForm();
+  // Datos del formulario de busqueda.
   let searchForm = emptySearchForm();
+  // Mensaje de exito visible.
   let message = "";
+  // Mensaje de error visible.
   let error = "";
+  // Indica si se esta esperando respuesta de la API.
   let loading = false;
+  // Ultima busqueda aplicada, util para refrescar despues de crear o borrar.
   let activeQuery = {};
 
+  // Limpia mensajes de exito y error.
   function clearFeedback() {
     message = "";
     error = "";
   }
 
+  // Comprueba si una busqueda tiene algun filtro activo.
   function hasQueryValues(query) {
     return Object.values(query).some(
       (value) => value !== undefined && value !== null && value !== ""
     );
   }
 
+  // Convierte un valor obligatorio a entero positivo.
   function parsePositiveInteger(value, fieldLabel) {
     const trimmed = String(value ?? "").trim();
 
@@ -69,6 +84,7 @@
     return parsed;
   }
 
+  // Convierte un valor opcional a entero igual o mayor que cero.
   function parseOptionalNonNegativeInteger(value, fieldLabel) {
     const trimmed = String(value ?? "").trim();
 
@@ -85,6 +101,7 @@
     return parsed;
   }
 
+  // Convierte un valor opcional a entero positivo.
   function parseOptionalPositiveInteger(value, fieldLabel) {
     const trimmed = String(value ?? "").trim();
 
@@ -101,6 +118,7 @@
     return parsed;
   }
 
+  // Valida el formulario de creacion antes de enviarlo al backend.
   function validateCityStatForm(form) {
     const city = String(form.city ?? "").trim();
     const country = String(form.country ?? "").trim();
@@ -124,6 +142,7 @@
     };
   }
 
+  // Construye el objeto de filtros que se enviara a la API.
   function buildSearchQuery() {
     const query = {
       q: String(searchForm.q ?? "").trim(),
@@ -153,6 +172,7 @@
     return query;
   }
 
+  // Recarga la tabla usando una query concreta.
   async function refreshList(query = activeQuery, successMessage = "") {
     loading = true;
     error = "";
@@ -175,6 +195,7 @@
     }
   }
 
+  // Ejecuta la busqueda del formulario.
   async function handleSearch() {
     clearFeedback();
 
@@ -195,12 +216,14 @@
     }
   }
 
+  // Limpia filtros y vuelve a cargar todos los registros.
   async function handleResetSearch() {
     searchForm = emptySearchForm();
     clearFeedback();
     await refreshList({}, "Se han limpiado los filtros.");
   }
 
+  // Crea un registro nuevo.
   async function handleCreate() {
     clearFeedback();
 
@@ -218,6 +241,7 @@
     }
   }
 
+  // Carga los datos iniciales de ejemplo.
   async function handleLoadInitialData() {
     clearFeedback();
 
@@ -234,6 +258,7 @@
     }
   }
 
+  // Borra todos los registros.
   async function handleDeleteAll() {
     clearFeedback();
 
@@ -245,6 +270,7 @@
     }
   }
 
+  // Borra un registro concreto.
   async function handleDeleteOne(city, country) {
     clearFeedback();
 
@@ -259,10 +285,12 @@
     }
   }
 
+  // Abre la pantalla de edicion para una ciudad concreta.
   function openEdit(city, country) {
     window.location.hash = `#/citys-stats/editar/${encodeURIComponent(city)}/${encodeURIComponent(country)}`;
   }
 
+  // Al abrir la pantalla, cargamos todos los datos.
   onMount(async () => {
     await refreshList({}, "");
   });

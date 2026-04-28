@@ -1,8 +1,11 @@
 
 
 <script>
+    // onMount ejecuta codigo cuando la pantalla se monta.
     import { onMount } from "svelte";
+    // push permite ir a la pantalla de edicion.
     import { push } from "svelte-spa-router";
+    // Importamos funciones para comunicarnos con la API de desastres.
     import {
         getDisasters,
         createDisaster,
@@ -11,14 +14,17 @@
         loadInitialData
     } from "../services/natural-disasters.js";
 
+    // Lista de desastres que aparece en la tabla.
     let disasters = [];
+    // Texto del mensaje mostrado al usuario.
     let mensaje = "";
+    // Tipo visual del mensaje: ok o error.
     let tipoMensaje = "ok"; 
 
-    // Formulario de creación
+    // Formulario de creacion.
     let form = { country: "", year: "", death_count: "", injured_count: "", economic_damage_usd: "" };
 
-    // Buscador
+    // Campos del buscador.
     let searchCountry = "";
     let searchYear = "";
     let searchFrom = ""; 
@@ -28,12 +34,14 @@
     let searchEconomicDamage = "";
     let limitResults = "";
 
+    // Muestra un mensaje temporal en pantalla.
     function mostrarMensaje(texto, tipo = "ok") {
         mensaje = texto;
         tipoMensaje = tipo;
         setTimeout(() => (mensaje = ""), 4500); 
     }
 
+    // Carga datos desde la API usando una query opcional.
     async function cargarDatos(query = "") {
         try {
             const data = await getDisasters(query);
@@ -45,6 +53,7 @@
         }
     }
 
+    // Carga los datos iniciales de ejemplo.
     async function cargarIniciales() {
         try {
             await loadInitialData();
@@ -55,6 +64,7 @@
         }
     }
 
+    // Crea un registro nuevo con los datos del formulario.
     async function manejarCreacion() {
         if (!form.country || !form.year) {
             mostrarMensaje("El país y el año son obligatorios para crear un registro.", "error");
@@ -76,6 +86,7 @@
         }
     }
 
+    // Borra todos los registros despues de confirmar.
     async function borrarTodos() {
         if (!confirm("¿Estás 100% seguro de que quieres vaciar toda la base de datos?")) return;
         try {
@@ -87,6 +98,7 @@
         }
     }
 
+    // Borra un registro concreto por pais y anio.
     async function borrarUno(country, year) {
         if (!confirm(`¿Eliminar el registro de ${country} (${year})?`)) return;
         try {
@@ -98,13 +110,12 @@
         }
     }
 
-    // Función para manejar la búsqueda (Requisito del profesor)
-    
-
+    // Maneja la busqueda construyendo parametros para la API.
     async function buscar() {
+        // Guardamos aqui los filtros que se enviaran en la URL.
         let queryParams = [];
         
-        // 1. Filtros de búsqueda
+        // Filtros de busqueda.
         if (searchCountry !== "" && searchCountry !== null) queryParams.push(`country=${searchCountry}`);
         if (searchYear !== "" && searchYear !== null) queryParams.push(`year=${searchYear}`);
         if (searchFrom !== "" && searchFrom !== null) queryParams.push(`from=${searchFrom}`); 
@@ -113,15 +124,15 @@
         if (searchInjuredCount !== "" && searchInjuredCount !== null) queryParams.push(`injured_count=${searchInjuredCount}`);
         if (searchEconomicDamage !== "" && searchEconomicDamage !== null) queryParams.push(`economic_damage_usd=${searchEconomicDamage}`);
         
-        // 2. Límite de paginación
+        // Limite de paginacion.
         if (limitResults) queryParams.push(`limit=${limitResults}`);
         
         let queryString = queryParams.length > 0 ? "?" + queryParams.join("&") : "";
         
-        // Ejecutamos la carga y guardamos el número de resultados
+        // Ejecutamos la carga y guardamos el numero de resultados.
         const numResultados = await cargarDatos(queryString);
         
-        // Lógica de mensajes (se queda igual que la tenías)
+        // Mostramos un mensaje distinto segun el resultado.
         if (numResultados === 0) {
             let errorMsg = "No se han encontrado registros";
             if (searchCountry && searchYear) {
@@ -142,6 +153,7 @@
         }
     }
 
+    // Limpia todos los filtros y vuelve a mostrar todos los registros.
     function limpiarBusqueda() {
         searchCountry = "";
         searchYear = "";
@@ -154,6 +166,7 @@
         cargarDatos();
     }
 
+    // Al abrir la pantalla, cargamos los datos disponibles.
     onMount(() => cargarDatos());
 </script>
 

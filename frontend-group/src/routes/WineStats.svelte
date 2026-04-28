@@ -1,6 +1,9 @@
 <script>
+  // onMount ejecuta una funcion cuando la pantalla aparece por primera vez.
   import { onMount } from "svelte";
+  // push permite navegar a otra ruta del frontend.
   import { push } from "svelte-spa-router";
+  // Importamos funciones ya preparadas para llamar a la API de vinos.
   import {
     getAllWineStats,
     createWineStat,
@@ -8,22 +11,30 @@
     deleteWineStat
   } from "../services/wine-stats.js";
 
+  // Esta URL se usa en busquedas y carga inicial directa desde esta pantalla.
   const API_BASE =
     window.location.hostname === "localhost"
       ? "http://localhost:10000/api/v1/wine-stats"
       : "/api/v1/wine-stats";
 
+  // Lista de vinos que se muestra en la tabla.
   let vinos = [];
+  // Texto del mensaje de exito o error.
   let mensaje = "";
+  // Tipo de mensaje: "ok" o "error".
   let tipoMensaje = "ok";
+  // Controla si se ve el formulario de alta.
   let mostrarFormulario = false;
+  // Controla si se ve el buscador.
   let mostrarBuscador = false;
 
+  // Objeto enlazado al formulario para crear un vino.
   let nuevoVino = {
     title: "", country: "", region: "", year: 0,
     price: 0, abv: 0, unit: 0, grape: "", type: "", capacity: 75
   };
 
+  // Objeto enlazado al formulario de filtros.
   let filtros = {
     title: "", country: "", region: "", year: "",
     price: "", abv: "", unit: "", grape: "", type: "",
@@ -31,12 +42,14 @@
     yearDesde: "", yearHasta: ""
   };
 
+  // Muestra un mensaje temporal en pantalla.
   function mostrarMensaje(texto, tipo = "ok") {
     mensaje = texto;
     tipoMensaje = tipo;
     setTimeout(() => (mensaje = ""), 10000);
   }
 
+  // Deja el formulario de alta como al principio.
   function resetFormulario() {
     nuevoVino = {
       title: "", country: "", region: "", year: 0,
@@ -45,6 +58,7 @@
     mostrarFormulario = false;
   }
 
+  // Limpia todos los filtros de busqueda.
   function resetFiltros() {
     filtros = {
       title: "", country: "", region: "", year: "",
@@ -54,6 +68,7 @@
     };
   }
 
+  // Carga todos los vinos desde la API.
   async function cargarVinos() {
     try {
       vinos = await getAllWineStats();
@@ -62,6 +77,7 @@
     }
   }
 
+  // Busca vinos aplicando los filtros indicados por el usuario.
   async function buscarVinos() {
     try {
       const params = new URLSearchParams();
@@ -97,6 +113,7 @@
     }
   }
 
+  // Pide al backend que cargue los datos iniciales.
   async function cargarDatosIniciales() {
     try {
       const res = await fetch(`${API_BASE}/loadInitialData`);
@@ -113,7 +130,8 @@
     }
   }
 
-  async function añadirVino() {
+  // Crea un vino con los datos del formulario.
+  async function anadirVino() {
     try {
       await createWineStat(nuevoVino);
       mostrarMensaje(`Vino "${nuevoVino.title}" añadido correctamente.`);
@@ -124,6 +142,7 @@
     }
   }
 
+  // Borra todos los vinos despues de pedir confirmacion.
   async function borrarTodos() {
     if (!confirm("¿Estás seguro de que quieres borrar todos los vinos?")) return;
     try {
@@ -135,6 +154,7 @@
     }
   }
 
+  // Borra un vino concreto por id.
   async function borrarVino(id, title) {
     if (!confirm(`¿Eliminar el vino "${title}"?`)) return;
     try {
@@ -146,10 +166,12 @@
     }
   }
 
+  // Navega a la pantalla de edicion de un vino.
   function irAEditar(id) {
     push(`/wine-stats/editar/${id}`);
   }
 
+  // Al abrir la pantalla, cargamos la lista inicial de vinos.
   onMount(cargarVinos);
 </script>
 
@@ -180,7 +202,7 @@
         <label>Capacidad (cl)<input type="number" bind:value={nuevoVino.capacity} /></label>
       </div>
       <div class="botones-form">
-        <button class="btn-primary" on:click={añadirVino}>💾 Guardar vino</button>
+        <button class="btn-primary" on:click={anadirVino}>💾 Guardar vino</button>
         <button class="btn-cancel" on:click={resetFormulario}>Cancelar</button>
       </div>
     </section>

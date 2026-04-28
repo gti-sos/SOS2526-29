@@ -1,10 +1,14 @@
+// Este modulo registra la API v1 del recurso citys-stats.
 module.exports = (app, db) => {
+    // Ruta base usada por todas las rutas de esta API.
     const BASE_API_URL = "/api/v1/citys-stats";
 
+    // URL de la documentacion; se puede cambiar con variable de entorno.
     const DOCS_URL =
         process.env.LCC_DOCS_URL ||
         "https://documenter.getpostman.com/view/52412147/2sBXiqEUAt";
 
+    // Datos de ejemplo que se cargan cuando la base esta vacia.
     const initialData = [
         { city: "jakarta", country: "indonesia", un_2025_population: 41913860 },
         { city: "dhaka", country: "bangladesh", un_2025_population: 36585479 },
@@ -20,13 +24,15 @@ module.exports = (app, db) => {
         { city: "mumbai", country: "india", un_2025_population: 20203056 }
     ];
 
-    function clean(doc) {
+    // Devuelve un documento sin el campo interno _id de NeDB.
+    function removeDatabaseId(doc) {
         if (!doc) return doc;
         const { _id, ...rest } = doc;
         return rest;
     }
 
-    function isExactBody(body) {
+    // Comprueba que el body tenga exactamente los campos de citys-stats.
+    function hasExactCityFields(body) {
         if (!body || typeof body !== "object" || Array.isArray(body)) return false;
 
         const expected = ["city", "country", "un_2025_population"].sort();
@@ -36,8 +42,9 @@ module.exports = (app, db) => {
             keys.every((k, i) => k === expected[i]);
     }
 
-    function normalize(body) {
-        if (!isExactBody(body)) return null;
+    // Limpia y valida los datos recibidos antes de guardarlos en la base.
+    function normalizeCityStat(body) {
+        if (!hasExactCityFields(body)) return null;
 
         const city = String(body.city).trim().toLowerCase();
         const country = String(body.country).trim().toLowerCase();
@@ -55,10 +62,12 @@ module.exports = (app, db) => {
         return { city, country, un_2025_population };
     }
 
+    // Limpia un texto de busqueda para mandarlo a APIs externas.
     function cleanSearchTerm(value) {
         return String(value ?? "").trim().replace(/[-_]+/g, " ");
     }
 
+    // Convierte limit en numero y comprueba que este dentro del rango permitido.
     function parseLimit(value, fallback, max) {
         if (value === undefined) return fallback;
 
@@ -71,17 +80,20 @@ module.exports = (app, db) => {
         return limit;
     }
 
+    // Cache para no pedir varias veces la misma poblacion al Banco Mundial.
     const worldBankPopulationCache = new Map();
 
-    function findAll() {
+    // Lee todos los registros locales de citys-stats.
+    function findAllCityStats() {
         return new Promise((resolve, reject) => {
             db.find({}, (err, docs) => {
                 if (err) return reject(err);
-                resolve(docs.map(clean));
+                resolve(docs.map(removeDatabaseId));
             });
         });
     }
 
+    // Hace una peticion HTTP y devuelve JSON con control de errores y timeout.
     async function fetchJson(url, sourceName, timeoutMs = 20000) {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -121,6 +133,7 @@ module.exports = (app, db) => {
         }
     }
 
+    // Busca coordenadas y datos basicos de una ciudad en Open-Meteo.
     async function getGeocoding(city, country = "") {
         const params = new URLSearchParams({
             name: cleanSearchTerm(city),
@@ -155,6 +168,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Busca informacion general de un pais en REST Countries.
     async function getCountryInfo(country) {
         const fields = [
             "name",
@@ -201,6 +215,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Busca la poblacion mas reciente de un pais en World Bank.
     async function getWorldBankPopulation(countryCode) {
         const code = String(countryCode ?? "").trim().toUpperCase();
 
@@ -231,6 +246,7 @@ module.exports = (app, db) => {
         return normalized;
     }
 
+    // Convierte una fila de World Bank al formato sencillo que devuelve esta API.
     function normalizeWorldBankRow(row, fallbackCode) {
         if (!row) return null;
 
@@ -244,6 +260,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Busca poblaciones de varios paises a la vez para que la integracion sea mas rapida.
     async function getWorldBankPopulations(countryCodes) {
         const uniqueCodes = [...new Set(countryCodes
             .map((countryCode) => String(countryCode ?? "").trim().toUpperCase())
@@ -287,6 +304,7 @@ module.exports = (app, db) => {
         return byCode;
     }
 
+    // Ejecuta una llamada externa y la convierte en exito o error controlado.
     async function safeExternal(source, task) {
         try {
             return { source, data: await task(), error: null };
@@ -295,6 +313,7 @@ module.exports = (app, db) => {
         }
     }
 
+    // Prepara los datos externos de una ciudad antes de pedir World Bank por lotes.
     async function buildIntegratedCityBase(item) {
         const [geocodingResult, countryResult] = await Promise.all([
             safeExternal("Open-Meteo Geocoding API", () => getGeocoding(item.city, item.country)),
@@ -308,6 +327,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Une el registro local con geocoding, pais y World Bank en un solo objeto.
     function buildIntegratedCity(base, worldBankByCode, worldBankBatchError) {
         const code = base.countryResult.data?.cca3;
         let worldBankResult;
@@ -353,94 +373,99 @@ module.exports = (app, db) => {
         };
     }
 
-    app.get(`${BASE_API_URL}/docs`, (req, res) => {
-        res.redirect(DOCS_URL);
+    // Redirige a la documentacion de Postman.
+    app.get(`${BASE_API_URL}/docs`, (request, response) => {
+        response.redirect(DOCS_URL);
     });
 
-    app.get(`${BASE_API_URL}/loadInitialData`, (req, res) => {
-        db.count({}, (err, count) => {
-            if (err) return res.sendStatus(500);
+    // Carga los datos iniciales si la base esta vacia.
+    app.get(`${BASE_API_URL}/loadInitialData`, (request, response) => {
+        db.count({}, (error, count) => {
+            if (error) return response.sendStatus(500);
 
             if (count > 0) {
-                db.find({}, (err2, docs) => {
-                    if (err2) return res.sendStatus(500);
-                    return res.status(200).json(docs.map(clean));
+                db.find({}, (findError, docs) => {
+                    if (findError) return response.sendStatus(500);
+                    return response.status(200).json(docs.map(removeDatabaseId));
                 });
                 return;
             }
 
-            db.insert(initialData, (err3, docs) => {
-                if (err3) return res.sendStatus(500);
-                return res.status(201).json(docs.map(clean));
+            db.insert(initialData, (insertError, docs) => {
+                if (insertError) return response.sendStatus(500);
+                return response.status(201).json(docs.map(removeDatabaseId));
             });
         });
     });
 
-    app.get(BASE_API_URL, (req, res) => {
-        db.find({}, (err, docs) => {
-            if (err) return res.sendStatus(500);
+    // Devuelve la coleccion con filtros exactos y paginacion.
+    app.get(BASE_API_URL, (request, response) => {
+        db.find({}, (error, docs) => {
+            if (error) return response.sendStatus(500);
 
-            let result = docs.map(clean);
+            let result = docs.map(removeDatabaseId);
 
-            if (req.query.city !== undefined) {
+            if (request.query.city !== undefined) {
                 result = result.filter(
-                    d => d.city === String(req.query.city).trim().toLowerCase()
+                    item => item.city === String(request.query.city).trim().toLowerCase()
                 );
             }
 
-            if (req.query.country !== undefined) {
+            if (request.query.country !== undefined) {
                 result = result.filter(
-                    d => d.country === String(req.query.country).trim().toLowerCase()
+                    item => item.country === String(request.query.country).trim().toLowerCase()
                 );
             }
 
-            if (req.query.un_2025_population !== undefined) {
-                const value = Number(req.query.un_2025_population);
+            if (request.query.un_2025_population !== undefined) {
+                const value = Number(request.query.un_2025_population);
                 if (!Number.isFinite(value)) {
-                    return res.status(400).json({ error: "Invalid query" });
+                    return response.status(400).json({ error: "Invalid query" });
                 }
-                result = result.filter(d => d.un_2025_population === value);
+                result = result.filter(item => item.un_2025_population === value);
             }
 
             let offset = 0;
             let limit = result.length;
 
-            if (req.query.offset !== undefined) {
-                offset = Number(req.query.offset);
+            if (request.query.offset !== undefined) {
+                offset = Number(request.query.offset);
                 if (!Number.isInteger(offset) || offset < 0) {
-                    return res.status(400).json({ error: "Invalid offset" });
+                    return response.status(400).json({ error: "Invalid offset" });
                 }
             }
 
-            if (req.query.limit !== undefined) {
-                limit = Number(req.query.limit);
+            if (request.query.limit !== undefined) {
+                limit = Number(request.query.limit);
                 if (!Number.isInteger(limit) || limit < 0) {
-                    return res.status(400).json({ error: "Invalid limit" });
+                    return response.status(400).json({ error: "Invalid limit" });
                 }
             }
 
-            return res.status(200).json(result.slice(offset, offset + limit));
+            return response.status(200).json(result.slice(offset, offset + limit));
         });
     });
 
-    app.get(`${BASE_API_URL}/top-cities`, async (req, res) => {
-        const limit = parseLimit(req.query.limit, 5, 20);
+    // Devuelve las ciudades con mayor poblacion, usado por las integraciones.
+    app.get(`${BASE_API_URL}/top-cities`, async (request, response) => {
+        const limit = parseLimit(request.query.limit, 5, 20);
 
         if (limit === null) {
-            return res.status(400).json({ error: "Invalid limit" });
+            return response.status(400).json({ error: "Invalid limit" });
         }
 
         try {
-            const result = (await findAll())
+            const result = (await findAllCityStats())
                 .sort((a, b) => Number(b.un_2025_population) - Number(a.un_2025_population))
                 .slice(0, limit);
 
-            return res.status(200).json(result);
+            return response.status(200).json(result);
         } catch {
-            return res.sendStatus(500);
+            return response.sendStatus(500);
         }
     });
 
+    // Consulta Open-Meteo para una ciudad concreta.
     app.get(`${BASE_API_URL}/integrations/geocoding/:city`, async (req, res) => {
         try {
             const result = await getGeocoding(req.params.city, req.query.country);
@@ -455,6 +480,7 @@ module.exports = (app, db) => {
         }
     });
 
+    // Consulta REST Countries para un pais concreto.
     app.get(`${BASE_API_URL}/integrations/country/:country`, async (req, res) => {
         try {
             const result = await getCountryInfo(req.params.country);
@@ -469,6 +495,7 @@ module.exports = (app, db) => {
         }
     });
 
+    // Consulta World Bank para un codigo de pais concreto.
     app.get(`${BASE_API_URL}/integrations/world-bank/:countryCode`, async (req, res) => {
         try {
             const result = await getWorldBankPopulation(req.params.countryCode);
@@ -483,6 +510,7 @@ module.exports = (app, db) => {
         }
     });
 
+    // Une datos locales y externos para mostrar un resumen integrado.
     app.get(`${BASE_API_URL}/integrations/summary`, async (req, res) => {
         const limit = parseLimit(req.query.limit, 5, 10);
 
@@ -491,7 +519,7 @@ module.exports = (app, db) => {
         }
 
         try {
-            const topCities = (await findAll())
+            const topCities = (await findAllCityStats())
                 .sort((a, b) => Number(b.un_2025_population) - Number(a.un_2025_population))
                 .slice(0, limit);
 
@@ -528,6 +556,7 @@ module.exports = (app, db) => {
         }
     });
 
+    // Devuelve un registro concreto identificado por ciudad y pais.
     app.get(`${BASE_API_URL}/:city/:country`, (req, res) => {
         const city = req.params.city.trim().toLowerCase();
         const country = req.params.country.trim().toLowerCase();
@@ -536,12 +565,13 @@ module.exports = (app, db) => {
             if (err) return res.sendStatus(500);
             if (!doc) return res.status(404).json({ error: "Resource not found" });
 
-            return res.status(200).json(clean(doc));
+            return res.status(200).json(removeDatabaseId(doc));
         });
     });
 
+    // Crea un nuevo registro de ciudad.
     app.post(BASE_API_URL, (req, res) => {
-        const item = normalize(req.body);
+        const item = normalizeCityStat(req.body);
 
         if (!item) {
             return res.status(400).json({
@@ -555,24 +585,27 @@ module.exports = (app, db) => {
 
             db.insert(item, (err2, newDoc) => {
                 if (err2) return res.sendStatus(500);
-                return res.status(201).json(clean(newDoc));
+                return res.status(201).json(removeDatabaseId(newDoc));
             });
         });
     });
 
+    // No se permite POST sobre un recurso concreto.
     app.post(`${BASE_API_URL}/:city/:country`, (req, res) => {
         return res.sendStatus(405);
     });
 
+    // No se permite PUT sobre la coleccion completa.
     app.put(BASE_API_URL, (req, res) => {
         return res.sendStatus(405);
     });
 
+    // Actualiza un registro concreto.
     app.put(`${BASE_API_URL}/:city/:country`, (req, res) => {
         const city = req.params.city.trim().toLowerCase();
         const country = req.params.country.trim().toLowerCase();
 
-        const item = normalize(req.body);
+        const item = normalizeCityStat(req.body);
 
         if (!item) {
             return res.status(400).json({
@@ -593,12 +626,13 @@ module.exports = (app, db) => {
 
                 db.findOne({ city, country }, (err3, updated) => {
                     if (err3) return res.sendStatus(500);
-                    return res.status(200).json(clean(updated));
+                    return res.status(200).json(removeDatabaseId(updated));
                 });
             });
         });
     });
 
+    // Borra todos los registros de la coleccion.
     app.delete(BASE_API_URL, (req, res) => {
         db.remove({}, { multi: true }, (err) => {
             if (err) return res.sendStatus(500);
@@ -606,6 +640,7 @@ module.exports = (app, db) => {
         });
     });
 
+    // Borra un registro concreto.
     app.delete(`${BASE_API_URL}/:city/:country`, (req, res) => {
         const city = req.params.city.trim().toLowerCase();
         const country = req.params.country.trim().toLowerCase();

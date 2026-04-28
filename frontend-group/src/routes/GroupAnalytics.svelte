@@ -1,26 +1,37 @@
 <script>
+  // onDestroy limpia la grafica al salir; tick espera a que Svelte pinte el HTML.
   import { onDestroy, onMount, tick } from "svelte";
+  // Importamos datos de las tres APIs.
   import { getAllCitysStats } from "../services/citysStatsApi";
   import { getDisasters } from "../services/natural-disasters.js";
   import { getAllWineStats } from "../services/wine-stats.js";
 
+  // Referencia a la libreria Highcharts cargada de forma dinamica.
   let Highcharts;
+  // Elemento HTML donde se dibuja la grafica.
   let chartContainer;
+  // Objeto de grafica creado por Highcharts.
   let chart;
+  // Estado de carga.
   let loading = true;
+  // Mensaje de error si falla alguna API.
   let error = "";
+  // Metricas combinadas de las tres APIs.
   let metrics = [];
   let chartContainer2;
   let chart2;
 
+  // Formateador para mostrar numeros con separadores espanoles.
   const formatter = new Intl.NumberFormat("es-ES", {
     maximumFractionDigits: 0
   });
 
+  // Suma un campo numerico de una lista de objetos.
   function sum(items, field) {
     return items.reduce((total, item) => total + Number(item[field] || 0), 0);
   }
 
+  // Carga Highcharts solo cuando hace falta.
   async function loadHighcharts() {
     if (Highcharts) return Highcharts;
 
@@ -32,6 +43,7 @@
     return Highcharts;
   }
 
+  // Convierte datos de las APIs en metricas para la grafica.
   function buildMetrics(citysStats, disasters, wines) {
     const raw = [
       {
@@ -62,11 +74,12 @@
     }));
   }
 
- function renderChart() {
-  if (!chartContainer || !chartContainer2) return;
+  // Dibuja la grafica de columnas.
+  function renderChart() {
+    if (!chartContainer || !chartContainer2) return;
 
-  chart?.destroy();
-  chart2?.destroy();
+    chart?.destroy();
+    chart2?.destroy();
 
   const colors = ["#0f766e", "#dc2626", "#7c3aed"];
 
@@ -129,8 +142,9 @@
     },
     series: [{ name: "Índice", data: metrics.map(m => m.index) }]
   });
-}
+  }
 
+  // Carga datos de las tres APIs y luego pinta la grafica.
   async function loadAnalytics() {
     loading = true;
     error = "";
@@ -153,8 +167,10 @@
     }
   }
 
+  // Al abrir la pantalla, cargamos las analiticas.
   onMount(loadAnalytics);
 
+  // Al salir, destruimos la grafica para liberar memoria.
   onDestroy(() => {
     chart?.destroy();
     chart2?.destroy();

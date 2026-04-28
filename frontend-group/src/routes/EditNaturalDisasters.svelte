@@ -1,28 +1,35 @@
 
 
 <script>
+    // pop vuelve a la pantalla anterior del router.
     import { pop } from "svelte-spa-router";
+    // Funciones del servicio para leer y actualizar desastres.
     import { getOneDisaster, updateDisaster } from "../services/natural-disasters.js";
 
-    // svelte-spa-router inyecta aquí los parámetros de la URL (country y year)
+    // svelte-spa-router inyecta aqui los parametros de la URL (country y year).
     export let params = {};
 
+    // Formulario enlazado a los inputs de la pantalla.
     let form = { country: "", year: "", death_count: "", injured_count: "", economic_damage_usd: "" };
+    // Mensaje que se muestra al usuario.
     let mensaje = "";
+    // Tipo del mensaje: ok o error.
     let tipoMensaje = "ok";
+    // Indica si aun se estan cargando datos.
     let cargando = true;
 
+    // Muestra un mensaje temporal.
     function mostrarMensaje(texto, tipo = "ok") {
         mensaje = texto;
         tipoMensaje = tipo;
         setTimeout(() => (mensaje = ""), 4000);
     }
 
-    // Al abrir la página, buscamos los datos de ese país y año
+    // Al abrir la pagina, buscamos los datos de ese pais y anio.
     async function cargarDatos() {
         try {
             const data = await getOneDisaster(params.country, params.year);
-            form = { ...data }; // Rellenamos el formulario
+            form = { ...data }; // Rellenamos el formulario con la respuesta de la API.
             cargando = false;
         } catch (e) {
             mostrarMensaje(`No existe el registro para ${params.country} en ${params.year}.`, "error");
@@ -30,6 +37,7 @@
         }
     }
 
+    // Envia a la API los cambios del formulario.
     async function guardarCambios() {
         try {
             await updateDisaster(params.country, params.year, {
@@ -40,12 +48,13 @@
                 economic_damage_usd: Number(form.economic_damage_usd)
             });
             mostrarMensaje("¡Registro actualizado correctamente!");
-            setTimeout(() => pop(), 1500); // Volvemos a la tabla tras 1.5 segundos
+            setTimeout(() => pop(), 1500); // Volvemos a la tabla tras 1.5 segundos.
         } catch (e) {
             mostrarMensaje(e.message, "error");
         }
     }
 
+    // Cargamos el registro al crear el componente.
     cargarDatos();
 </script>
 

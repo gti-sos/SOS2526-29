@@ -1,5 +1,7 @@
 <script>
+  // onMount ejecuta codigo al abrir la pantalla.
   import { onMount } from "svelte";
+  // Funciones para leer, crear, borrar y actualizar citys-stats.
   import {
     createCityStat,
     deleteCityStat,
@@ -7,25 +9,34 @@
     updateCityStat
   } from "../services/citysStatsApi";
 
+  // params contiene city y country tomados de la URL.
   export let params = {};
 
+  // Devuelve el formulario vacio.
   const emptyForm = () => ({
     city: "",
     country: "",
     un_2025_population: ""
   });
 
+  // Datos actuales del formulario.
   let form = emptyForm();
+  // Guarda la ciudad y pais originales para saber que recurso se esta editando.
   let originalKey = { city: "", country: "" };
+  // Mensaje de exito.
   let message = "";
+  // Mensaje de error.
   let error = "";
+  // Indica si la pantalla esta cargando.
   let loading = true;
 
+  // Limpia los mensajes de la pantalla.
   function clearFeedback() {
     message = "";
     error = "";
   }
 
+  // Convierte un valor a entero positivo obligatorio.
   function parsePositiveInteger(value, fieldLabel) {
     const trimmed = String(value ?? "").trim();
 
@@ -42,6 +53,7 @@
     return parsed;
   }
 
+  // Valida el formulario antes de guardar.
   function validateForm() {
     const city = String(form.city ?? "").trim();
     const country = String(form.country ?? "").trim();
@@ -65,6 +77,7 @@
     };
   }
 
+  // Comprueba si ciudad y pais siguen siendo los mismos.
   function isSameResource(payload) {
     return (
       payload.city.trim().toLowerCase() === originalKey.city &&
@@ -72,6 +85,7 @@
     );
   }
 
+  // Cambia la URL si el usuario modifica ciudad o pais.
   function updateRoute(city, country) {
     window.history.replaceState(
       {},
@@ -80,6 +94,7 @@
     );
   }
 
+  // Carga el registro original desde la API.
   async function loadResource() {
     loading = true;
     error = "";
@@ -104,6 +119,7 @@
     }
   }
 
+  // Guarda cambios, actualizando o recreando si cambia la clave.
   async function handleUpdate() {
     clearFeedback();
 
@@ -149,6 +165,7 @@
     }
   }
 
+  // Al abrir la pantalla, cargamos el registro.
   onMount(loadResource);
 </script>
 
