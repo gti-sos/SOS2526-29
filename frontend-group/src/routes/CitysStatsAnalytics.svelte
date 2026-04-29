@@ -1,22 +1,33 @@
 <script>
+  // onDestroy limpia la grafica; tick espera a que exista el contenedor.
   import { onDestroy, onMount, tick } from "svelte";
+  // Servicio para pedir citys-stats al backend.
   import { getAllCitysStats } from "../services/citysStatsApi";
 
+  // Libreria Highcharts cargada cuando se necesita.
   let Highcharts;
+  // Contenedor HTML de la grafica.
   let chartContainer;
+  // Grafica creada por Highcharts.
   let chart;
+  // Datos locales de citys-stats.
   let citysStats = [];
+  // Estado de carga.
   let loading = true;
+  // Mensaje de error.
   let error = "";
 
+  // Formateador de numeros en espanol.
   const formatter = new Intl.NumberFormat("es-ES", {
     maximumFractionDigits: 0
   });
 
+  // Crea una etiqueta legible para una ciudad.
   function labelFor(item) {
     return `${item.city} (${item.country})`;
   }
 
+  // Carga Highcharts y su modulo de accesibilidad.
   async function loadHighcharts() {
     if (Highcharts) return Highcharts;
 
@@ -28,6 +39,7 @@
     return Highcharts;
   }
 
+  // Dibuja la grafica circular.
   function renderChart() {
     if (!chartContainer) return;
 
@@ -92,6 +104,7 @@
     });
   }
 
+  // Carga datos y despues pinta la grafica.
   async function loadAnalytics() {
     loading = true;
     error = "";
@@ -108,8 +121,10 @@
     }
   }
 
+  // Al abrir la pantalla, cargamos las analiticas.
   onMount(loadAnalytics);
 
+  // Al salir de la pantalla, destruimos la grafica.
   onDestroy(() => {
     chart?.destroy();
   });

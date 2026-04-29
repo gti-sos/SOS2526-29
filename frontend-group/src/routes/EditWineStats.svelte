@@ -1,21 +1,31 @@
 <script>
+  // onMount carga los datos al entrar en la pantalla.
   import { onMount } from "svelte";
+  // pop vuelve a la pantalla anterior.
   import { pop } from "svelte-spa-router";
+  // Funciones para leer y actualizar vinos desde la API.
   import { getOneWineStat, updateWineStat } from "../services/wine-stats.js";
 
+  // params contiene el id que aparece en la URL.
   export let params = {};
 
+  // Vino que se esta editando.
   let vino = null;
+  // Mensaje visible para el usuario.
   let mensaje = "";
+  // Tipo del mensaje: ok o error.
   let tipoMensaje = "ok";
+  // Indica si aun estamos cargando datos.
   let cargando = true;
 
+  // Muestra un mensaje durante unos segundos.
   function mostrarMensaje(texto, tipo = "ok") {
     mensaje = texto;
     tipoMensaje = tipo;
     setTimeout(() => (mensaje = ""), 4000);
   }
 
+  // Lee el vino desde la API usando el id de la URL.
   async function cargarVino() {
     const id = Number(params.id);
     try {
@@ -27,17 +37,19 @@
     }
   }
 
+  // Guarda los cambios realizados en el formulario.
   async function guardarCambios() {
-  const id = Number(params.id);
-  try {
-    await updateWineStat(id, vino);
-    mostrarMensaje("Vino actualizado correctamente.");
-    setTimeout(() => pop(), 3000); // ← 3 segundos para que el usuario vea el mensaje
-  } catch (e) {
-    mostrarMensaje(e.message, "error");
+    const id = Number(params.id);
+    try {
+      await updateWineStat(id, vino);
+      mostrarMensaje("Vino actualizado correctamente.");
+      setTimeout(() => pop(), 3000); // Esperamos 3 segundos para que se lea el mensaje.
+    } catch (e) {
+      mostrarMensaje(e.message, "error");
+    }
   }
-}
 
+  // Al abrir la pantalla, cargamos el vino.
   onMount(cargarVino);
 </script>
 

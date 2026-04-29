@@ -1,4 +1,6 @@
+/* Estilos globales heredados de la plantilla inicial de Svelte/Vite. */
 :root {
+  /* Variables de color para texto, fondo, bordes y acentos. */
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
@@ -8,9 +10,11 @@
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
+  /* Sombra reutilizable para botones y tarjetas pequenas. */
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
+  /* Familias tipograficas usadas por defecto. */
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -30,6 +34,7 @@
   }
 }
 
+/* Ajustes automaticos cuando el navegador esta en modo oscuro. */
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;
@@ -50,10 +55,12 @@
   }
 }
 
+/* Quitamos el margen por defecto del navegador. */
 body {
   margin: 0;
 }
 
+/* Titulos principales y secundarios. */
 h1,
 h2 {
   font-family: var(--heading);
@@ -83,6 +90,7 @@ p {
   margin: 0;
 }
 
+/* Estilos compartidos por codigo y contador de ejemplo. */
 code,
 .counter {
   font-family: var(--mono);
@@ -117,6 +125,7 @@ code {
   }
 }
 
+/* Bloque visual de la plantilla inicial. */
 .hero {
   position: relative;
 
@@ -156,6 +165,7 @@ code {
   }
 }
 
+/* Contenedor raiz donde se monta la aplicacion Svelte. */
 #app {
   width: 1126px;
   max-width: 100%;
@@ -168,6 +178,7 @@ code {
   box-sizing: border-box;
 }
 
+/* Zona central usada por la plantilla inicial. */
 #center {
   display: flex;
   flex-direction: column;
@@ -182,6 +193,7 @@ code {
   }
 }
 
+/* Seccion inferior de la plantilla inicial. */
 #next-steps {
   display: flex;
   border-top: 1px solid var(--border);
@@ -273,6 +285,7 @@ code {
   }
 }
 
+/* Pequenos marcadores decorativos de la plantilla. */
 .ticks {
   position: relative;
   width: 100%;

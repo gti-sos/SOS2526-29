@@ -1,8 +1,12 @@
 <script>
+  // onDestroy limpia el mapa; tick espera a que exista el contenedor.
   import { onDestroy, onMount, tick } from "svelte";
+  // Mapa mundial en formato TopoJSON para Highcharts Maps.
   import worldMap from "@highcharts/map-collection/custom/world.topo.json";
+  // Servicio para pedir registros de citys-stats.
   import { getAllCitysStats } from "../services/citysStatsApi";
 
+  // Coordenadas locales para colocar cada ciudad en el mapa.
   const coordinates = {
     "jakarta|indonesia": { lat: -6.2088, lon: 106.8456 },
     "dhaka|bangladesh": { lat: 23.8103, lon: 90.4125 },
@@ -22,22 +26,32 @@
     "sevilla|spain": { lat: 37.3891, lon: -5.9845 }
   };
 
+  // Libreria Highcharts cargada de forma dinamica.
   let Highcharts;
+  // Contenedor HTML del mapa.
   let mapContainer;
+  // Objeto del mapa creado por Highcharts.
   let mapChart;
+  // Registros de citys-stats.
   let citysStats = [];
+  // Estado de carga.
   let loading = true;
+  // Mensaje de error.
   let error = "";
+  // Clave de la ciudad seleccionada.
   let selectedKey = "";
 
+  // Formateador de numeros en espanol.
   const formatter = new Intl.NumberFormat("es-ES", {
     maximumFractionDigits: 0
   });
 
+  // Construye la clave city|country para buscar coordenadas.
   function keyFor(item) {
     return `${String(item.city).toLowerCase()}|${String(item.country).toLowerCase()}`;
   }
 
+  // Convierte textos con guiones a formato de titulo.
   function titleCase(value) {
     return String(value)
       .split("-")
@@ -45,6 +59,7 @@
       .join(" ");
   }
 
+  // Elige color de marcador segun la poblacion.
   function colorFor(population) {
     if (population >= 35000000) return "#b91c1c";
     if (population >= 30000000) return "#ea580c";
@@ -52,20 +67,24 @@
     return "#2563eb";
   }
 
+  // Calcula el tamano del marcador segun la poblacion.
   function radiusFor(population) {
     return 8 + Math.sqrt(population / maxPopulation) * 15;
   }
 
+  // Guarda la ciudad que el usuario ha seleccionado.
   function selectPoint(point) {
     selectedKey = point.key;
   }
 
+  // Evita que los marcadores se recorten en los bordes del mapa.
   function removeCityMarkerClip(chart) {
     const citySeries = chart.series.find((series) => series.name === "Ciudades");
     citySeries?.markerGroup?.element?.removeAttribute("clip-path");
     citySeries?.group?.element?.removeAttribute("clip-path");
   }
 
+  // Carga Highcharts Maps y accesibilidad.
   async function loadHighchartsMap() {
     if (Highcharts) return Highcharts;
 
@@ -78,6 +97,7 @@
     return Highcharts;
   }
 
+  // Dibuja el mapa con marcadores de ciudades.
   function renderMap() {
     if (!mapContainer || !Highcharts || points.length === 0) return;
 
@@ -223,6 +243,7 @@
     });
   }
 
+  // Carga citys-stats y despues pinta el mapa.
   async function loadMapData() {
     loading = true;
     error = "";
@@ -239,6 +260,7 @@
     }
   }
 
+  // Calcula registros que tienen coordenadas.
   $: geolocated = citysStats
     .map((item) => {
       const key = keyFor(item);
@@ -255,22 +277,31 @@
     })
     .filter(Boolean);
 
+  // Registros sin coordenadas locales.
   $: missing = citysStats.filter((item) => !coordinates[keyFor(item)]);
+  // Poblacion maxima para calcular colores y radios.
   $: maxPopulation = Math.max(...geolocated.map((item) => item.population), 1);
+  // Poblacion minima para la escala de color.
   $: minPopulation = Math.min(...geolocated.map((item) => item.population), maxPopulation);
+  // Puntos finales que se envian a Highcharts.
   $: points = geolocated.map((item) => ({
     ...item,
     color: colorFor(item.population),
     radius: radiusFor(item.population)
   }));
+  // Si no hay ciudad seleccionada, elegimos la primera.
   $: if (!selectedKey && points.length > 0) {
     selectedKey = points[0].key;
   }
+  // Ciudad seleccionada que se muestra en el panel lateral.
   $: selectedPoint = points.find((point) => point.key === selectedKey) || points[0];
+  // Suma de poblaciones representadas en el mapa.
   $: totalPopulation = geolocated.reduce((total, item) => total + item.population, 0);
 
+  // Al abrir la pantalla, cargamos los datos del mapa.
   onMount(loadMapData);
 
+  // Al salir, destruimos el mapa.
   onDestroy(() => {
     mapChart?.destroy();
   });
