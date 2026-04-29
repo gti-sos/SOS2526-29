@@ -191,7 +191,7 @@
     <div class="header-links">
       <a class="primary-link" href="/analytics/wine-stats">📊 Wine Stats</a>
       <a class="primary-link" href="/analytics/citys-stats">📊 Citys Stats</a>
-      <a class="primary-link" href="#/analytics/natural-disasters">📊 Natural Disasters</a>
+      <a class="primary-link" href="/analytics/natural-disasters">📊 Natural Disasters</a>
     </div>
   </header>
 

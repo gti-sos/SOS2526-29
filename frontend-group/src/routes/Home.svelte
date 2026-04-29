@@ -77,8 +77,8 @@
       name: "Alberto Lirola Gomez",
       resource: "natural-disasters",
       source: "natural-disasters",
-      frontendUrl: "#/natural-disasters",
-      analyticsUrl: "#/analytics/natural-disasters",
+      frontendUrl: "/natural-disasters",
+      analyticsUrl: "/analytics/natural-disasters",
       apiLinks: [
         {
           id: "api-v1-natural-disasters",
