@@ -130,7 +130,7 @@
 
 <div class="page">
     <div class="topbar">
-        <a href="#/analytics/natural-disasters" class="btn-back">← Volver a mis Gráficas</a>
+        <a href="/analytics/natural-disasters" class="btn-back">← Volver a mis Gráficas</a>
     </div>
 
     <h1>🗺️ Mapa Mundial Interactivo</h1>
