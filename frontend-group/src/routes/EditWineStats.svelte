@@ -1,8 +1,8 @@
 <script>
   // onMount carga los datos al entrar en la pantalla.
   import { onMount } from "svelte";
-  // pop vuelve a la pantalla anterior.
-  import { pop } from "svelte-spa-router";
+  // back vuelve a la pantalla anterior.
+  import { back } from "../lib/navigation.js";
   // Funciones para leer y actualizar vinos desde la API.
   import { getOneWineStat, updateWineStat } from "../services/wine-stats.js";
 
@@ -43,7 +43,7 @@
     try {
       await updateWineStat(id, vino);
       mostrarMensaje("Vino actualizado correctamente.");
-      setTimeout(() => pop(), 3000); // Esperamos 3 segundos para que se lea el mensaje.
+      setTimeout(() => back(), 3000); // Esperamos 3 segundos para que se lea el mensaje.
     } catch (e) {
       mostrarMensaje(e.message, "error");
     }
@@ -58,7 +58,7 @@
 </svelte:head>
 
 <div class="page">
-  <button class="btn-back" on:click={() => pop()}>← Volver</button>
+  <button class="btn-back" on:click={() => back()}>← Volver</button>
   <h1>✏️ Editar vino</h1>
 
   {#if mensaje}
@@ -83,7 +83,7 @@
       </div>
       <div class="botones">
         <button class="btn-primary" on:click={guardarCambios}>💾 Guardar cambios</button>
-        <button class="btn-cancel" on:click={() => pop()}>Cancelar</button>
+        <button class="btn-cancel" on:click={() => back()}>Cancelar</button>
       </div>
     </div>
   {:else}

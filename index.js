@@ -88,20 +88,8 @@ app.get("/about", (request, response) => {
     response.sendFile(frontendIndexPath);
 });
 
-// Estas rutas directas pertenecen al frontend, por eso devuelven index.html.
-app.get([
-    "/analytics",
-    "/analytics/citys-stats",
-    "/analytics/citys-stats/map",
-    "/analytics/city-stats",
-    "/analytics/city-stats/map",
-    "/integrations/citys-stats",
-    "/integrations/city-stats",
-    "/analytics/wine-stats",
-    "/analytics/wine-stats/map",
-    "/analytics/natural-disasters",
-    "/analytics/natural-disasters/map"
-], (request, response) => {
+// Cualquier ruta del frontend (que no sea /api) devuelve la SPA.
+app.get(/^\/(?!api\/).*/, (request, response) => {
     response.sendFile(frontendIndexPath);
 });
 

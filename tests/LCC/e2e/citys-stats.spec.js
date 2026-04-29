@@ -12,18 +12,18 @@ async function resetCollection(request) {
 
 test.beforeEach(async ({ request, page }) => {
   await resetCollection(request);
-  await page.goto("/#/citys-stats");
+  await page.goto("/citys-stats");
 });
 
 test("la portada del grupo muestra correctamente la parte de LCC", async ({ page }) => {
-  await page.goto("/#/");
+  await page.goto("/");
 
   const lccCard = page.getByTestId("member-citys-stats");
 
   await expect(lccCard).toContainText("Luis Cortes Cobos");
   await expect(lccCard).toContainText("Recurso de la API: citys-stats");
   await expect(lccCard).toContainText("Fuente de datos asociada: citys-stats");
-  await expect(lccCard.getByTestId("frontend-citys-stats")).toHaveAttribute("href", "#/citys-stats");
+  await expect(lccCard.getByTestId("frontend-citys-stats")).toHaveAttribute("href", "/citys-stats");
   await expect(lccCard.getByTestId("api-v1-citys-stats")).toHaveAttribute("href", /\/api\/v1\/citys-stats$/);
   await expect(lccCard.getByTestId("api-v2-citys-stats")).toHaveAttribute("href", /\/api\/v2\/citys-stats$/);
   await expect(lccCard.getByTestId("docs-v1-citys-stats")).toHaveAttribute("href", /\/api\/v1\/citys-stats\/docs$/);
@@ -63,7 +63,7 @@ test("borra todos los registros", async ({ page }) => {
 test("edita un registro en su vista separada", async ({ page }) => {
   await page.getByTestId("edit-tokyo-japan").click();
 
-  await expect(page).toHaveURL(/#\/citys-stats\/editar\/tokyo\/japan$/);
+  await expect(page).toHaveURL(/\/citys-stats\/editar\/tokyo\/japan$/);
   await page.getByTestId("edit-population").fill("34000000");
   await page.getByTestId("edit-submit").click();
   await expect(page.getByTestId("edit-success")).toContainText("Los cambios se han guardado correctamente.");

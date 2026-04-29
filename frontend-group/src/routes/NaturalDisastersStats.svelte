@@ -3,8 +3,8 @@
 <script>
     // onMount ejecuta codigo cuando la pantalla se monta.
     import { onMount } from "svelte";
-    // push permite ir a la pantalla de edicion.
-    import { push } from "svelte-spa-router";
+    // navigate permite ir a la pantalla de edicion.
+    import { navigate } from "../lib/navigation.js";
     // Importamos funciones para comunicarnos con la API de desastres.
     import {
         getDisasters,
@@ -172,7 +172,7 @@
 
 <div class="page">
     <div class="topbar">
-        <a href="#/" class="btn-back">← Volver al inicio</a>
+        <a href="/" class="btn-back">← Volver al inicio</a>
     </div>
 
     <h1>🌍 Gestión de Desastres Naturales</h1>
@@ -254,7 +254,7 @@
                                 <td>{disaster.injured_count}</td>
                                 <td>{disaster.economic_damage_usd}</td>
                                 <td class="acciones-fila">
-                                    <button class="btn-edit" on:click={() => push(`/natural-disasters/editar/${disaster.country}/${disaster.year}`)}>✏️ Editar</button>
+                                    <button class="btn-edit" on:click={() => navigate(`/natural-disasters/editar/${disaster.country}/${disaster.year}`)}>✏️ Editar</button>
                                     <button class="btn-danger-sm" on:click={() => borrarUno(disaster.country, disaster.year)}>🗑️ Borrar</button>
                                 </td>
                             </tr>

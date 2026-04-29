@@ -184,8 +184,8 @@
       </p>
     </div>
     <div class="header-links">
-      <a class="btn-link purple" href="/#/analytics/wine-stats">📊 Gráfico sincronizado</a>
-      <a class="btn-link gray" href="#/wine-stats">← Volver a Wine Stats</a>
+      <a class="btn-link purple" href="/analytics/wine-stats">📊 Gráfico sincronizado</a>
+      <a class="btn-link gray" href="/wine-stats">← Volver a Wine Stats</a>
     </div>
   </header>
 

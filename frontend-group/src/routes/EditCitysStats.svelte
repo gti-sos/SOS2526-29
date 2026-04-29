@@ -8,6 +8,7 @@
     getOneCityStat,
     updateCityStat
   } from "../services/citysStatsApi";
+  import { replace } from "../lib/navigation.js";
 
   // params contiene city y country tomados de la URL.
   export let params = {};
@@ -87,11 +88,7 @@
 
   // Cambia la URL si el usuario modifica ciudad o pais.
   function updateRoute(city, country) {
-    window.history.replaceState(
-      {},
-      "",
-      `#/citys-stats/editar/${encodeURIComponent(city)}/${encodeURIComponent(country)}`
-    );
+    replace(`/citys-stats/editar/${encodeURIComponent(city)}/${encodeURIComponent(country)}`);
   }
 
   // Carga el registro original desde la API.
@@ -176,7 +173,7 @@
 <div class="page-shell">
   <div class="page">
     <div class="topbar">
-      <a href="#/citys-stats" class="ghost-link">Volver al listado</a>
+      <a href="/citys-stats" class="ghost-link">Volver al listado</a>
     </div>
 
     <section class="panel hero-panel">
@@ -201,7 +198,7 @@
       {:else if error && !originalKey.city}
         <div class="empty-box">
           <p>No hemos podido abrir este registro.</p>
-          <a href="#/citys-stats" class="ghost-link full-width">Volver al listado</a>
+          <a href="/citys-stats" class="ghost-link full-width">Volver al listado</a>
         </div>
       {:else}
         <form class="grid-form" on:submit|preventDefault={handleUpdate}>

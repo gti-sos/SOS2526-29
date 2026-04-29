@@ -308,8 +308,8 @@ async function loadHighcharts() {
       </p>
     </div>
     <div class="header-links">
-      <a class="btn-link purple" href="/#/analytics/wine-stats/map">🗺️ Ver mapa</a>
-      <a class="btn-link gray" href="/#/wine-stats">← Volver a Wine Stats</a>
+      <a class="btn-link purple" href="/analytics/wine-stats/map">🗺️ Ver mapa</a>
+      <a class="btn-link gray" href="/wine-stats">← Volver a Wine Stats</a>
     </div>
   </header>
 

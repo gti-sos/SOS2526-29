@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Cambia el puerto si tu servidor local usa otro distinto al 10000
-const BASE_URL = 'http://localhost:10000/#/natural-disasters';
+const BASE_URL = 'http://localhost:10000/natural-disasters';
 
 test.describe('E2E Tests para Natural Disasters (Alberto)', () => {
 

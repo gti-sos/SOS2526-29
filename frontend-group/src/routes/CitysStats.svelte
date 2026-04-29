@@ -9,6 +9,7 @@
     getAllCitysStats,
     loadInitialCitysStats
   } from "../services/citysStatsApi";
+  import { navigate } from "../lib/navigation.js";
 
   // Opciones del desplegable de ordenacion.
   const sortOptions = [
@@ -287,7 +288,7 @@
 
   // Abre la pantalla de edicion para una ciudad concreta.
   function openEdit(city, country) {
-    window.location.hash = `#/citys-stats/editar/${encodeURIComponent(city)}/${encodeURIComponent(country)}`;
+    navigate(`/citys-stats/editar/${encodeURIComponent(city)}/${encodeURIComponent(country)}`);
   }
 
   // Al abrir la pantalla, cargamos todos los datos.
@@ -303,7 +304,7 @@
 <div class="page-shell">
   <div class="page">
     <div class="topbar">
-      <a href="#/" class="ghost-link">Volver al inicio</a>
+      <a href="/" class="ghost-link">Volver al inicio</a>
       <button type="button" class="ghost-button" on:click={handleLoadInitialData} data-testid="load-initial-data">
         Cargar datos de ejemplo
       </button>

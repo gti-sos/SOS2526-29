@@ -1,8 +1,8 @@
 <script>
   // onMount ejecuta una funcion cuando la pantalla aparece por primera vez.
   import { onMount } from "svelte";
-  // push permite navegar a otra ruta del frontend.
-  import { push } from "svelte-spa-router";
+  // navigate permite navegar a otra ruta del frontend.
+  import { navigate } from "../lib/navigation.js";
   // Importamos funciones ya preparadas para llamar a la API de vinos.
   import {
     getAllWineStats,
@@ -168,7 +168,7 @@
 
   // Navega a la pantalla de edicion de un vino.
   function irAEditar(id) {
-    push(`/wine-stats/editar/${id}`);
+    navigate(`/wine-stats/editar/${id}`);
   }
 
   // Al abrir la pantalla, cargamos la lista inicial de vinos.

@@ -15,8 +15,8 @@
       "Nuestro proyecto analiza la relacion entre desastres naturales, estadisticas de ciudades y datos sobre vino.",
     repository: "https://github.com/gti-sos/SOS2526-29",
     deployUrl: isViteLocal
-      ? "http://localhost:10000/#/"
-      : `${window.location.origin}/#/`
+      ? "http://localhost:10000/"
+      : `${window.location.origin}/`
   };
 
   // Lista de miembros y enlaces asociados a cada recurso.
@@ -25,8 +25,8 @@
       name: "Rufino Moreno Pacheco",
       resource: "wine-stats",
       source: "wine-stats",
-      frontendUrl: "#/wine-stats",
-      analyticsUrl: "#/analytics/wine-stats",
+      frontendUrl: "/wine-stats",
+      analyticsUrl: "/analytics/wine-stats",
       apiLinks: [
         {
           id: "api-v1-wine-stats",
@@ -46,8 +46,8 @@
       name: "Luis Cortes Cobos (LCC)",
       resource: "citys-stats",
       source: "citys-stats",
-      frontendUrl: "#/citys-stats",
-      analyticsUrl: "#/analytics/citys-stats",
+      frontendUrl: "/citys-stats",
+      analyticsUrl: "/analytics/citys-stats",
       apiLinks: [
         {
           id: "api-v1-citys-stats",

@@ -61,8 +61,8 @@
 
 <div class="page">
     <div class="topbar">
-        <a href="#/analytics" class="btn-back">← Volver a Analytics Grupal</a>
-        <a href="#/analytics/natural-disasters/map" class="btn-map">🗺️ Ver Mapa Mundial</a>
+        <a href="/analytics" class="btn-back">← Volver a Analytics Grupal</a>
+        <a href="/analytics/natural-disasters/map" class="btn-map">🗺️ Ver Mapa Mundial</a>
     </div>
 
     <h1>📈 Analíticas Individuales: Desastres Naturales</h1>

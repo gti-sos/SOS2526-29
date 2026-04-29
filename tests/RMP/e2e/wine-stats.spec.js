@@ -4,26 +4,26 @@ test.describe("Wine Stats - Frontend", () => {
   test.describe.configure({ mode: "serial" });
 
   test("Borrar todos los vinos", async ({ page }) => {
-    await page.goto("/#/wine-stats");
+    await page.goto("/wine-stats");
     page.on("dialog", dialog => dialog.accept());
     await page.click("button.btn-danger");
     await expect(page.locator(".mensaje.ok")).toBeVisible();
   });
 
   test("Cargar datos iniciales", async ({ page }) => {
-    await page.goto("/#/wine-stats");
+    await page.goto("/wine-stats");
     await page.click("button.btn-init");
     await expect(page.locator(".mensaje.ok")).toBeVisible();
   });
 
   test("Listar todos los vinos", async ({ page }) => {
-    await page.goto("/#/wine-stats");
+    await page.goto("/wine-stats");
     await expect(page.locator("table")).toBeVisible();
     await expect(page.locator("tbody tr").first()).toBeVisible();
   });
 
   test("Crear un nuevo vino", async ({ page }) => {
-    await page.goto("/#/wine-stats");
+    await page.goto("/wine-stats");
     await page.click("text=Añadir vino");
     await page.fill('input[placeholder="Nombre del vino"]', "Test Wine");
     await page.fill('input[placeholder="spain, france..."]', "spain");
@@ -40,16 +40,16 @@ test.describe("Wine Stats - Frontend", () => {
   });
 
   test("Editar un vino", async ({ page }) => {
-    await page.goto("/#/wine-stats");
+    await page.goto("/wine-stats");
     await page.locator("button.btn-edit").first().click();
-    await expect(page).toHaveURL(/#\/wine-stats\/editar\/\d+/);
+    await expect(page).toHaveURL(/\/wine-stats\/editar\/\d+/);
     await page.locator('label:has-text("Precio") input').fill("19.99");
     await page.click("text=Guardar cambios");
     await expect(page.locator(".mensaje.ok")).toBeVisible();
   });
 
   test("Borrar un vino concreto", async ({ page }) => {
-    await page.goto("/#/wine-stats");
+    await page.goto("/wine-stats");
     page.on("dialog", dialog => dialog.accept());
     await page.locator("button.btn-danger-sm").first().click();
     await expect(page.locator(".mensaje.ok")).toBeVisible();

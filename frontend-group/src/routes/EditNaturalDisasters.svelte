@@ -1,12 +1,12 @@
 
 
 <script>
-    // pop vuelve a la pantalla anterior del router.
-    import { pop } from "svelte-spa-router";
+    // back vuelve a la pantalla anterior.
+    import { back } from "../lib/navigation.js";
     // Funciones del servicio para leer y actualizar desastres.
     import { getOneDisaster, updateDisaster } from "../services/natural-disasters.js";
 
-    // svelte-spa-router inyecta aqui los parametros de la URL (country y year).
+    // params contiene los parametros de la URL (country y year).
     export let params = {};
 
     // Formulario enlazado a los inputs de la pantalla.
@@ -48,7 +48,7 @@
                 economic_damage_usd: Number(form.economic_damage_usd)
             });
             mostrarMensaje("¡Registro actualizado correctamente!");
-            setTimeout(() => pop(), 1500); // Volvemos a la tabla tras 1.5 segundos.
+            setTimeout(() => back(), 1500); // Volvemos a la tabla tras 1.5 segundos.
         } catch (e) {
             mostrarMensaje(e.message, "error");
         }
@@ -59,7 +59,7 @@
 </script>
 
 <div class="page">
-    <button class="btn-back" on:click={() => pop()}>← Volver a la tabla</button>
+    <button class="btn-back" on:click={() => back()}>← Volver a la tabla</button>
 
     <div class="card">
         <h1>✏️ Editar Registro</h1>

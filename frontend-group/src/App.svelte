@@ -1,6 +1,5 @@
 <script>
-  // Router permite cambiar de pantalla dentro de una SPA sin recargar toda la pagina.
-  import Router from "svelte-spa-router";
+  import { onMount } from "svelte";
   // Importamos la portada del proyecto.
   import Home from "./routes/Home.svelte";
   // Importamos la pantalla principal de citys-stats.
@@ -35,7 +34,7 @@
   import NaturalDisastersMapAnalytics from "./routes/NaturalDisastersMapAnalytics.svelte";
 
 
-  // routes relaciona cada hash de la URL con el componente que se debe mostrar.
+  // routes relaciona cada URL con el componente que se debe mostrar.
   const routes = {
     "/": Home,
     "/citys-stats": CitysStats,
@@ -57,33 +56,61 @@
     "/analytics/natural-disasters/map": NaturalDisastersMapAnalytics
   };
 
-  // directRoutes permite abrir algunas pantallas sin usar # en la URL.
-  const directRoutes = {
-    "/analytics": GroupAnalytics,
-    "/analytics/citys-stats": CitysStatsAnalytics,
-    "/analytics/citys-stats/map": CitysStatsMapAnalytics,
-    "/analytics/city-stats": CitysStatsAnalytics,
-    "/analytics/city-stats/map": CitysStatsMapAnalytics,
-    "/integrations/citys-stats": CitysStatsIntegrations,
-    "/integrations/city-stats": CitysStatsIntegrations,
-    "/analytics/wine-stats": WineStatsAnalytics,
-    "/analytics/wine-stats/map": WineStatsMapAnalytics,
-    "/analytics/natural-disasters": NaturalDisastersAnalytics,
-    "/analytics/natural-disasters/map": NaturalDisastersMapAnalytics
-  };
+  let currentPath = window.location.pathname;
+  let currentRoute = { component: Home, params: {} };
 
-  // Si la URL ya usa #/, dejamos que svelte-spa-router la gestione.
-  const directPath = window.location.hash.startsWith("#/") ? "" : window.location.pathname;
-  // Buscamos si la ruta directa existe en el mapa anterior.
-  const DirectRoute = directRoutes[directPath] || null;
+  function toRegex(path) {
+    const parts = path.split("/").filter(Boolean);
+    const params = [];
+    const pattern = parts
+      .map((part) => {
+        if (part.startsWith(":")) {
+          params.push(part.slice(1));
+          return "([^/]+)";
+        }
+        return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      })
+      .join("/");
+    return {
+      regex: new RegExp(`^/${pattern}$`),
+      params
+    };
+  }
+
+  const compiledRoutes = Object.entries(routes).map(([path, component]) => ({
+    path,
+    component,
+    ...toRegex(path)
+  }));
+
+  function resolveRoute(pathname) {
+    const cleanPath = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
+    for (const route of compiledRoutes) {
+      const match = cleanPath.match(route.regex);
+      if (match) {
+        const params = {};
+        route.params.forEach((param, index) => {
+          params[param] = decodeURIComponent(match[index + 1] || "");
+        });
+        return { component: route.component, params };
+      }
+    }
+    return { component: Home, params: {} };
+  }
+
+  function onLocationChange() {
+    currentPath = window.location.pathname;
+    currentRoute = resolveRoute(currentPath);
+  }
+
+  onMount(() => {
+    onLocationChange();
+    window.addEventListener("popstate", onLocationChange);
+    return () => window.removeEventListener("popstate", onLocationChange);
+  });
 </script>
 
 <!-- Mostramos la barra de navegacion en todas las pantallas. -->
 <Navbar />
 
-<!-- Si hay ruta directa, mostramos su componente; si no, usamos el router normal. -->
-{#if DirectRoute}
-  <svelte:component this={DirectRoute} />
-{:else}
-  <Router {routes} />
-{/if}
+<svelte:component this={currentRoute.component} params={currentRoute.params} />
