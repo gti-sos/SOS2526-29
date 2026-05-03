@@ -18,8 +18,8 @@
   let loading = true;
   // Mensaje de error.
   let error = "";
-  // Numero de ciudades que se piden al resumen.
-  let selectedLimit = 5;
+  // Numero de paises que se piden al resumen.
+  let selectedLimit = 8;
 
   // Formateador normal para numeros grandes.
   const formatter = new Intl.NumberFormat("es-ES", {
@@ -48,6 +48,21 @@
       name: "World Bank",
       label: "Indicators",
       url: "https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation"
+    },
+    {
+      name: "SOS2526-25",
+      label: "Tourist arrivals",
+      url: "https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals/docs"
+    },
+    {
+      name: "SOS2526-19",
+      label: "Earthquakes",
+      url: "https://sos2526-19.onrender.com/api/v1/earthquakes/docs"
+    },
+    {
+      name: "SOS2526-26",
+      label: "FIFA squad values",
+      url: "https://documenter.getpostman.com/view/52260149/2sBXinGW4o"
     }
   ];
 
@@ -66,7 +81,7 @@
     return Number.isFinite(parsed) ? parsed : null;
   }
 
-  // Lee la poblacion local de citys-stats.
+  // Lee la poblacion local agregada por pais de citys-stats.
   function localPopulation(item) {
     return numberOrNull(item.un_2025_population) ?? 0;
   }
@@ -79,6 +94,37 @@
   // Lee la poblacion del pais segun World Bank.
   function worldBankPopulation(item) {
     return numberOrNull(item.worldBankPopulation?.value);
+  }
+
+  // Lee las llegadas turisticas agregadas del proxy SOS2526-25.
+  function touristArrivals(item) {
+    return numberOrNull(item.touristArrivals?.totalArrivals);
+  }
+
+  // Lee la poblacion expuesta agregada del proxy SOS2526-19.
+  function earthquakeExposedPopulation(item) {
+    return numberOrNull(item.earthquakeStats?.exposedPopulation);
+  }
+
+  // Lee el valor de plantilla FIFA agregado del proxy SOS2526-26.
+  function fifaSquadValue(item) {
+    return numberOrNull(item.fifaSquadValue?.latestTotalMarketValue);
+  }
+
+  function positiveOrNull(value) {
+    const parsed = numberOrNull(value);
+    return parsed && parsed > 0 ? parsed : null;
+  }
+
+  function studentMetricValue(value) {
+    const parsed = numberOrNull(value);
+    if (parsed === null) return "Sin dato";
+
+    if (Number.isInteger(parsed)) return formatter.format(parsed);
+
+    return parsed.toLocaleString("es-ES", {
+      maximumFractionDigits: 1
+    });
   }
 
   // Carga Highcharts cuando se va a pintar la grafica.
@@ -105,20 +151,20 @@
         backgroundColor: "transparent"
       },
       title: {
-        text: "Poblacion local y externa"
+        text: "Indicadores integrados por pais"
       },
       subtitle: {
-        text: "citys-stats frente a Open-Meteo y World Bank"
+        text: "citys-stats agregado por pais frente a APIs externas y SOS"
       },
       accessibility: {
         enabled: true,
         description:
-          "Comparacion de poblacion local de citys-stats, poblacion de ciudad segun Open-Meteo y poblacion del pais segun World Bank."
+          "Comparacion por pais de citys-stats, Open-Meteo, World Bank, llegadas turisticas, terremotos y valor de plantillas FIFA."
       },
       xAxis: {
-        categories: items.map((item) => titleCase(item.city)),
+        categories: items.map((item) => titleCase(item.country)),
         title: {
-          text: "Ciudad"
+          text: "Pais"
         }
       },
       yAxis: {
@@ -130,6 +176,9 @@
       },
       tooltip: {
         formatter() {
+          if (this.y === null || this.y === undefined) {
+            return `<strong>${this.series.name}</strong><br/>${this.x}: sin dato`;
+          }
           return `<strong>${this.series.name}</strong><br/>${this.x}: ${formatter.format(this.y)}`;
         }
       },
@@ -139,6 +188,7 @@
           dataLabels: {
             enabled: true,
             formatter() {
+              if (this.y === null || this.y === undefined) return "";
               return compactFormatter.format(this.y);
             }
           }
@@ -146,7 +196,7 @@
       },
       series: [
         {
-          name: "citys-stats",
+          name: "citys-stats pais",
           color: "#0f766e",
           data: items.map(localPopulation)
         },
@@ -158,7 +208,22 @@
         {
           name: "World Bank pais",
           color: "#b45309",
-          data: items.map((item) => worldBankPopulation(item))
+          data: items.map((item) => positiveOrNull(worldBankPopulation(item)))
+        },
+        {
+          name: "SOS25 turistas pais",
+          color: "#db2777",
+          data: items.map((item) => positiveOrNull(touristArrivals(item)))
+        },
+        {
+          name: "SOS19 poblacion expuesta",
+          color: "#4f46e5",
+          data: items.map((item) => positiveOrNull(earthquakeExposedPopulation(item)))
+        },
+        {
+          name: "SOS26 valor FIFA",
+          color: "#0891b2",
+          data: items.map((item) => positiveOrNull(fifaSquadValue(item)))
         }
       ],
       credits: {
@@ -203,16 +268,16 @@
     <div>
       <p class="eyebrow">LCC citys-stats</p>
       <h1>Integraciones externas</h1>
-      <p class="subtitle">Datos conectados con geocodificacion, paises e indicadores oficiales.</p>
+      <p class="subtitle">Datos agregados por pais y conectados con APIs externas y de otros grupos SOS.</p>
     </div>
 
     <div class="toolbar" aria-label="Opciones de integracion">
       <label>
-        <span>Ciudades</span>
+        <span>Paises</span>
         <select bind:value={selectedLimit} on:change={loadIntegrations}>
-          <option value={3}>3</option>
           <option value={5}>5</option>
           <option value={8}>8</option>
+          <option value={12}>12</option>
         </select>
       </label>
       <button type="button" on:click={loadIntegrations}>Actualizar</button>
@@ -235,6 +300,33 @@
   {:else if items.length === 0}
     <div class="message">No hay registros locales de citys-stats para integrar.</div>
   {:else}
+    {#if summary?.studentApis?.length}
+      <section class="student-api-grid" aria-label="Resumen de APIs SOS de otros grupos">
+        {#each summary.studentApis as api}
+          <article class="student-api-card" class:error-card={api.error}>
+            <span>API SOS de otro grupo</span>
+            <strong>{api.source}</strong>
+            {#if api.error}
+              <p>{api.error}</p>
+            {:else}
+              <p>{formatter.format(api.count)} registros recibidos por proxy propio.</p>
+              {#if api.countries?.length}
+                <ul class="student-api-list" aria-label={`Top paises de ${api.source}`}>
+                  {#each api.countries as country}
+                    <li>
+                      <span>{titleCase(country.country)}</span>
+                      <strong>{api.metricLabel}: {studentMetricValue(country.metric)}</strong>
+                      <small>{country.detail}</small>
+                    </li>
+                  {/each}
+                </ul>
+              {/if}
+            {/if}
+          </article>
+        {/each}
+      </section>
+    {/if}
+
     <section class="chart-panel" aria-labelledby="integration-chart-title">
       <h2 id="integration-chart-title">Vista comparada</h2>
       <div class="chart-frame" bind:this={chartContainer}></div>
@@ -246,7 +338,8 @@
           <div class="city-heading">
             <div>
               <p>{titleCase(item.country)}</p>
-              <h2>{titleCase(item.city)}</h2>
+              <h2>{titleCase(item.country)}</h2>
+              <p>{item.cityCount} ciudades · principal: {titleCase(item.topCity)}</p>
             </div>
             {#if item.countryInfo?.flagPng}
               <img src={item.countryInfo.flagPng} alt={`Bandera de ${item.countryInfo.name}`} />
@@ -255,11 +348,11 @@
 
           <dl>
             <div>
-              <dt>citys-stats 2025</dt>
+              <dt>citys-stats pais</dt>
               <dd>{formatter.format(localPopulation(item))}</dd>
             </div>
             <div>
-              <dt>Open-Meteo</dt>
+              <dt>Open-Meteo ciudad principal</dt>
               <dd>
                 {#if item.geocoding}
                   {item.geocoding.latitude?.toFixed(2)}, {item.geocoding.longitude?.toFixed(2)}
@@ -283,6 +376,38 @@
               <dd>
                 {#if item.worldBankPopulation}
                   {compactFormatter.format(item.worldBankPopulation.value)} ({item.worldBankPopulation.date})
+                {:else}
+                  Sin dato
+                {/if}
+              </dd>
+            </div>
+            <div>
+              <dt>SOS25 turistas</dt>
+              <dd>
+                {#if item.touristArrivals}
+                  {compactFormatter.format(item.touristArrivals.totalArrivals)}
+                  ({item.touristArrivals.records} reg., ult. {item.touristArrivals.latestYear})
+                {:else}
+                  Sin dato
+                {/if}
+              </dd>
+            </div>
+            <div>
+              <dt>SOS19 terremotos</dt>
+              <dd>
+                {#if item.earthquakeStats}
+                  {item.earthquakeStats.records} eventos · M{item.earthquakeStats.maxSeverity}
+                {:else}
+                  Sin dato
+                {/if}
+              </dd>
+            </div>
+            <div>
+              <dt>SOS26 valor FIFA</dt>
+              <dd>
+                {#if item.fifaSquadValue}
+                  {compactFormatter.format(item.fifaSquadValue.latestTotalMarketValue)}
+                  ({item.fifaSquadValue.latestYear})
                 {:else}
                   Sin dato
                 {/if}
@@ -398,12 +523,13 @@
 
   .source-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
     margin-bottom: 16px;
   }
 
   .source-card,
+  .student-api-card,
   .chart-panel,
   .city-card,
   .message,
@@ -432,6 +558,64 @@
   .source-card strong {
     color: #0f172a;
     font-size: 1.05rem;
+  }
+
+  .student-api-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .student-api-card {
+    padding: 14px;
+  }
+
+  .student-api-card span {
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .student-api-card strong {
+    display: block;
+    margin-top: 4px;
+    color: #0f172a;
+  }
+
+  .student-api-card p {
+    margin-top: 8px;
+    color: #475569;
+  }
+
+  .student-api-list {
+    display: grid;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .student-api-list li {
+    display: grid;
+    gap: 2px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 8px;
+  }
+
+  .student-api-list span,
+  .student-api-list small {
+    color: #64748b;
+  }
+
+  .student-api-list strong {
+    margin-top: 0;
+  }
+
+  .error-card {
+    border-color: #fecaca;
+    background: #fef2f2;
   }
 
   .chart-panel {
@@ -512,6 +696,7 @@
 
     .toolbar,
     .source-grid,
+    .student-api-grid,
     .city-grid,
     dl {
       grid-template-columns: 1fr;

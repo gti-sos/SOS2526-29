@@ -385,11 +385,13 @@ Integraciones:
 2. Open-Meteo: `getGeocoding`.
 3. REST Countries: `getCountryInfo`.
 4. World Bank: `getWorldBankPopulation`.
-5. Union de datos: `buildIntegratedCity`.
-6. Control de errores: `fetchJson` y `safeExternal`.
-7. Frontend service: `citysStatsIntegrations.js`.
-8. Pantalla: `CitysStatsIntegrations.svelte`.
-9. Comprueba `/api/v1/citys-stats/integrations/summary` y `/integrations/citys-stats`.
+5. APIs SOS externas: `getTouristArrivals`, `getEarthquakes` y `getFifaSquadValues`.
+6. Agregado local por pais: `buildCityCountrySummaries`.
+7. Union de datos: `buildIntegratedCity`.
+8. Control de errores: `fetchJson` y `safeExternal`.
+9. Frontend service: `citysStatsIntegrations.js`.
+10. Pantalla: `CitysStatsIntegrations.svelte`.
+11. Comprueba `/api/v1/citys-stats/integrations/summary` y `/integrations/citys-stats`.
 
 ### Codigos HTTP que hay que saber explicar
 
@@ -587,7 +589,7 @@ SOS2526-29/
 - `index.js`: archivo principal del backend. Crea el servidor Express, abre las bases de datos NeDB, carga las APIs y sirve el frontend compilado.
 - `src/back/v1/natural-disasters.js`: API v1 de desastres naturales. Tiene rutas para documentacion, carga inicial, busqueda, creacion, edicion y borrado.
 - `src/back/v2/natural-disasters.js`: API v2 de desastres naturales. Es parecida a v1, pero mejora busquedas por pais parcial y rango de anios.
-- `src/back/v1/citys-stats.js`: API v1 de ciudades. Incluye CRUD, top de ciudades e integraciones con Open-Meteo, REST Countries y World Bank.
+- `src/back/v1/citys-stats.js`: API v1 de ciudades. Incluye CRUD, top de ciudades, agregados por pais, proxies e integraciones con Open-Meteo, REST Countries, World Bank y APIs SOS externas.
 - `src/back/v2/citys-stats.js`: API v2 de ciudades. Anade busqueda libre con `q` y ordenacion con `sort`.
 - `src/back/v1/wine-stats.js`: API v1 de vinos. Gestiona vinos con identificador numerico `id`.
 - `src/back/*.db`: archivos donde NeDB guarda los datos reales.
@@ -609,7 +611,7 @@ SOS2526-29/
 - `normalizeWineStat` en `wine-stats`: valida y convierte los datos de un vino.
 - `getNextWineId` en `wine-stats`: calcula el siguiente `id` disponible.
 - `fetchJson` en `src/back/v1/citys-stats.js`: llama a APIs externas y controla errores.
-- `buildIntegratedCity` en `src/back/v1/citys-stats.js`: une datos locales con datos externos.
+- `buildIntegratedCity` en `src/back/v1/citys-stats.js`: une datos locales agregados por pais con datos externos.
 - `getAllCitysStats`, `createCityStat`, `updateCityStat`: servicio frontend para ciudades.
 - `getDisasters`, `createDisaster`, `updateDisaster`: servicio frontend para desastres.
 - `getAllWineStats`, `createWineStat`, `updateWineStat`: servicio frontend para vinos.

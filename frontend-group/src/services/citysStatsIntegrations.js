@@ -38,7 +38,7 @@ export async function getTopCities(limit = 5) {
 
 // Obtiene el resumen que combina API local y APIs externas.
 export async function getCitysStatsIntegrationSummary(limit = 5) {
-    // summary llama a Open-Meteo, REST Countries y World Bank desde el backend.
+    // summary integra por pais datos locales, APIs no SOS y APIs SOS externas.
     const response = await fetch(`${CITYS_STATS_INTEGRATIONS_API_BASE}/integrations/summary?limit=${limit}`);
     // Devolvemos el resultado ya procesado.
     return handleResponse(response);

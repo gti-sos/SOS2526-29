@@ -91,7 +91,7 @@ APIs de desastres:
 
 APIs de ciudades:
 
-- `src/back/v1/citys-stats.js`: CRUD v1, filtros, integraciones externas, `top-cities`, Open-Meteo, REST Countries y World Bank.
+- `src/back/v1/citys-stats.js`: CRUD v1, filtros, agregados por pais, proxies e integraciones con Open-Meteo, REST Countries, World Bank y APIs SOS externas.
 - `src/back/v2/citys-stats.js`: CRUD v2, busqueda libre `q`, ordenacion `sort`, paginacion, validacion y carga inicial.
 
 API de vinos:
@@ -194,14 +194,18 @@ Rutas principales:
 Integraciones externas en v1:
 
 - `GET /api/v1/citys-stats/top-cities`
+- `GET /api/v1/citys-stats/country-summaries`
 - `GET /api/v1/citys-stats/integrations/geocoding/:city`
 - `GET /api/v1/citys-stats/integrations/country/:country`
 - `GET /api/v1/citys-stats/integrations/world-bank/:countryCode`
+- `GET /api/v1/citys-stats/integrations/sos-tourist-arrivals`
+- `GET /api/v1/citys-stats/integrations/sos-earthquakes`
+- `GET /api/v1/citys-stats/integrations/sos-fifa-squad-values`
 - `GET /api/v1/citys-stats/integrations/summary`
 
 Defensa rapida:
 
-> Ciudades usa `city` y `country` como clave compuesta. La v2 es la API principal del frontend porque incluye busqueda libre con `q`, ordenacion con `sort` y paginacion. La v1 se conserva porque ahi estan las integraciones externas.
+> Ciudades usa `city` y `country` como clave compuesta. La v2 es la API principal del frontend porque incluye busqueda libre con `q`, ordenacion con `sort` y paginacion. La v1 se conserva porque ahi estan las integraciones externas, ahora agregadas por pais para cruzar mejor los datos.
 
 ### `wine-stats`
 
@@ -732,13 +736,17 @@ Funciones backend:
 - `getGeocoding`: Open-Meteo.
 - `getCountryInfo`: REST Countries.
 - `getWorldBankPopulation`: World Bank.
+- `getTouristArrivals`: API SOS2526-25 de llegadas turisticas.
+- `getEarthquakes`: API SOS2526-19 de terremotos.
+- `getFifaSquadValues`: API SOS2526-26 de valor de plantillas FIFA.
+- `buildCityCountrySummaries`: agrega `citys-stats` por pais.
 - `buildIntegratedCityBase`: lanza llamadas externas.
-- `buildIntegratedCity`: une datos locales y externos.
+- `buildIntegratedCity`: une datos locales agregados por pais con datos externos.
 - `safeExternal`: captura errores para que una API externa no hunda todo.
 
 Frase de defensa:
 
-> Las integraciones se llaman desde el backend, no desde el navegador. Asi controlamos errores, timeout y formato antes de devolverlo al frontend.
+> Las integraciones se llaman desde el backend, no desde el navegador. Asi controlamos errores, timeout y formato antes de devolverlo al frontend. En D03 las cruzo por pais porque da mas coincidencias reales que por ciudad.
 
 ### Cambio: "El profesor pide borrar la base o recargar datos"
 
@@ -1254,11 +1262,13 @@ Integraciones:
 2. Open-Meteo: `getGeocoding`.
 3. REST Countries: `getCountryInfo`.
 4. World Bank: `getWorldBankPopulation`.
-5. Union final: `buildIntegratedCity`.
-6. Errores: `fetchJson` y `safeExternal`.
-7. Frontend service: `citysStatsIntegrations.js`.
-8. Pantalla: `CitysStatsIntegrations.svelte`.
-9. Prueba `/api/v1/citys-stats/integrations/summary`.
+5. APIs SOS externas: `getTouristArrivals`, `getEarthquakes` y `getFifaSquadValues`.
+6. Agregado local por pais: `buildCityCountrySummaries`.
+7. Union final: `buildIntegratedCity`.
+8. Errores: `fetchJson` y `safeExternal`.
+9. Frontend service: `citysStatsIntegrations.js`.
+10. Pantalla: `CitysStatsIntegrations.svelte`.
+11. Prueba `/api/v1/citys-stats/integrations/summary`.
 
 ## 12. Estrategia si te piden un cambio grande
 

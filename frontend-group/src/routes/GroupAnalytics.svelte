@@ -1,37 +1,26 @@
 <script>
-  // onDestroy limpia la grafica al salir; tick espera a que Svelte pinte el HTML.
   import { onDestroy, onMount, tick } from "svelte";
-  // Importamos datos de las tres APIs.
   import { getAllCitysStats } from "../services/citysStatsApi";
   import { getDisasters } from "../services/natural-disasters.js";
   import { getAllWineStats } from "../services/wine-stats.js";
 
-  // Referencia a la libreria Highcharts cargada de forma dinamica.
   let Highcharts;
-  // Elemento HTML donde se dibuja la grafica.
   let chartContainer;
-  // Objeto de grafica creado por Highcharts.
   let chart;
-  // Estado de carga.
   let loading = true;
-  // Mensaje de error si falla alguna API.
   let error = "";
-  // Metricas combinadas de las tres APIs.
   let metrics = [];
-  let chartContainer2;
-  let chart2;
 
-  // Formateador para mostrar numeros con separadores espanoles.
   const formatter = new Intl.NumberFormat("es-ES", {
     maximumFractionDigits: 0
   });
 
-  // Suma un campo numerico de una lista de objetos.
+  const colors = ["#0f766e", "#dc2626", "#7c3aed"];
+
   function sum(items, field) {
     return items.reduce((total, item) => total + Number(item[field] || 0), 0);
   }
 
-  // Carga Highcharts solo cuando hace falta.
   async function loadHighcharts() {
     if (Highcharts) return Highcharts;
 
@@ -43,7 +32,6 @@
     return Highcharts;
   }
 
-  // Convierte datos de las APIs en metricas para la grafica.
   function buildMetrics(citysStats, disasters, wines) {
     const raw = [
       {
@@ -74,77 +62,85 @@
     }));
   }
 
-  // Dibuja la grafica de columnas.
   function renderChart() {
-    if (!chartContainer || !chartContainer2) return;
+    if (!chartContainer || !Highcharts) return;
 
     chart?.destroy();
-    chart2?.destroy();
 
-  const colors = ["#0f766e", "#dc2626", "#7c3aed"];
+    chart = Highcharts.chart(chartContainer, {
+      chart: {
+        type: "column",
+        backgroundColor: "transparent"
+      },
+      title: {
+        text: "Vista integrada del grupo",
+        align: "left"
+      },
+      subtitle: {
+        text: "Registros e indicador principal normalizado de citys-stats, natural-disasters y wine-stats",
+        align: "left"
+      },
+      accessibility: {
+        enabled: true,
+        description:
+          "Grafico de columnas que combina datos de las tres APIs del grupo: registros e indicador principal normalizado."
+      },
+      credits: {
+        enabled: false
+      },
+      xAxis: {
+        categories: metrics.map((metric) => metric.name),
+        title: { text: null }
+      },
+      yAxis: [
+        {
+          min: 0,
+          title: { text: "Registros" }
+        },
+        {
+          min: 0,
+          max: 100,
+          opposite: true,
+          title: { text: "Indice normalizado (0-100)" }
+        }
+      ],
+      tooltip: {
+        shared: true,
+        formatter() {
+          const index = this.points?.[0]?.point.index ?? 0;
+          const metric = metrics[index];
 
-  // GRÁFICO 1 — Número de registros
-  chart = Highcharts.chart(chartContainer, {
-    chart: { type: "bar", backgroundColor: "transparent" },
-    title: { text: "Registros por API", align: "left" },
-    subtitle: { text: "Número total de recursos en cada colección", align: "left" },
-    accessibility: { enabled: true, description: "Gráfico de barras con el número de registros de cada API." },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    xAxis: {
-      categories: metrics.map(m => m.name),
-      title: { text: null }
-    },
-    yAxis: { min: 0, title: { text: "Registros" } },
-    tooltip: {
-      formatter() {
-        const metric = metrics[this.point.index];
-        return `<b>${metric.name}</b><br/>Registros: <b>${formatter.format(metric.records)}</b>`;
-      }
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 4,
-        dataLabels: { enabled: true, format: "{y}" },
-        colorByPoint: true,
-        colors
-      }
-    },
-    series: [{ name: "Registros", data: metrics.map(m => m.records) }]
-  });
-
-  // GRÁFICO 2 — Indicador principal normalizado
-  chart2 = Highcharts.chart(chartContainer2, {
-    chart: { type: "bar", backgroundColor: "transparent" },
-    title: { text: "Indicador principal normalizado (0-100)", align: "left" },
-    subtitle: { text: "Comparación relativa del indicador principal de cada API", align: "left" },
-    accessibility: { enabled: true, description: "Gráfico de barras con el indicador normalizado de cada API." },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    xAxis: {
-      categories: metrics.map(m => m.name),
-      title: { text: null }
-    },
-    yAxis: { min: 0, max: 100, title: { text: "Índice (0-100)" } },
-    tooltip: {
-      formatter() {
-        const metric = metrics[this.point.index];
-        return `<b>${metric.name}</b><br/>${metric.indicatorName}: <b>${formatter.format(metric.indicator)}</b><br/>Índice: <b>${metric.index}</b>`;
-      }
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 4,
-        dataLabels: { enabled: true, format: "{y}" },
-        colorByPoint: true,
-        colors
-      }
-    },
-    series: [{ name: "Índice", data: metrics.map(m => m.index) }]
-  });
+          return `<b>${metric.name}</b><br/>Registros: <b>${formatter.format(metric.records)}</b><br/>${metric.indicatorName}: <b>${formatter.format(metric.indicator)}</b><br/>Indice: <b>${metric.index}</b>`;
+        }
+      },
+      plotOptions: {
+        column: {
+          borderRadius: 4,
+          dataLabels: {
+            enabled: true
+          }
+        }
+      },
+      series: [
+        {
+          name: "Registros",
+          data: metrics.map((metric, index) => ({
+            y: metric.records,
+            color: colors[index]
+          }))
+        },
+        {
+          name: "Indicador normalizado",
+          yAxis: 1,
+          data: metrics.map((metric, index) => ({
+            y: metric.index,
+            color: colors[index]
+          }))
+        }
+      ]
+    });
   }
 
-  // Carga datos de las tres APIs y luego pinta la grafica.
   async function loadAnalytics() {
     loading = true;
     error = "";
@@ -167,13 +163,10 @@
     }
   }
 
-  // Al abrir la pantalla, cargamos las analiticas.
   onMount(loadAnalytics);
 
-  // Al salir, destruimos la grafica para liberar memoria.
   onDestroy(() => {
     chart?.destroy();
-    chart2?.destroy();
   });
 </script>
 
@@ -182,16 +175,16 @@
 </svelte:head>
 
 <main class="analytics-page">
-    <header class="analytics-header">
+  <header class="analytics-header">
     <div>
       <p class="eyebrow">SOS2526-29</p>
       <h1>Analytics del grupo</h1>
-      <p class="subtitle">Datos combinados de citys-stats, natural-disasters y wine-stats.</p>
+      <p class="subtitle">Un unico widget con datos combinados de citys-stats, natural-disasters y wine-stats.</p>
     </div>
     <div class="header-links">
-      <a class="primary-link" href="/analytics/wine-stats">📊 Wine Stats</a>
-      <a class="primary-link" href="/analytics/citys-stats">📊 Citys Stats</a>
-      <a class="primary-link" href="/analytics/natural-disasters">📊 Natural Disasters</a>
+      <a class="primary-link" href="/analytics/wine-stats">Wine Stats</a>
+      <a class="primary-link" href="/analytics/citys-stats">Citys Stats</a>
+      <a class="primary-link" href="/analytics/natural-disasters">Natural Disasters</a>
     </div>
   </header>
 
@@ -199,15 +192,10 @@
     <p class="state" role="status">Cargando datos de analytics...</p>
   {:else if error}
     <div class="message error" role="alert">{error}</div>
-    {:else}
+  {:else}
     <section class="chart-panel" aria-labelledby="group-chart-title">
-      <h2 id="group-chart-title">Registros por API</h2>
+      <h2 id="group-chart-title">Widget integrado unico</h2>
       <div class="chart-frame" bind:this={chartContainer}></div>
-    </section>
-
-    <section class="chart-panel" aria-labelledby="group-chart-title-2">
-      <h2 id="group-chart-title-2">Indicador principal normalizado</h2>
-      <div class="chart-frame" bind:this={chartContainer2}></div>
     </section>
 
     <section class="metric-grid" aria-label="Resumen de metricas integradas">
@@ -279,12 +267,6 @@
     font-size: 1.2rem;
     margin-bottom: 14px;
   }
-    .header-links {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
 
   h3 {
     color: #0f172a;
@@ -296,6 +278,13 @@
     margin-top: 10px;
     color: #526174;
     max-width: 680px;
+  }
+
+  .header-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .primary-link {
@@ -327,7 +316,7 @@
   }
 
   .chart-frame {
-    min-height: 430px;
+    min-height: 470px;
   }
 
   .metric-grid {
@@ -386,7 +375,7 @@
     }
 
     .chart-frame {
-      min-height: 360px;
+      min-height: 380px;
     }
   }
 </style>

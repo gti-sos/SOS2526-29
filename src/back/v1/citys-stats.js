@@ -8,6 +8,35 @@ module.exports = (app, db) => {
         process.env.LCC_DOCS_URL ||
         "https://documenter.getpostman.com/view/52412147/2sBXiqEUAt";
 
+    const TOURIST_ARRIVALS_API_URL =
+        "https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals";
+    const EARTHQUAKES_API_URL =
+        "https://sos2526-19.onrender.com/api/v1/earthquakes";
+    const FIFA_SQUAD_VALUES_API_URL =
+        "https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years";
+    const ISO3_COUNTRY_NAMES = {
+        AFG: "Afghanistan",
+        ARG: "Argentina",
+        AUS: "Australia",
+        BEL: "Belgium",
+        BRA: "Brazil",
+        CHN: "China",
+        DEU: "Germany",
+        EGY: "Egypt",
+        ESP: "Spain",
+        FRA: "France",
+        GRC: "Greece",
+        IDN: "Indonesia",
+        IND: "India",
+        IRN: "Iran",
+        ITA: "Italy",
+        JPN: "Japan",
+        NLD: "Netherlands",
+        PHL: "Philippines",
+        PRT: "Portugal",
+        TJK: "Tajikistan"
+    };
+
     // Datos de ejemplo que se cargan cuando la base esta vacia.
     const initialData = [
         { city: "jakarta", country: "indonesia", un_2025_population: 41913860 },
@@ -67,6 +96,33 @@ module.exports = (app, db) => {
         return String(value ?? "").trim().replace(/[-_]+/g, " ");
     }
 
+    // Normaliza paises para cruzar nuestra API con APIs SOS de otros grupos.
+    function normalizeCountryKey(value) {
+        return String(value ?? "")
+            .trim()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[-_]+/g, " ")
+            .toLowerCase();
+    }
+
+    function countryFromIso3(value, fallback) {
+        const code = String(value ?? "").trim().toUpperCase();
+        return ISO3_COUNTRY_NAMES[code] || fallback;
+    }
+
+    function readFiniteNumber(value, fallback = null) {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    function asArray(data) {
+        if (Array.isArray(data)) return data;
+        if (Array.isArray(data?.data)) return data.data;
+        if (Array.isArray(data?.items)) return data.items;
+        return [];
+    }
+
     // Convierte limit en numero y comprueba que este dentro del rango permitido.
     function parseLimit(value, fallback, max) {
         if (value === undefined) return fallback;
@@ -91,6 +147,49 @@ module.exports = (app, db) => {
                 resolve(docs.map(removeDatabaseId));
             });
         });
+    }
+
+    function buildCityCountrySummaries(items) {
+        const byCountry = new Map();
+
+        items.forEach((item) => {
+            const key = normalizeCountryKey(item.country);
+            if (!key) return;
+
+            const population = readFiniteNumber(item.un_2025_population, 0);
+            const current = byCountry.get(key) || {
+                country: item.country,
+                countryKey: key,
+                city: item.city,
+                topCity: item.city,
+                topCityPopulation: population,
+                cityCount: 0,
+                un_2025_population: 0,
+                cities: []
+            };
+
+            current.cityCount += 1;
+            current.un_2025_population += population;
+            current.cities.push({
+                city: item.city,
+                population
+            });
+
+            if (population > current.topCityPopulation) {
+                current.city = item.city;
+                current.topCity = item.city;
+                current.topCityPopulation = population;
+            }
+
+            byCountry.set(key, current);
+        });
+
+        return [...byCountry.values()]
+            .map((item) => ({
+                ...item,
+                cities: item.cities.sort((a, b) => b.population - a.population)
+            }))
+            .sort((a, b) => b.un_2025_population - a.un_2025_population);
     }
 
     // Hace una peticion HTTP y devuelve JSON con control de errores y timeout.
@@ -328,7 +427,7 @@ module.exports = (app, db) => {
     }
 
     // Une el registro local con geocoding, pais y World Bank en un solo objeto.
-    function buildIntegratedCity(base, worldBankByCode, worldBankBatchError) {
+    function buildIntegratedCity(base, worldBankByCode, worldBankBatchError, studentApis) {
         const code = base.countryResult.data?.cca3;
         let worldBankResult;
 
@@ -353,24 +452,233 @@ module.exports = (app, db) => {
             };
         }
 
+        const countryKey = normalizeCountryKey(base.item.country);
+        const touristArrivals = studentApis?.touristByCountry?.get(countryKey) ?? null;
+        const earthquakeStats = studentApis?.earthquakesByCountry?.get(countryKey) ?? null;
+        const fifaSquadValue = studentApis?.fifaByCountry?.get(countryKey) ?? null;
+        const integrationResults = [
+            base.geocodingResult,
+            base.countryResult,
+            worldBankResult
+        ];
+
+        if (studentApis?.touristResult?.error) {
+            integrationResults.push(studentApis.touristResult);
+        }
+
+        if (studentApis?.earthquakeResult?.error) {
+            integrationResults.push(studentApis.earthquakeResult);
+        }
+
+        if (studentApis?.fifaResult?.error) {
+            integrationResults.push(studentApis.fifaResult);
+        }
+
         return {
             city: base.item.city,
             country: base.item.country,
+            cityCount: base.item.cityCount ?? 1,
+            topCity: base.item.topCity ?? base.item.city,
+            topCityPopulation: base.item.topCityPopulation ?? base.item.un_2025_population,
+            cities: base.item.cities ?? [{
+                city: base.item.city,
+                population: base.item.un_2025_population
+            }],
             un_2025_population: base.item.un_2025_population,
             geocoding: base.geocodingResult.data,
             countryInfo: base.countryResult.data,
             worldBankPopulation: worldBankResult.data,
-            integrationErrors: [
-                base.geocodingResult,
-                base.countryResult,
-                worldBankResult
-            ]
+            touristArrivals,
+            earthquakeStats,
+            fifaSquadValue,
+            integrationErrors: integrationResults
                 .filter((result) => result.error)
                 .map((result) => ({
                     source: result.source,
                     error: result.error
                 }))
         };
+    }
+
+    function normalizeTouristArrival(row) {
+        const country = String(row?.country ?? "").trim();
+        const year = readFiniteNumber(row?.year);
+        const airArrival = readFiniteNumber(row?.air_arrival, 0);
+        const waterArrival = readFiniteNumber(row?.water_arrival, 0);
+        const landArrival = readFiniteNumber(row?.land_arrival, 0);
+
+        if (!country || year === null) return null;
+
+        return {
+            source: "SOS2526-25 International Tourist Arrivals API",
+            country,
+            year,
+            airArrival,
+            waterArrival,
+            landArrival,
+            totalArrivals: airArrival + waterArrival + landArrival
+        };
+    }
+
+    async function getTouristArrivals() {
+        const data = await fetchJson(
+            TOURIST_ARRIVALS_API_URL,
+            "SOS2526-25 International Tourist Arrivals API",
+            60000
+        );
+
+        return asArray(data).map(normalizeTouristArrival).filter(Boolean);
+    }
+
+    function buildTouristArrivalsByCountry(rows) {
+        const byCountry = new Map();
+
+        rows.forEach((row) => {
+            const key = normalizeCountryKey(row.country);
+            if (!key) return;
+
+            const current = byCountry.get(key) || {
+                source: row.source,
+                country: row.country,
+                records: 0,
+                totalArrivals: 0,
+                latestYear: null,
+                latestTotalArrivals: 0
+            };
+
+            current.records += 1;
+            current.totalArrivals += row.totalArrivals;
+
+            if (current.latestYear === null || row.year > current.latestYear) {
+                current.latestYear = row.year;
+                current.latestTotalArrivals = row.totalArrivals;
+            }
+
+            byCountry.set(key, current);
+        });
+
+        return byCountry;
+    }
+
+    function normalizeEarthquake(row) {
+        const country = String(countryFromIso3(row?.iso3, row?.country) ?? "").trim();
+        const severity = readFiniteNumber(row?.severity);
+
+        if (!country || severity === null) return null;
+
+        return {
+            source: "SOS2526-19 Earthquakes API",
+            country,
+            name: row?.name ?? row?.description ?? "Earthquake",
+            date: row?.fromdate ?? row?.date ?? null,
+            severity,
+            depth: readFiniteNumber(row?.depth),
+            alertLevel: row?.alertlevel ?? row?.episodealertlevel ?? null,
+            exposedPopulation: readFiniteNumber(row?.exposed_population, 0)
+        };
+    }
+
+    async function getEarthquakes() {
+        const data = await fetchJson(
+            EARTHQUAKES_API_URL,
+            "SOS2526-19 Earthquakes API",
+            60000
+        );
+
+        return asArray(data).map(normalizeEarthquake).filter(Boolean);
+    }
+
+    function buildEarthquakesByCountry(rows) {
+        const byCountry = new Map();
+
+        rows.forEach((row) => {
+            const key = normalizeCountryKey(row.country);
+            if (!key) return;
+
+            const current = byCountry.get(key) || {
+                source: row.source,
+                country: row.country,
+                records: 0,
+                maxSeverity: 0,
+                exposedPopulation: 0,
+                latestDate: null
+            };
+
+            current.records += 1;
+            current.maxSeverity = Math.max(current.maxSeverity, row.severity);
+            current.exposedPopulation += row.exposedPopulation || 0;
+
+            if (!current.latestDate || (row.date && row.date > current.latestDate)) {
+                current.latestDate = row.date;
+            }
+
+            byCountry.set(key, current);
+        });
+
+        return byCountry;
+    }
+
+    function normalizeFifaSquadValue(row) {
+        const country = String(row?.country ?? "").trim();
+        const year = readFiniteNumber(row?.year);
+        const squadSize = readFiniteNumber(row?.squad_size, 0);
+        const totalMarketValue = readFiniteNumber(row?.total_market_value, 0);
+        const averageMarketValue = readFiniteNumber(row?.average_market_value, 0);
+
+        if (!country || year === null) return null;
+
+        return {
+            source: "SOS2526-26 FIFA Squad Value API",
+            country,
+            year,
+            squadSize,
+            totalMarketValue,
+            averageMarketValue
+        };
+    }
+
+    async function getFifaSquadValues() {
+        const data = await fetchJson(
+            FIFA_SQUAD_VALUES_API_URL,
+            "SOS2526-26 FIFA Squad Value API",
+            60000
+        );
+
+        return asArray(data).map(normalizeFifaSquadValue).filter(Boolean);
+    }
+
+    function buildFifaSquadValuesByCountry(rows) {
+        const byCountry = new Map();
+
+        rows.forEach((row) => {
+            const key = normalizeCountryKey(row.country);
+            if (!key) return;
+
+            const current = byCountry.get(key) || {
+                source: row.source,
+                country: row.country,
+                records: 0,
+                totalMarketValue: 0,
+                latestYear: null,
+                latestTotalMarketValue: 0,
+                latestAverageMarketValue: 0,
+                latestSquadSize: 0
+            };
+
+            current.records += 1;
+            current.totalMarketValue += row.totalMarketValue;
+
+            if (current.latestYear === null || row.year > current.latestYear) {
+                current.latestYear = row.year;
+                current.latestTotalMarketValue = row.totalMarketValue;
+                current.latestAverageMarketValue = row.averageMarketValue;
+                current.latestSquadSize = row.squadSize;
+            }
+
+            byCountry.set(key, current);
+        });
+
+        return byCountry;
     }
 
     // Redirige a la documentacion de Postman.
@@ -465,6 +773,23 @@ module.exports = (app, db) => {
         }
     });
 
+    // Devuelve citys-stats agregado por pais para integraciones por campo country.
+    app.get(`${BASE_API_URL}/country-summaries`, async (request, response) => {
+        const limit = parseLimit(request.query.limit, 8, 20);
+
+        if (limit === null) {
+            return response.status(400).json({ error: "Invalid limit" });
+        }
+
+        try {
+            const result = buildCityCountrySummaries(await findAllCityStats()).slice(0, limit);
+
+            return response.status(200).json(result);
+        } catch {
+            return response.sendStatus(500);
+        }
+    });
+
     // Consulta Open-Meteo para una ciudad concreta.
     app.get(`${BASE_API_URL}/integrations/geocoding/:city`, async (req, res) => {
         try {
@@ -510,20 +835,73 @@ module.exports = (app, db) => {
         }
     });
 
+    // Proxy propio hacia la API SOS2526-25 de llegadas internacionales de turistas.
+    app.get(`${BASE_API_URL}/integrations/sos-tourist-arrivals`, async (req, res) => {
+        try {
+            const rows = await getTouristArrivals();
+            const countries = [...buildTouristArrivalsByCountry(rows).values()]
+                .sort((a, b) => b.totalArrivals - a.totalArrivals);
+
+            return res.status(200).json({
+                source: "SOS2526-25 International Tourist Arrivals API",
+                endpoint: TOURIST_ARRIVALS_API_URL,
+                count: rows.length,
+                countries
+            });
+        } catch (err) {
+            return res.status(502).json({ error: err.message });
+        }
+    });
+
+    // Proxy propio hacia la API SOS2526-19 de terremotos.
+    app.get(`${BASE_API_URL}/integrations/sos-earthquakes`, async (req, res) => {
+        try {
+            const rows = await getEarthquakes();
+            const countries = [...buildEarthquakesByCountry(rows).values()]
+                .sort((a, b) => b.maxSeverity - a.maxSeverity);
+
+            return res.status(200).json({
+                source: "SOS2526-19 Earthquakes API",
+                endpoint: EARTHQUAKES_API_URL,
+                count: rows.length,
+                countries
+            });
+        } catch (err) {
+            return res.status(502).json({ error: err.message });
+        }
+    });
+
+    // Proxy propio hacia la API SOS2526-26 de valor de plantillas FIFA.
+    app.get(`${BASE_API_URL}/integrations/sos-fifa-squad-values`, async (req, res) => {
+        try {
+            const rows = await getFifaSquadValues();
+            const countries = [...buildFifaSquadValuesByCountry(rows).values()]
+                .sort((a, b) => b.latestTotalMarketValue - a.latestTotalMarketValue);
+
+            return res.status(200).json({
+                source: "SOS2526-26 FIFA Squad Value API",
+                endpoint: FIFA_SQUAD_VALUES_API_URL,
+                count: rows.length,
+                countries
+            });
+        } catch (err) {
+            return res.status(502).json({ error: err.message });
+        }
+    });
+
     // Une datos locales y externos para mostrar un resumen integrado.
     app.get(`${BASE_API_URL}/integrations/summary`, async (req, res) => {
-        const limit = parseLimit(req.query.limit, 5, 10);
+        const limit = parseLimit(req.query.limit, 8, 20);
 
         if (limit === null) {
             return res.status(400).json({ error: "Invalid limit" });
         }
 
         try {
-            const topCities = (await findAllCityStats())
-                .sort((a, b) => Number(b.un_2025_population) - Number(a.un_2025_population))
+            const countrySummaries = buildCityCountrySummaries(await findAllCityStats())
                 .slice(0, limit);
 
-            const integrationBases = await Promise.all(topCities.map(buildIntegratedCityBase));
+            const integrationBases = await Promise.all(countrySummaries.map(buildIntegratedCityBase));
             const countryCodes = integrationBases
                 .map((base) => base.countryResult.data?.cca3)
                 .filter(Boolean);
@@ -537,16 +915,91 @@ module.exports = (app, db) => {
                 worldBankBatchError = err.message;
             }
 
+            const [touristResult, earthquakeResult, fifaResult] = await Promise.all([
+                safeExternal("SOS2526-25 International Tourist Arrivals API", getTouristArrivals),
+                safeExternal("SOS2526-19 Earthquakes API", getEarthquakes),
+                safeExternal("SOS2526-26 FIFA Squad Value API", getFifaSquadValues)
+            ]);
+
+            const touristByCountry = touristResult.data
+                ? buildTouristArrivalsByCountry(touristResult.data)
+                : new Map();
+            const earthquakesByCountry = earthquakeResult.data
+                ? buildEarthquakesByCountry(earthquakeResult.data)
+                : new Map();
+            const fifaByCountry = fifaResult.data
+                ? buildFifaSquadValuesByCountry(fifaResult.data)
+                : new Map();
+
+            const studentApis = {
+                touristResult,
+                earthquakeResult,
+                fifaResult,
+                touristByCountry,
+                earthquakesByCountry,
+                fifaByCountry
+            };
+
             const integrations = integrationBases.map((base) =>
-                buildIntegratedCity(base, worldBankByCode, worldBankBatchError)
+                buildIntegratedCity(base, worldBankByCode, worldBankBatchError, studentApis)
             );
 
             return res.status(200).json({
-                localResource: `${BASE_API_URL}/top-cities`,
+                localResource: `${BASE_API_URL}/country-summaries`,
                 externalApis: [
                     "Open-Meteo Geocoding API",
                     "REST Countries API",
-                    "World Bank Indicators API"
+                    "World Bank Indicators API",
+                    "SOS2526-25 International Tourist Arrivals API",
+                    "SOS2526-19 Earthquakes API",
+                    "SOS2526-26 FIFA Squad Value API"
+                ],
+                studentApis: [
+                    {
+                        source: "SOS2526-25 International Tourist Arrivals API",
+                        endpoint: TOURIST_ARRIVALS_API_URL,
+                        count: touristResult.data?.length ?? 0,
+                        error: touristResult.error,
+                        metricLabel: "Llegadas totales",
+                        countries: [...touristByCountry.values()]
+                            .sort((a, b) => b.totalArrivals - a.totalArrivals)
+                            .slice(0, 5)
+                            .map((country) => ({
+                                country: country.country,
+                                metric: country.totalArrivals,
+                                detail: `${country.records} registros`
+                            }))
+                    },
+                    {
+                        source: "SOS2526-19 Earthquakes API",
+                        endpoint: EARTHQUAKES_API_URL,
+                        count: earthquakeResult.data?.length ?? 0,
+                        error: earthquakeResult.error,
+                        metricLabel: "Severidad maxima",
+                        countries: [...earthquakesByCountry.values()]
+                            .sort((a, b) => b.maxSeverity - a.maxSeverity)
+                            .slice(0, 5)
+                            .map((country) => ({
+                                country: country.country,
+                                metric: country.maxSeverity,
+                                detail: `${country.records} eventos`
+                            }))
+                    },
+                    {
+                        source: "SOS2526-26 FIFA Squad Value API",
+                        endpoint: FIFA_SQUAD_VALUES_API_URL,
+                        count: fifaResult.data?.length ?? 0,
+                        error: fifaResult.error,
+                        metricLabel: "Valor plantilla",
+                        countries: [...fifaByCountry.values()]
+                            .sort((a, b) => b.latestTotalMarketValue - a.latestTotalMarketValue)
+                            .slice(0, 5)
+                            .map((country) => ({
+                                country: country.country,
+                                metric: country.latestTotalMarketValue,
+                                detail: `${country.latestYear}, ${country.latestSquadSize} jugadores`
+                            }))
+                    }
                 ],
                 count: integrations.length,
                 items: integrations
