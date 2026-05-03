@@ -11,7 +11,7 @@
   <!-- Enlace directo a las analiticas. -->
   <a href="/analytics">Analytics</a>
   <!-- Enlace directo a las integraciones externas de citys-stats. -->
-  <a href="/integrations/citys-stats">Integraciones</a>
+  <a href="/integrations">Integraciones</a>
 </nav>
 
 <style>

@@ -32,6 +32,10 @@
   import NaturalDisastersAnalytics from "./routes/NaturalDisastersAnalytics.svelte";
   // Importamos el mapa de natural-disasters.
   import NaturalDisastersMapAnalytics from "./routes/NaturalDisastersMapAnalytics.svelte";
+  //Importamos la pantalla de integraciones del grupo.
+  import GroupIntegrations from "./routes/GroupIntegrations.svelte";
+  //Importamos la pantalla de integraciones de desastres naturales.
+  import NaturalDisastersIntegrations from "./routes/NaturalDisastersIntegration.svelte";
 
 
   // routes relaciona cada URL con el componente que se debe mostrar.
@@ -53,7 +57,9 @@
     "/integrations/city-stats": CitysStatsIntegrations,
     "/analytics/wine-stats/map": WineStatsMapAnalytics,
     "/analytics/natural-disasters": NaturalDisastersAnalytics,
-    "/analytics/natural-disasters/map": NaturalDisastersMapAnalytics
+    "/analytics/natural-disasters/map": NaturalDisastersMapAnalytics,
+    "/integrations": GroupIntegrations,
+    "/integrations/natural-disasters": NaturalDisastersIntegrations
   };
 
   let currentPath = window.location.pathname;
