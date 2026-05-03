@@ -4,6 +4,8 @@
 
 Esta seccion esta pensada para una defensa real: si el profesor pide un cambio, no vale decir "eso esta en el backend". Hay que saber el archivo exacto, la funcion aproximada y la comprobacion. La version larga esta en [GUIA_DEFENSA.md](GUIA_DEFENSA.md).
 
+Para preguntas mas teoricas del temario, usa tambien [TEORIA_Y_ESTILO_DEFENSA.md](TEORIA_Y_ESTILO_DEFENSA.md), que cruza las diapositivas L00-L11 con archivos concretos del proyecto.
+
 ### Idea principal para explicar el proyecto
 
 > "Nuestro proyecto es una aplicacion web hecha con Node, Express y Svelte. El backend ofrece una API REST con tres recursos: `natural-disasters`, `citys-stats` y `wine-stats`. Cada recurso permite listar, buscar, crear, editar, borrar y cargar datos iniciales. Los datos se guardan en NeDB, una base de datos local basada en archivos. El frontend usa Svelte para mostrar formularios, tablas, mensajes, graficas, mapa e integraciones. Cuando el usuario hace una accion, Svelte llama al backend con `fetch`, Express valida la peticion, consulta o modifica NeDB y responde en JSON."

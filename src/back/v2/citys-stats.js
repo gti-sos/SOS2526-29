@@ -1,4 +1,7 @@
 // Este modulo registra la API v2 del recurso citys-stats.
+// Sigue el patron REST de las diapositivas: una URL de coleccion
+// (/api/v2/citys-stats) y una URL de recurso concreto
+// (/api/v2/citys-stats/:city/:country), con CRUD mediante metodos HTTP.
 module.exports = (app, db) => {
     // Ruta base de la version 2.
     const BASE_API_URL = "/api/v2/citys-stats";

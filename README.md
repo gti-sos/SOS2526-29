@@ -71,6 +71,8 @@ La vista `https://sos2526-29.onrender.com/integrations/citys-stats` integra por 
 
 Guia principal de defensa LCC: [docs/D03_DEFENSA_LCC.md](docs/D03_DEFENSA_LCC.md).
 
+Guia de teoria y estilo para defensa: [docs/TEORIA_Y_ESTILO_DEFENSA.md](docs/TEORIA_Y_ESTILO_DEFENSA.md).
+
 ## Ejecutar en local
 
 Requisitos: Node.js y npm instalados.

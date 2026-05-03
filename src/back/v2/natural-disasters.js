@@ -38,7 +38,7 @@ module.exports = function registerNaturalDisastersV2(app, db) {
         { country: "cambodia", year: 1980, death_count: 0, injured_count: 0, economic_damage_usd: 0 },
         { country: "cambodia", year: 1990, death_count: 70, injured_count: 0, economic_damage_usd: 25201 },
         { country: "cambodia", year: 2000, death_count: 47, injured_count: 14, economic_damage_usd: 21410 },
-        { country: "cambodia", year: 2010,death_count: 53, injured_count: 2, economic_damage_usd: 109300 },
+        { country: "cambodia", year: 2010, death_count: 53, injured_count: 2, economic_damage_usd: 109300 },
         { country: "france", year: 1990, death_count: 37, injured_count: 9, economic_damage_usd: 1770880 },
         { country: "france", year: 2000, death_count: 2101, injured_count: 42, economic_damage_usd: 1076340 },
         { country: "france", year: 2010, death_count: 490, injured_count: 26, economic_damage_usd: 1162100 },

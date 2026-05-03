@@ -7,6 +7,10 @@ const Datastore = require("@seald-io/nedb");
 // Importamos cors para permitir llamadas al backend desde el frontend en desarrollo.
 const cors = require("cors");
 
+// Estructura alineada con la arquitectura del curso:
+// navegador/Svelte -> API REST/Express -> persistencia NeDB e integraciones externas.
+// El contrato publico vive bajo /api; el resto de rutas sirven la SPA compilada.
+
 // Creamos la aplicacion principal de Express.
 const app = express();
 // Usamos el puerto de Render si existe; si no, usamos 10000 en local.

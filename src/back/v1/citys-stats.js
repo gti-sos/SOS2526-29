@@ -14,6 +14,9 @@ module.exports = (app, db) => {
         "https://sos2526-19.onrender.com/api/v1/earthquakes";
     const FIFA_SQUAD_VALUES_API_URL =
         "https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years";
+
+    // Las integraciones viven en backend como proxy propio: el navegador llama
+    // a nuestra API y Express normaliza fuentes externas antes de responder JSON.
     const ISO3_COUNTRY_NAMES = {
         AFG: "Afghanistan",
         ARG: "Argentina",
