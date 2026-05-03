@@ -22,7 +22,7 @@
     "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
     "test-citys-stats-v2": "newman run ./tests/LCC/pruebas-lcc-v2.json -e ./tests/LCC/local_env_v2.json",
     "test-wine-stats": "newman run ./tests/RMP/pruebas-rmp.json -e ./tests/RMP/local_env.json",
-    "test-ALG": "start-server-and-test start http://localhost:10000/api/v1/natural-disasters \"npm run test-natural-disasters\"",
+    "test-ALG": "start-server-and-test start http://localhost:10000/api/v2/natural-disasters \"npm run test-natural-disasters\"",
     "test-LCC": "start-server-and-test start http://localhost:10000/api/v1/citys-stats \"npm run test-citys-stats\"",
     "test-LCC-v2": "start-server-and-test start http://localhost:10000/api/v2/citys-stats \"npm run test-citys-stats-v2\"",
     "test-LCC-e2e": "playwright test -c tests/LCC/playwright.config.js",

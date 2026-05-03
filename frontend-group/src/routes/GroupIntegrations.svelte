@@ -1,8 +1,5 @@
 
 
-<script>
-    // No necesitamos mucha lógica aquí, solo visual.
-</script>
 
 <div class="page">
     <div class="topbar">
