@@ -17,21 +17,19 @@
     const API_COMPANERO_2 = "https://sos2526-26.onrender.com/api/v2/countries-idh-per-years";
 
 
-    // --- INTEGRACION 1: CHART.JS (Productividad G19 vs Muertes acumuladas) ---
-
     // -- TRADUCCION DE NOMBRES DE PAISES (para comparar "España" / "espana" / inglés) ---
 
-    /** Quita tildes para comparar "España" / "espana" / inglés. */
+    /// Quita tildes para comparar "España" / "espana" / inglés. 
     function sinDiacriticos(str) {
         return String(str || "")
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "");
     }
 
-    /**
-     * Misma clave para tu API (inglés) y la del compañero (inglés o español).
-     * Clave canónica = nombre en inglés en minúsculas, como en tu backend.
-     */
+    
+    /// Misma clave para tu API (inglés) y la del compañero (inglés o español).
+    /// Clave canónica = nombre en inglés en minúsculas, como en tu backend.
+
     const VARIANTE_A_PAIS_CANONICO = (() => {
         const map = {};
         const add = (canon, lista) => {
@@ -57,7 +55,7 @@
         return VARIANTE_A_PAIS_CANONICO[slug] || slug;
     }
 
-    /** País en fila del compañero: admite country, pais, nombre, etc. */
+    /// País en fila del compañero: admite country, pais, nombre, etc.
     function leerNombrePaisEnFila(row) {
         if (!row || typeof row !== "object") return "";
         for (const [key, val] of Object.entries(row)) {
@@ -69,10 +67,13 @@
         return "";
     }
 
-    /**
-     * API G19: productividad por hora y otros numéricos; no suele traer campos "hdi".
-     * Priorizamos productivity_hour y claves con "productivity".
-     */
+
+    // --- INTEGRACION 1: CHART.JS (Productividad G19 vs Muertes acumuladas) ---
+
+    
+    ///API G19: productividad por hora y otros numéricos.
+    ///Priorizamos productivity_hour y claves con "productivity".
+     
     function leerMetricaProductividad(row) {
         if (!row || typeof row !== "object") return NaN;
         const excluir = new Set(["id", "year", "country", "pais", "país"]);
@@ -94,7 +95,8 @@
         return NaN;
     }
 
-    // --- FUNCION DE INTEGRACION 1: CHARTS.JS ---
+    ///FUNCION PRINCIPAL DE CARGA Y COMPARATIVA DE LA INTEGRACIÓN 1
+
     async function cargarIntegracion1() {
         try {
             const [resMia, resComp1] = await Promise.all([fetch(MI_API), fetch(API_COMPANERO_1)]);
