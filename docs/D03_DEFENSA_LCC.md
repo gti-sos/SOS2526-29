@@ -138,17 +138,17 @@ Mostrar:
 
 ## 4. APIs integradas por LCC
 
-La vista `/integrations/citys-stats` integra por el campo `country`, porque asi se combinan muchos mas datos que por ciudad. Todas las integraciones hacen `fetch`, reciben JSON y se representan en HTML o en un widget Highcharts.
+La vista `/integrations/citys-stats` integra por el campo `country`, porque asi se combinan muchos mas datos que por ciudad. Todas las integraciones hacen `fetch`, reciben JSON y cada una tiene su propia visualizacion Highcharts con un tipo diferente, ademas de datos resumidos en HTML.
 
-| API | Tipo requerido | Endpoint fuente | Endpoint local proxy | Uso en la vista |
+| API | Tipo requerido | Endpoint fuente | Endpoint local proxy | Visualizacion |
 | --- | --- | --- | --- | --- |
-| Open-Meteo Geocoding | No SOS | `https://geocoding-api.open-meteo.com/v1/search` | `/api/v1/citys-stats/integrations/geocoding/:city` | Coordenadas aproximadas de la ciudad principal de cada pais |
-| REST Countries | No SOS | `https://restcountries.com/v3.1/name/:country` | `/api/v1/citys-stats/integrations/country/:country` | Codigo ISO, region, capital y poblacion real del pais |
-| World Bank Indicators | No SOS | `https://api.worldbank.org/v2/country/:code/indicator/SP.POP.TOTL` | `/api/v1/citys-stats/integrations/world-bank/:countryCode` | Poblacion nacional mas reciente |
-| SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals` | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` | Llegadas turisticas por pais y ultimo anio disponible |
-| SOS2526-19 `earthquakes` | Alumno SOS | `https://sos2526-19.onrender.com/api/v1/earthquakes` | `/api/v1/citys-stats/integrations/sos-earthquakes` | Severidad maxima y poblacion expuesta por pais |
-| SOS2526-26 `fifa-squad-value-per-years` | Alumno SOS | `https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years` | `/api/v1/citys-stats/integrations/sos-fifa-squad-values` | Valor de mercado de plantillas por pais y ultimo anio disponible |
-| SOS2526-30 `esportsearnings-stats` | Alumno SOS | `https://sos2526-30.onrender.com/api/v2/esportsearnings-stats` | `/api/v1/citys-stats/integrations/sos-esports-earnings` | Premios de eSports por pais, juego y anio |
+| Open-Meteo Geocoding | No SOS | `https://geocoding-api.open-meteo.com/v1/search` | `/api/v1/citys-stats/integrations/geocoding/:city` | Highcharts `treemap` con rectangulos por poblacion local y color por latitud |
+| REST Countries | No SOS | `https://restcountries.com/v3.1/name/:country` | `/api/v1/citys-stats/integrations/country/:country` | Highcharts `sankey` con relacion local-oficial |
+| World Bank Indicators | No SOS | `https://api.worldbank.org/v2/country/:code/indicator/SP.POP.TOTL` | `/api/v1/citys-stats/integrations/world-bank/:countryCode` | Highcharts `lollipop` con ranking de poblacion |
+| SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals` | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` | Highcharts `variwide` con llegadas y registros |
+| SOS2526-19 `earthquakes` | Alumno SOS | `https://sos2526-19.onrender.com/api/v1/earthquakes` | `/api/v1/citys-stats/integrations/sos-earthquakes` | Highcharts `bullet` con severidad frente a umbral |
+| SOS2526-26 `fifa-squad-value-per-years` | Alumno SOS | `https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years` | `/api/v1/citys-stats/integrations/sos-fifa-squad-values` | Highcharts `dumbbell` con ranking local frente a ranking FIFA |
+| SOS2526-30 `esportsearnings-stats` | Alumno SOS | `https://sos2526-30.onrender.com/api/v1/esportsearnings-stats` | `/api/v1/citys-stats/integrations/sos-esports-earnings` | Highcharts `sunburst` con pais y juego |
 
 ## 5. Cumplimiento D03.B
 
@@ -157,22 +157,23 @@ La vista `/integrations/citys-stats` integra por el campo `country`, porque asi 
 - Al menos 2 APIs realizadas por alumnos SOS de otros grupos: se usan 4, de los grupos 25, 19, 26 y 30.
 - Estilo RESTful y JSON: todas las fuentes se consumen mediante peticiones HTTP y se parsean como JSON.
 - Uso de proxy propio: las llamadas externas se encapsulan en el backend Express.
-- Sin JSON crudo en pantalla: el frontend muestra graficas, tarjetas, metricas y listas.
-- Widget no `line`: la grafica de integraciones no usa `chart.type = "line"`.
+- Sin JSON crudo en pantalla: el frontend muestra widgets Highcharts, tarjetas, metricas y listas.
+- Widgets no `line`: las integraciones usan `treemap`, `sankey`, `lollipop`, `variwide`, `bullet`, `dumbbell` y `sunburst`.
+- Cada widget cruza datos locales de `citys-stats` con la API externa: tamano por poblacion local, series comparativas, anchura local, objetivo local o rama local dentro del mismo widget.
+- No se repite tipo de visualizacion dentro de las integraciones LCC.
 - Vista requerida: todo se accede desde `/integrations/citys-stats`, enlazada desde `/integrations`.
 
 ## 6. Flujo tecnico de integraciones
 
 1. El usuario abre `/integrations/citys-stats`.
-2. El frontend llama a `getCitysStatsIntegrationSummary(limit)`.
-3. El servicio `frontend-group/src/services/citysStatsIntegrations.js` hace `fetch` a `/api/v1/citys-stats/integrations/summary?limit=N`.
+2. El frontend llama a `getCountrySummaries(limit)`.
+3. El servicio `frontend-group/src/services/citysStatsIntegrations.js` hace `fetch` a `/api/v1/citys-stats/country-summaries?limit=N`.
 4. El backend lee los registros locales de `citys-stats`.
 5. El backend agrega registros por `country` con `buildCityCountrySummaries`.
 6. Para cada pais seleccionado, el backend consulta Open-Meteo y REST Countries.
 7. Con el codigo ISO obtenido, consulta World Bank.
 8. En paralelo obtiene y normaliza las APIs SOS externas.
-9. El backend devuelve un JSON ya integrado por pais.
-10. El frontend transforma ese JSON en series de Highcharts, tarjetas por API y detalle por pais.
+9. El frontend transforma cada respuesta JSON en un widget Highcharts distinto y en detalle HTML.
 
 ## 7. Contrato del endpoint `summary`
 
