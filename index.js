@@ -105,6 +105,7 @@ app.get(/^\/(?!api\/).*/, (request, response) => {
 app.listen(port, () => {
     // Mostramos por consola la direccion principal del servidor.
     console.log(`>>> Servidor SOS2526-29 listo en puerto ${port}`);
+    console.log(`>>> pagina: http://localhost:${port}`);
     // Mostramos la ruta de la API de desastres naturales v1.
     console.log(`>>> API ALG: http://localhost:${port}/api/v1/natural-disasters`);
     // Mostramos la ruta de la API de ciudades v1.
