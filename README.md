@@ -34,7 +34,7 @@ Aplicacion web de la asignatura SOS2526 para analizar datos de desastres natural
 | CRUD `citys-stats` | https://sos2526-29.onrender.com/citys-stats | Listar, buscar, crear, editar, borrar y cargar datos |
 | Analytics individual LCC | https://sos2526-29.onrender.com/analytics/citys-stats | Grafico Highcharts no lineal del recurso |
 | Mapa LCC | https://sos2526-29.onrender.com/analytics/citys-stats/map | Visualizacion geografica del recurso |
-| Integraciones LCC | https://sos2526-29.onrender.com/integrations/citys-stats | 6 APIs integradas con datos JSON y widget no lineal |
+| Integraciones LCC | https://sos2526-29.onrender.com/integrations/citys-stats | 7 APIs integradas con datos JSON y widget no lineal |
 | Analytics grupal | https://sos2526-29.onrender.com/analytics | Un unico widget combinado de los tres recursos |
 | Integraciones grupales | https://sos2526-29.onrender.com/integrations | Entrada comun a las integraciones del grupo |
 
@@ -68,6 +68,7 @@ La vista `https://sos2526-29.onrender.com/integrations/citys-stats` integra por 
 | SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` |
 | SOS2526-19 `earthquakes` | Alumno SOS | `/api/v1/citys-stats/integrations/sos-earthquakes` |
 | SOS2526-26 `fifa-squad-value-per-years` | Alumno SOS | `/api/v1/citys-stats/integrations/sos-fifa-squad-values` |
+| SOS2526-30 `esportsearnings-stats` | Alumno SOS | `/api/v1/citys-stats/integrations/sos-esports-earnings` |
 
 Guia principal de defensa LCC: [docs/D03_DEFENSA_LCC.md](docs/D03_DEFENSA_LCC.md).
 
@@ -108,7 +109,7 @@ En PowerShell se recomienda usar `npm.cmd` para evitar el bloqueo habitual de `n
 ## Checklist D03
 
 - Parte LCC de CRUD, API v1/v2, analytics individual, mapa e integraciones: preparada.
-- Integraciones LCC: 6 APIs REST con JSON, 3 no SOS y 3 APIs de alumnos SOS.
+- Integraciones LCC: 7 APIs REST con JSON, 3 no SOS y 4 APIs de alumnos SOS.
 - Integracion LCC por proxy propio: preparada mediante endpoints bajo `/api/v1/citys-stats/integrations`.
 - Analytics grupal: preparado en `/analytics` con un unico widget Highcharts no lineal.
 - Integraciones grupales: preparadas en `/integrations`, con la parte LCC enlazada.

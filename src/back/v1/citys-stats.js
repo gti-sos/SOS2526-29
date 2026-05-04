@@ -14,6 +14,8 @@ module.exports = (app, db) => {
         "https://sos2526-19.onrender.com/api/v1/earthquakes";
     const FIFA_SQUAD_VALUES_API_URL =
         "https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years";
+    const ESPORTS_EARNINGS_API_URL =
+        "https://sos2526-30.onrender.com/api/v2/esportsearnings-stats";
 
     // Las integraciones viven en backend como proxy propio: el navegador llama
     // a nuestra API y Express normaliza fuentes externas antes de responder JSON.
@@ -123,6 +125,8 @@ module.exports = (app, db) => {
         if (Array.isArray(data)) return data;
         if (Array.isArray(data?.data)) return data.data;
         if (Array.isArray(data?.items)) return data.items;
+        if (Array.isArray(data?.value)) return data.value;
+        if (Array.isArray(data?.results)) return data.results;
         return [];
     }
 
@@ -459,6 +463,7 @@ module.exports = (app, db) => {
         const touristArrivals = studentApis?.touristByCountry?.get(countryKey) ?? null;
         const earthquakeStats = studentApis?.earthquakesByCountry?.get(countryKey) ?? null;
         const fifaSquadValue = studentApis?.fifaByCountry?.get(countryKey) ?? null;
+        const esportsEarnings = studentApis?.esportsByCountry?.get(countryKey) ?? null;
         const integrationResults = [
             base.geocodingResult,
             base.countryResult,
@@ -475,6 +480,10 @@ module.exports = (app, db) => {
 
         if (studentApis?.fifaResult?.error) {
             integrationResults.push(studentApis.fifaResult);
+        }
+
+        if (studentApis?.esportsResult?.error) {
+            integrationResults.push(studentApis.esportsResult);
         }
 
         return {
@@ -494,6 +503,7 @@ module.exports = (app, db) => {
             touristArrivals,
             earthquakeStats,
             fifaSquadValue,
+            esportsEarnings,
             integrationErrors: integrationResults
                 .filter((result) => result.error)
                 .map((result) => ({
@@ -676,6 +686,88 @@ module.exports = (app, db) => {
                 current.latestTotalMarketValue = row.totalMarketValue;
                 current.latestAverageMarketValue = row.averageMarketValue;
                 current.latestSquadSize = row.squadSize;
+            }
+
+            byCountry.set(key, current);
+        });
+
+        return byCountry;
+    }
+
+    function normalizeEsportsEarning(row) {
+        const country = String(row?.country ?? "").trim();
+        const gameName = String(row?.game_name ?? "").trim();
+        const genre = String(row?.genre ?? "").trim();
+        const year = readFiniteNumber(row?.year);
+
+        if (!country || !gameName || year === null) return null;
+
+        return {
+            source: "SOS2526-30 Esports Earnings API",
+            country,
+            gameName,
+            genre: genre || null,
+            year,
+            totalMoney: readFiniteNumber(row?.total_money, 0),
+            playerNo: readFiniteNumber(row?.player_no, 0),
+            tournamentNo: readFiniteNumber(row?.tournament_no, 0),
+            topCountryEarnings: readFiniteNumber(row?.top_country_earnings, 0)
+        };
+    }
+
+    async function getEsportsEarnings() {
+        const data = await fetchJson(
+            ESPORTS_EARNINGS_API_URL,
+            "SOS2526-30 Esports Earnings API",
+            60000
+        );
+
+        return asArray(data).map(normalizeEsportsEarning).filter(Boolean);
+    }
+
+    function buildEsportsEarningsByCountry(rows) {
+        const byCountry = new Map();
+
+        rows.forEach((row) => {
+            const key = normalizeCountryKey(row.country);
+            if (!key) return;
+
+            const current = byCountry.get(key) || {
+                source: row.source,
+                country: row.country,
+                records: 0,
+                totalMoney: 0,
+                playerNo: 0,
+                tournamentNo: 0,
+                topCountryEarnings: 0,
+                latestYear: null,
+                latestGameName: null,
+                latestGenre: null,
+                latestTotalMoney: 0,
+                topGameName: null,
+                topGameGenre: null,
+                topGameYear: null,
+                topGameEarnings: 0
+            };
+
+            current.records += 1;
+            current.totalMoney += row.totalMoney;
+            current.playerNo += row.playerNo;
+            current.tournamentNo += row.tournamentNo;
+            current.topCountryEarnings += row.topCountryEarnings;
+
+            if (current.latestYear === null || row.year > current.latestYear) {
+                current.latestYear = row.year;
+                current.latestGameName = row.gameName;
+                current.latestGenre = row.genre;
+                current.latestTotalMoney = row.totalMoney;
+            }
+
+            if (row.topCountryEarnings > current.topGameEarnings) {
+                current.topGameName = row.gameName;
+                current.topGameGenre = row.genre;
+                current.topGameYear = row.year;
+                current.topGameEarnings = row.topCountryEarnings;
             }
 
             byCountry.set(key, current);
@@ -892,6 +984,24 @@ module.exports = (app, db) => {
         }
     });
 
+    // Proxy propio hacia la API SOS2526-30 de ganancias en eSports.
+    app.get(`${BASE_API_URL}/integrations/sos-esports-earnings`, async (req, res) => {
+        try {
+            const rows = await getEsportsEarnings();
+            const countries = [...buildEsportsEarningsByCountry(rows).values()]
+                .sort((a, b) => b.topCountryEarnings - a.topCountryEarnings);
+
+            return res.status(200).json({
+                source: "SOS2526-30 Esports Earnings API",
+                endpoint: ESPORTS_EARNINGS_API_URL,
+                count: rows.length,
+                countries
+            });
+        } catch (err) {
+            return res.status(502).json({ error: err.message });
+        }
+    });
+
     // Une datos locales y externos para mostrar un resumen integrado.
     app.get(`${BASE_API_URL}/integrations/summary`, async (req, res) => {
         const limit = parseLimit(req.query.limit, 8, 20);
@@ -918,10 +1028,11 @@ module.exports = (app, db) => {
                 worldBankBatchError = err.message;
             }
 
-            const [touristResult, earthquakeResult, fifaResult] = await Promise.all([
+            const [touristResult, earthquakeResult, fifaResult, esportsResult] = await Promise.all([
                 safeExternal("SOS2526-25 International Tourist Arrivals API", getTouristArrivals),
                 safeExternal("SOS2526-19 Earthquakes API", getEarthquakes),
-                safeExternal("SOS2526-26 FIFA Squad Value API", getFifaSquadValues)
+                safeExternal("SOS2526-26 FIFA Squad Value API", getFifaSquadValues),
+                safeExternal("SOS2526-30 Esports Earnings API", getEsportsEarnings)
             ]);
 
             const touristByCountry = touristResult.data
@@ -933,14 +1044,19 @@ module.exports = (app, db) => {
             const fifaByCountry = fifaResult.data
                 ? buildFifaSquadValuesByCountry(fifaResult.data)
                 : new Map();
+            const esportsByCountry = esportsResult.data
+                ? buildEsportsEarningsByCountry(esportsResult.data)
+                : new Map();
 
             const studentApis = {
                 touristResult,
                 earthquakeResult,
                 fifaResult,
+                esportsResult,
                 touristByCountry,
                 earthquakesByCountry,
-                fifaByCountry
+                fifaByCountry,
+                esportsByCountry
             };
 
             const integrations = integrationBases.map((base) =>
@@ -955,7 +1071,8 @@ module.exports = (app, db) => {
                     "World Bank Indicators API",
                     "SOS2526-25 International Tourist Arrivals API",
                     "SOS2526-19 Earthquakes API",
-                    "SOS2526-26 FIFA Squad Value API"
+                    "SOS2526-26 FIFA Squad Value API",
+                    "SOS2526-30 Esports Earnings API"
                 ],
                 studentApis: [
                     {
@@ -1001,6 +1118,21 @@ module.exports = (app, db) => {
                                 country: country.country,
                                 metric: country.latestTotalMarketValue,
                                 detail: `${country.latestYear}, ${country.latestSquadSize} jugadores`
+                            }))
+                    },
+                    {
+                        source: "SOS2526-30 Esports Earnings API",
+                        endpoint: ESPORTS_EARNINGS_API_URL,
+                        count: esportsResult.data?.length ?? 0,
+                        error: esportsResult.error,
+                        metricLabel: "Premios eSports",
+                        countries: [...esportsByCountry.values()]
+                            .sort((a, b) => b.topCountryEarnings - a.topCountryEarnings)
+                            .slice(0, 5)
+                            .map((country) => ({
+                                country: country.country,
+                                metric: country.topCountryEarnings,
+                                detail: `${country.records} juegos, ult. ${country.latestYear}`
                             }))
                     }
                 ],

@@ -184,7 +184,7 @@ Orden recomendado para la defensa:
 | 4 | `/analytics/citys-stats` | Highcharts individual no lineal |
 | 5 | `/analytics/citys-stats/map` | Mapa del recurso |
 | 6 | `/integrations` | Entrada comun de integraciones |
-| 7 | `/integrations/citys-stats` | Integraciones LCC con 6 APIs |
+| 7 | `/integrations/citys-stats` | Integraciones LCC con 7 APIs |
 | 8 | `/analytics` | Analytics grupal en un unico widget |
 
 URLs desplegadas:
@@ -216,6 +216,7 @@ http://localhost:10000/api/v1/citys-stats/integrations/summary?limit=8
 http://localhost:10000/api/v1/citys-stats/integrations/sos-tourist-arrivals
 http://localhost:10000/api/v1/citys-stats/integrations/sos-earthquakes
 http://localhost:10000/api/v1/citys-stats/integrations/sos-fifa-squad-values
+http://localhost:10000/api/v1/citys-stats/integrations/sos-esports-earnings
 ```
 
 Comprobacion local con PowerShell:
@@ -690,6 +691,7 @@ Integraciones externas en v1:
 - `GET /api/v1/citys-stats/integrations/sos-tourist-arrivals`
 - `GET /api/v1/citys-stats/integrations/sos-earthquakes`
 - `GET /api/v1/citys-stats/integrations/sos-fifa-squad-values`
+- `GET /api/v1/citys-stats/integrations/sos-esports-earnings`
 - `GET /api/v1/citys-stats/integrations/summary`
 
 Defensa rapida:
@@ -890,12 +892,13 @@ La vista `/integrations/citys-stats` integra por el campo `country`, porque asi 
 | SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals` | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` | Llegadas turisticas por pais y ultimo anio disponible |
 | SOS2526-19 `earthquakes` | Alumno SOS | `https://sos2526-19.onrender.com/api/v1/earthquakes` | `/api/v1/citys-stats/integrations/sos-earthquakes` | Severidad maxima y poblacion expuesta por pais |
 | SOS2526-26 `fifa-squad-value-per-years` | Alumno SOS | `https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years` | `/api/v1/citys-stats/integrations/sos-fifa-squad-values` | Valor de mercado de plantillas por pais y ultimo anio disponible |
+| SOS2526-30 `esportsearnings-stats` | Alumno SOS | `https://sos2526-30.onrender.com/api/v2/esportsearnings-stats` | `/api/v1/citys-stats/integrations/sos-esports-earnings` | Premios de eSports por pais, juego y anio |
 
 ### 10.3 Cumplimiento D03.B
 
-- Al menos 5 APIs distintas: se usan 6.
+- Al menos 5 APIs distintas: se usan 7.
 - Al menos 3 APIs no realizadas por alumnos SOS: Open-Meteo, REST Countries y World Bank.
-- Al menos 2 APIs realizadas por alumnos SOS de otros grupos: se usan 3, de los grupos 25, 19 y 26.
+- Al menos 2 APIs realizadas por alumnos SOS de otros grupos: se usan 4, de los grupos 25, 19, 26 y 30.
 - Estilo RESTful y JSON: todas las fuentes se consumen mediante peticiones HTTP y se parsean como JSON.
 - Uso de proxy propio: las llamadas externas se encapsulan en el backend Express.
 - Sin JSON crudo en pantalla: el frontend muestra graficas, tarjetas, metricas y listas.
@@ -949,6 +952,7 @@ Campos relevantes de cada item:
 | `touristArrivals` | Datos agregados de llegadas turisticas |
 | `earthquakeStats` | Datos agregados de terremotos |
 | `fifaSquadValue` | Datos agregados de valor FIFA |
+| `esportsEarnings` | Datos agregados de premios de eSports |
 | `integrationErrors` | Errores parciales si una fuente externa falla |
 
 ### 10.6 Normalizacion de datos
@@ -962,6 +966,7 @@ El backend no pasa los datos externos directamente al frontend. Antes los normal
 - `normalizeTouristArrival`: calcula `totalArrivals` como suma de `air_arrival`, `water_arrival` y `land_arrival`.
 - `normalizeEarthquake`: extrae severidad, profundidad, alerta y poblacion expuesta.
 - `normalizeFifaSquadValue`: extrae valor total, valor medio, tamano de plantilla y anio.
+- `normalizeEsportsEarning`: extrae premios totales, jugadores, torneos, juego, genero y anio.
 
 ### 10.7 Por que se integra por pais
 
@@ -1833,9 +1838,9 @@ npm run test-LCC-e2e
 - Busqueda, filtros, paginacion y ordenacion preparados.
 - Grafica individual no lineal.
 - Mapa preparado.
-- Integraciones por pais con 6 APIs.
+- Integraciones por pais con 7 APIs.
 - Al menos 3 APIs no SOS.
-- Al menos 2 APIs SOS externas de otros grupos.
+- 4 APIs SOS externas de otros grupos.
 - Proxy propio en backend.
 - Vista `/integrations` enlaza la parte LCC.
 - Vista `/analytics` contiene un unico widget grupal.

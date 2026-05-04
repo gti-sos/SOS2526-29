@@ -201,6 +201,7 @@ Integraciones externas en v1:
 - `GET /api/v1/citys-stats/integrations/sos-tourist-arrivals`
 - `GET /api/v1/citys-stats/integrations/sos-earthquakes`
 - `GET /api/v1/citys-stats/integrations/sos-fifa-squad-values`
+- `GET /api/v1/citys-stats/integrations/sos-esports-earnings`
 - `GET /api/v1/citys-stats/integrations/summary`
 
 Defensa rapida:
@@ -739,6 +740,7 @@ Funciones backend:
 - `getTouristArrivals`: API SOS2526-25 de llegadas turisticas.
 - `getEarthquakes`: API SOS2526-19 de terremotos.
 - `getFifaSquadValues`: API SOS2526-26 de valor de plantillas FIFA.
+- `getEsportsEarnings`: API SOS2526-30 de premios de eSports.
 - `buildCityCountrySummaries`: agrega `citys-stats` por pais.
 - `buildIntegratedCityBase`: lanza llamadas externas.
 - `buildIntegratedCity`: une datos locales agregados por pais con datos externos.

@@ -8,8 +8,10 @@
   let Highcharts;
   // Contenedor HTML de la grafica.
   let chartContainer;
+  let sosChartContainer;
   // Objeto de grafica.
   let chart;
+  let sosChart;
   // Resumen completo devuelto por el backend.
   let summary = null;
   // Lista de ciudades integradas.
@@ -63,6 +65,11 @@
       name: "SOS2526-26",
       label: "FIFA squad values",
       url: "https://documenter.getpostman.com/view/52260149/2sBXinGW4o"
+    },
+    {
+      name: "SOS2526-30",
+      label: "Esports earnings",
+      url: "https://documenter.getpostman.com/view/52332561/2sBXijJWy6"
     }
   ];
 
@@ -111,6 +118,11 @@
     return numberOrNull(item.fifaSquadValue?.latestTotalMarketValue);
   }
 
+  // Lee los premios de eSports agregados del proxy SOS2526-30.
+  function esportsEarnings(item) {
+    return numberOrNull(item.esportsEarnings?.topCountryEarnings);
+  }
+
   function positiveOrNull(value) {
     const parsed = numberOrNull(value);
     return parsed && parsed > 0 ? parsed : null;
@@ -125,6 +137,23 @@
     return parsed.toLocaleString("es-ES", {
       maximumFractionDigits: 1
     });
+  }
+
+  function shortApiName(source) {
+    source = String(source ?? "");
+    if (source.includes("SOS2526-25")) return "SOS25 turismo";
+    if (source.includes("SOS2526-19")) return "SOS19 terremotos";
+    if (source.includes("SOS2526-26")) return "SOS26 FIFA";
+    if (source.includes("SOS2526-30")) return "SOS30 eSports";
+    return source;
+  }
+
+  function topStudentCountry(api) {
+    return Array.isArray(api?.countries) ? api.countries[0] : null;
+  }
+
+  function studentApiRecordCount(api) {
+    return numberOrNull(api?.count) ?? 0;
   }
 
   // Carga Highcharts cuando se va a pintar la grafica.
@@ -159,7 +188,7 @@
       accessibility: {
         enabled: true,
         description:
-          "Comparacion por pais de citys-stats, Open-Meteo, World Bank, llegadas turisticas, terremotos y valor de plantillas FIFA."
+          "Comparacion por pais de citys-stats, Open-Meteo, World Bank, llegadas turisticas, terremotos, valor de plantillas FIFA y premios de eSports."
       },
       xAxis: {
         categories: items.map((item) => titleCase(item.country)),
@@ -171,7 +200,7 @@
         type: "logarithmic",
         min: 1,
         title: {
-          text: "Poblacion"
+          text: "Indicador integrado"
         }
       },
       tooltip: {
@@ -224,6 +253,102 @@
           name: "SOS26 valor FIFA",
           color: "#0891b2",
           data: items.map((item) => positiveOrNull(fifaSquadValue(item)))
+        },
+        {
+          name: "SOS30 premios eSports",
+          color: "#7c3aed",
+          data: items.map((item) => positiveOrNull(esportsEarnings(item)))
+        }
+      ],
+      credits: {
+        enabled: false
+      }
+    });
+  }
+
+  function renderSosChart() {
+    const apis = Array.isArray(summary?.studentApis) ? summary.studentApis : [];
+    if (!sosChartContainer || !Highcharts || apis.length === 0) return;
+
+    sosChart?.destroy();
+
+    sosChart = Highcharts.chart(sosChartContainer, {
+      chart: {
+        type: "column",
+        backgroundColor: "transparent"
+      },
+      title: {
+        text: "Registros recibidos de APIs SOS"
+      },
+      subtitle: {
+        text: "Permite ver rapidamente que APIs traen datos y cuales responden vacias"
+      },
+      accessibility: {
+        enabled: true,
+        description:
+          "Grafica de columnas con las cuatro APIs SOS externas y el numero de registros recibidos desde cada una."
+      },
+      xAxis: {
+        categories: apis.map((api) => shortApiName(api.source)),
+        title: {
+          text: "API SOS"
+        }
+      },
+      yAxis: {
+        min: 0,
+        allowDecimals: false,
+        title: {
+          text: "Registros recibidos"
+        }
+      },
+      tooltip: {
+        formatter() {
+          const detail = this.point.custom ?? {};
+          if (detail.error) {
+            return `<strong>${detail.source}</strong><br/>${detail.error}`;
+          }
+
+          if (this.y === 0) {
+            return `<strong>${detail.source}</strong><br/>La API responde, pero ahora mismo no devuelve registros.`;
+          }
+
+          const countryLine = detail.country
+            ? `<br/>Pais destacado: ${titleCase(detail.country)}<br/>${detail.metricLabel}: ${studentMetricValue(detail.metric)}`
+            : "";
+
+          return `<strong>${detail.source}</strong><br/>Registros recibidos: ${formatter.format(this.y)}${countryLine}${detail.detail ? `<br/>${detail.detail}` : ""}`;
+        }
+      },
+      plotOptions: {
+        column: {
+          borderRadius: 3,
+          dataLabels: {
+            enabled: true,
+            formatter() {
+              return this.y === 0 ? "0" : compactFormatter.format(this.y);
+            }
+          }
+        }
+      },
+      series: [
+        {
+          name: "APIs SOS",
+          colorByPoint: true,
+          data: apis.map((api, index) => {
+            const topCountry = topStudentCountry(api);
+            return {
+              y: studentApiRecordCount(api),
+              color: ["#db2777", "#4f46e5", "#0891b2", "#7c3aed"][index] ?? "#0f766e",
+              custom: {
+                source: api.source,
+                metricLabel: api.metricLabel,
+                metric: topCountry?.metric,
+                country: topCountry?.country,
+                detail: topCountry?.detail,
+                error: api.error
+              }
+            };
+          })
         }
       ],
       credits: {
@@ -244,6 +369,7 @@
       await tick();
       await loadHighcharts();
       renderChart();
+      renderSosChart();
     } catch (e) {
       error = e.message || "No se pudieron cargar las integraciones.";
       loading = false;
@@ -256,6 +382,7 @@
   // Al salir, destruimos la grafica para no dejar memoria ocupada.
   onDestroy(() => {
     chart?.destroy();
+    sosChart?.destroy();
   });
 </script>
 
@@ -330,6 +457,11 @@
     <section class="chart-panel" aria-labelledby="integration-chart-title">
       <h2 id="integration-chart-title">Vista comparada</h2>
       <div class="chart-frame" bind:this={chartContainer}></div>
+    </section>
+
+    <section class="chart-panel" aria-labelledby="sos-chart-title">
+      <h2 id="sos-chart-title">APIs SOS externas</h2>
+      <div class="chart-frame" bind:this={sosChartContainer}></div>
     </section>
 
     <section class="city-grid" aria-label="Detalle de integraciones por ciudad">
@@ -408,6 +540,17 @@
                 {#if item.fifaSquadValue}
                   {compactFormatter.format(item.fifaSquadValue.latestTotalMarketValue)}
                   ({item.fifaSquadValue.latestYear})
+                {:else}
+                  Sin dato
+                {/if}
+              </dd>
+            </div>
+            <div>
+              <dt>SOS30 premios eSports</dt>
+              <dd>
+                {#if item.esportsEarnings}
+                  {compactFormatter.format(item.esportsEarnings.topCountryEarnings)}
+                  ({item.esportsEarnings.topGameName ?? item.esportsEarnings.latestGameName})
                 {:else}
                   Sin dato
                 {/if}
@@ -620,6 +763,10 @@
 
   .chart-panel {
     padding: 20px;
+  }
+
+  .chart-panel + .chart-panel {
+    margin-top: 16px;
   }
 
   .chart-panel h2 {
