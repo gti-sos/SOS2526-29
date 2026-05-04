@@ -92,6 +92,15 @@ app.get("/about", (request, response) => {
     response.sendFile(frontendIndexPath);
 });
 
+app.get("/api/proxy/exportations-stats", async (req, res) => {
+    try {
+        const response = await fetch("https://sos2526-13.onrender.com/api/v2/exportations-stats");
+        const data = await response.json();
+        res.status(200).json(data);
+    } catch (err) {
+        res.status(500).json({ error: "No se pudo conectar con la API externa." });
+    }
+});
 // Cualquier ruta del frontend (que no sea /api) devuelve la SPA.
 app.get(/^\/(?!api\/).*/, (request, response) => {
     response.sendFile(frontendIndexPath);
@@ -102,7 +111,9 @@ app.get(/^\/(?!api\/).*/, (request, response) => {
 // =============================================================================
 
 // Ponemos el servidor a escuchar peticiones HTTP en el puerto elegido.
+
 app.listen(port, () => {
+    
     // Mostramos por consola la direccion principal del servidor.
     console.log(`>>> Servidor SOS2526-29 listo en puerto ${port}`);
     console.log(`>>> pagina: http://localhost:${port}`);
