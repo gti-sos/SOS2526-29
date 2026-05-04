@@ -1,8 +1,7 @@
 // Elegimos la URL de la API de vinos segun el entorno.
-const WINE_STATS_API_BASE =
-  window.location.hostname === "localhost"
-    ? "http://localhost:10000/api/v1/wine-stats"
-    : "/api/v1/wine-stats";
+import { apiPath } from "./apiBase.js";
+
+const WINE_STATS_API_BASE = apiPath("/api/v1/wine-stats");
 
 // Procesa una respuesta HTTP y devuelve datos o lanza un error.
 async function handleResponse(response) {

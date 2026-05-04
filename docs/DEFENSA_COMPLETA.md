@@ -72,11 +72,11 @@ Tecnologias usadas:
 4. Decir: "Aqui esta el contrato REST principal de mi recurso: GET, POST, PUT, DELETE, filtros, ordenacion y paginacion".
 5. Abrir `frontend-group/src/services/citysStatsApi.js`.
 6. Decir: "Aqui Svelte llama al backend con `fetch`".
-7. Abrir `frontend-group/src/routes/CitysStats.svelte`.
+7. Abrir `frontend-group/src/routes/citys-stats/+page.svelte`.
 8. Decir: "Aqui esta el CRUD visible".
 9. Abrir `src/back/v1/citys-stats.js`.
 10. Decir: "Aqui estan los proxies e integraciones por backend".
-11. Abrir `frontend-group/src/routes/GroupAnalytics.svelte`.
+11. Abrir `frontend-group/src/routes/analytics/+page.svelte`.
 12. Decir: "Aqui se cumple el widget grupal no lineal".
 
 ### 2.2 Guion D03 LCC de 4 minutos
@@ -311,7 +311,7 @@ El proyecto tiene cuatro capas principales:
 - `index.js`: arranque del servidor. Crea Express, abre las bases NeDB, registra las APIs y sirve el frontend compilado.
 - `src/back/v1` y `src/back/v2`: backend REST. Aqui viven rutas, validaciones, filtros, datos iniciales, integraciones y codigos HTTP.
 - `frontend-group/src/services`: funciones `fetch` que llaman al backend desde Svelte.
-- `frontend-group/src/routes`: pantallas visibles: tablas, formularios, busquedas, graficas, mapa e integraciones.
+- `frontend-group/src/routes`: rutas por carpetas. Cada `+page.svelte` es una pantalla visible.
 
 Estructura general:
 
@@ -330,6 +330,12 @@ SOS2526-29/
 |   |-- src/
 |   |   |-- components/
 |   |   |-- routes/
+|   |   |   |-- +page.svelte
+|   |   |   |-- citys-stats/
+|   |   |   |-- analytics/
+|   |   |   |-- integrations/
+|   |   |   |-- natural-disasters/
+|   |   |   |-- wine-stats/
 |   |   |-- services/
 |   |-- vite.config.js
 |-- tests/
@@ -358,10 +364,10 @@ Archivos importantes:
 | `src/back/v1/wine-stats.js` | CRUD v1, ids automaticos, filtros, validacion y carga inicial |
 | `src/back/*.db` | Archivos donde NeDB guarda los datos reales |
 | `frontend-group/src/main.js` | Punto de entrada del frontend Svelte |
-| `frontend-group/src/App.svelte` | Define rutas del frontend y decide que pantalla se muestra |
+| `frontend-group/src/App.svelte` | Carga automaticamente las rutas por carpetas y decide que pantalla se muestra |
 | `frontend-group/src/components/Navbar.svelte` | Barra de navegacion superior |
 | `frontend-group/src/services/*.js` | Funciones que llaman al backend con `fetch` |
-| `frontend-group/src/routes/*.svelte` | Pantallas visibles de la aplicacion |
+| `frontend-group/src/routes/**/+page.svelte` | Pantallas visibles de la aplicacion organizadas por URL |
 | `frontend-group/vite.config.js` | Configura la compilacion del frontend hacia `public` |
 | `public/` | Frontend compilado que sirve Express en produccion |
 | `tests/` | Pruebas Postman/Newman y Playwright |
@@ -389,7 +395,7 @@ Flujo general del programa:
 4. `index.js` carga los modulos de API de `src/back/v1` y `src/back/v2`.
 5. Express queda escuchando en `http://localhost:10000`.
 6. Si el usuario abre la web, Express sirve los archivos de `public`.
-7. Svelte carga `App.svelte` y muestra la pantalla segun la ruta.
+7. Svelte carga `App.svelte`, detecta el `+page.svelte` correspondiente y muestra la pantalla segun la ruta.
 8. Cuando el usuario pulsa botones o envia formularios, los services hacen peticiones `fetch`.
 9. El backend recibe la peticion, valida datos, consulta o modifica NeDB y responde en JSON.
 10. El frontend actualiza tablas, mensajes, formularios, graficas o mapas.
@@ -514,9 +520,9 @@ Frase de defensa:
 
 En el proyecto:
 
-- `frontend-group/src/App.svelte` registra rutas.
+- `frontend-group/src/App.svelte` descubre automaticamente las rutas por carpetas.
 - `frontend-group/src/components/Navbar.svelte` define navegacion.
-- `frontend-group/src/routes` contiene pantallas.
+- `frontend-group/src/routes` contiene pantallas como `+page.svelte`.
 - `frontend-group/src/services` contiene funciones `fetch`.
 - `frontend-group/vite.config.js` compila hacia `../public`.
 
@@ -542,10 +548,10 @@ La asignatura pide visualizacion con widget no `line`, grafico grupal y, como ex
 
 En el proyecto:
 
-- `frontend-group/src/routes/GroupAnalytics.svelte`: widget grupal con datos de los tres recursos.
-- `frontend-group/src/routes/CitysStatsAnalytics.svelte`: grafica individual de ciudades.
-- `frontend-group/src/routes/CitysStatsMapAnalytics.svelte`: mapa.
-- `frontend-group/src/routes/CitysStatsIntegrations.svelte`: widget de integraciones.
+- `frontend-group/src/routes/analytics/+page.svelte`: widget grupal con datos de los tres recursos.
+- `frontend-group/src/routes/analytics/citys-stats/+page.svelte`: grafica individual de ciudades.
+- `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte`: mapa.
+- `frontend-group/src/routes/integrations/citys-stats/+page.svelte`: widget de integraciones.
 
 Frase de defensa:
 
@@ -615,8 +621,8 @@ Archivos:
 
 - `src/back/v1/natural-disasters.js`
 - `src/back/v2/natural-disasters.js`
-- `frontend-group/src/routes/NaturalDisastersStats.svelte`
-- `frontend-group/src/routes/EditNaturalDisasters.svelte`
+- `frontend-group/src/routes/natural-disasters/+page.svelte`
+- `frontend-group/src/routes/natural-disasters/editar/[country]/[year]/+page.svelte`
 - `frontend-group/src/services/natural-disasters.js`
 - `tests/ALG`
 
@@ -656,8 +662,8 @@ Archivos:
 
 - `src/back/v1/citys-stats.js`
 - `src/back/v2/citys-stats.js`
-- `frontend-group/src/routes/CitysStats.svelte`
-- `frontend-group/src/routes/EditCitysStats.svelte`
+- `frontend-group/src/routes/citys-stats/+page.svelte`
+- `frontend-group/src/routes/citys-stats/editar/[city]/[country]/+page.svelte`
 - `frontend-group/src/services/citysStatsApi.js`
 - `frontend-group/src/services/citysStatsIntegrations.js`
 - `tests/LCC`
@@ -724,8 +730,8 @@ Identificador:
 Archivos:
 
 - `src/back/v1/wine-stats.js`
-- `frontend-group/src/routes/WineStats.svelte`
-- `frontend-group/src/routes/EditWineStats.svelte`
+- `frontend-group/src/routes/wine-stats/+page.svelte`
+- `frontend-group/src/routes/wine-stats/editar/[id]/+page.svelte`
 - `frontend-group/src/services/wine-stats.js`
 - `tests/RMP`
 
@@ -748,9 +754,16 @@ Defensa rapida:
 
 Rutas y navegacion:
 
-- `frontend-group/src/App.svelte`: registra las rutas Svelte y las rutas directas.
+- `frontend-group/src/App.svelte`: router ligero que descubre `src/routes/**/+page.svelte`.
 - `frontend-group/src/components/Navbar.svelte`: cambia aqui el menu superior.
-- `frontend-group/src/routes/Home.svelte`: cambia aqui portada, miembros, links de APIs y links de documentacion.
+- `frontend-group/src/routes/+page.svelte`: cambia aqui portada, miembros, links de APIs y links de documentacion.
+
+Convencion de rutas:
+
+- Una carpeta representa un segmento de URL.
+- `+page.svelte` es la pantalla de esa URL.
+- Los parametros dinamicos van entre corchetes: `[city]`, `[country]`, `[id]`.
+- Ejemplo: `src/routes/citys-stats/editar/[city]/[country]/+page.svelte` se abre con `/citys-stats/editar/:city/:country`.
 
 Services frontend:
 
@@ -761,16 +774,16 @@ Services frontend:
 
 Pantallas frontend:
 
-- `frontend-group/src/routes/CitysStats.svelte`: listar, crear, buscar y borrar ciudades.
-- `frontend-group/src/routes/EditCitysStats.svelte`: cargar y actualizar una ciudad.
-- `frontend-group/src/routes/NaturalDisastersStats.svelte`: listar, crear, buscar y borrar desastres.
-- `frontend-group/src/routes/EditNaturalDisasters.svelte`: cargar y actualizar un desastre.
-- `frontend-group/src/routes/WineStats.svelte`: listar, crear, buscar y borrar vinos.
-- `frontend-group/src/routes/EditWineStats.svelte`: cargar y actualizar un vino.
+- `frontend-group/src/routes/citys-stats/+page.svelte`: listar, crear, buscar y borrar ciudades.
+- `frontend-group/src/routes/citys-stats/editar/[city]/[country]/+page.svelte`: cargar y actualizar una ciudad.
+- `frontend-group/src/routes/natural-disasters/+page.svelte`: listar, crear, buscar y borrar desastres.
+- `frontend-group/src/routes/natural-disasters/editar/[country]/[year]/+page.svelte`: cargar y actualizar un desastre.
+- `frontend-group/src/routes/wine-stats/+page.svelte`: listar, crear, buscar y borrar vinos.
+- `frontend-group/src/routes/wine-stats/editar/[id]/+page.svelte`: cargar y actualizar un vino.
 
 Flujo completo al crear una ciudad:
 
-1. El usuario rellena el formulario en `CitysStats.svelte`.
+1. El usuario rellena el formulario en `frontend-group/src/routes/citys-stats/+page.svelte`.
 2. `handleCreate` valida el formulario.
 3. `createCityStat` en `citysStatsApi.js` hace `POST /api/v2/citys-stats`.
 4. Express recibe la peticion en `src/back/v2/citys-stats.js`.
@@ -782,8 +795,8 @@ Flujo completo al crear una ciudad:
 
 Flujo completo al editar:
 
-1. La tabla navega a `/#/citys-stats/editar/:city/:country`.
-2. `App.svelte` carga `EditCitysStats.svelte`.
+1. La tabla navega a `/citys-stats/editar/:city/:country`.
+2. `App.svelte` carga `src/routes/citys-stats/editar/[city]/[country]/+page.svelte`.
 3. `onMount` llama `getOneCityStat`.
 4. El usuario cambia datos y pulsa guardar.
 5. `updateCityStat` hace `PUT /api/v2/citys-stats/:city/:country`.
@@ -795,15 +808,15 @@ Flujo completo al editar:
 
 Analytics e integraciones:
 
-- `frontend-group/src/routes/GroupAnalytics.svelte`: grafica conjunta de las tres APIs.
-- `frontend-group/src/routes/CitysStatsAnalytics.svelte`: grafica de ciudades.
-- `frontend-group/src/routes/CitysStatsMapAnalytics.svelte`: mapa de ciudades.
-- `frontend-group/src/routes/CitysStatsIntegrations.svelte`: pantalla de integraciones externas.
-- `frontend-group/src/routes/GroupIntegrations.svelte`: entrada de integraciones del grupo.
+- `frontend-group/src/routes/analytics/+page.svelte`: grafica conjunta de las tres APIs.
+- `frontend-group/src/routes/analytics/citys-stats/+page.svelte`: grafica de ciudades.
+- `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte`: mapa de ciudades.
+- `frontend-group/src/routes/integrations/citys-stats/+page.svelte`: pantalla de integraciones externas.
+- `frontend-group/src/routes/integrations/+page.svelte`: entrada de integraciones del grupo.
 
 Flujo de analytics:
 
-1. `GroupAnalytics.svelte` se monta.
+1. `routes/analytics/+page.svelte` se monta.
 2. Llama en paralelo a ciudades, desastres y vinos con `Promise.all`.
 3. `buildMetrics` calcula registros e indicadores.
 4. `renderChart` crea una grafica Highcharts.
@@ -811,20 +824,20 @@ Flujo de analytics:
 
 Grafica del grupo:
 
-- Archivo: `frontend-group/src/routes/GroupAnalytics.svelte`.
+- Archivo: `frontend-group/src/routes/analytics/+page.svelte`.
 - Cambiar `buildMetrics` si cambia el dato calculado.
 - Cambiar `renderChart` si cambia tipo de grafica, titulo, ejes o series.
-- Comprobar `/#/analytics`.
+- Comprobar `/analytics`.
 
 Grafica de ciudades:
 
-- Archivo: `frontend-group/src/routes/CitysStatsAnalytics.svelte`.
+- Archivo: `frontend-group/src/routes/analytics/citys-stats/+page.svelte`.
 - Cambiar transformacion de datos, labels o `renderChart`.
 - Comprobar `/analytics/citys-stats`.
 
 Mapa:
 
-- Archivo: `frontend-group/src/routes/CitysStatsMapAnalytics.svelte`.
+- Archivo: `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte`.
 - Si falta una ciudad, anadirla en `coordinates` con clave `city-country`.
 - Si cambia color o tamano, tocar `colorFor` o `radiusFor`.
 - Si cambia Highcharts, tocar `renderMap`.
@@ -841,7 +854,7 @@ Integraciones:
 - Union final: `buildIntegratedCity`.
 - Errores: `fetchJson` y `safeExternal`.
 - Frontend service: `citysStatsIntegrations.js`.
-- Pantalla: `CitysStatsIntegrations.svelte`.
+- Pantalla: `frontend-group/src/routes/integrations/citys-stats/+page.svelte`.
 - Comprobar `/api/v1/citys-stats/integrations/summary` y `/integrations/citys-stats`.
 
 Frase de defensa:
@@ -1066,11 +1079,11 @@ Si el campo es de desastres:
 3. Anade el campo a cada objeto de `initialData`.
 4. Ajusta `hasValidDisasterBody` si el campo tiene reglas especiales.
 5. Si se filtra por ese campo, anadelo a `buildSearchQuery`.
-6. Frontend: abre `frontend-group/src/routes/NaturalDisastersStats.svelte`.
+6. Frontend: abre `frontend-group/src/routes/natural-disasters/+page.svelte`.
 7. Anade el campo al objeto `form`.
 8. Anade el input de creacion.
 9. Anade la columna en la tabla.
-10. Edicion: abre `EditNaturalDisasters.svelte` y anade input, carga y guardado.
+10. Edicion: abre `frontend-group/src/routes/natural-disasters/editar/[country]/[year]/+page.svelte` y anade input, carga y guardado.
 11. Service: revisa `frontend-group/src/services/natural-disasters.js`.
 12. Tests: revisa `tests/ALG`.
 13. Comprueba con `npm run test-ALG` y creando un registro en la pantalla.
@@ -1082,11 +1095,11 @@ Si el campo es de ciudades:
 3. Limpialo y validalo dentro de `normalizeCityStat`.
 4. Anade el campo a cada objeto de `initialData`.
 5. Si afecta a integraciones, revisa `buildIntegratedCity`.
-6. Frontend: abre `frontend-group/src/routes/CitysStats.svelte`.
+6. Frontend: abre `frontend-group/src/routes/citys-stats/+page.svelte`.
 7. Anade el campo a `emptyCreateForm`.
 8. Anade input en el formulario de creacion.
 9. Anade columna en la tabla.
-10. Edicion: abre `EditCitysStats.svelte` y anade input, carga y guardado.
+10. Edicion: abre `frontend-group/src/routes/citys-stats/editar/[city]/[country]/+page.svelte` y anade input, carga y guardado.
 11. Service: revisa `frontend-group/src/services/citysStatsApi.js`.
 12. Tests: revisa `tests/LCC`.
 13. Comprueba con `npm run test-LCC-v2` y `npm run test-LCC-e2e`.
@@ -1098,11 +1111,11 @@ Si el campo es de vinos:
 3. Limpialo y validalo dentro de `normalizeWineStat`.
 4. Anade el campo a cada objeto de `initialData`.
 5. Si se puede filtrar, anadelo a `TEXT_FILTER_FIELDS` o `NUMBER_FILTER_FIELDS`.
-6. Frontend: abre `frontend-group/src/routes/WineStats.svelte`.
+6. Frontend: abre `frontend-group/src/routes/wine-stats/+page.svelte`.
 7. Anade el campo a `nuevoVino`.
 8. Anade input en el formulario.
 9. Anade columna en la tabla.
-10. Edicion: abre `EditWineStats.svelte` y anade input, carga y guardado.
+10. Edicion: abre `frontend-group/src/routes/wine-stats/editar/[id]/+page.svelte` y anade input, carga y guardado.
 11. Service: revisa `frontend-group/src/services/wine-stats.js`.
 12. Tests: revisa `tests/RMP`.
 13. Comprueba con `npm run test-RMP`.
@@ -1119,7 +1132,7 @@ Toca:
 
 - Backend: `src/back/v1/citys-stats.js`, `src/back/v2/citys-stats.js`.
 - Frontend: todos los componentes que imprimen o leen `un_2025_population`.
-- Analytics: `CitysStatsAnalytics.svelte`, `CitysStatsMapAnalytics.svelte`, `GroupAnalytics.svelte`.
+- Analytics: `routes/analytics/citys-stats/+page.svelte`, `routes/analytics/citys-stats/map/+page.svelte`, `routes/analytics/+page.svelte`.
 - Tests: Postman/Newman y Playwright.
 
 Busqueda recomendada:
@@ -1174,7 +1187,7 @@ Desastres:
 1. Abre `src/back/v2/natural-disasters.js`.
 2. Toca `buildSearchQuery`.
 3. Convierte el query param al tipo correcto.
-4. Abre `NaturalDisastersStats.svelte`.
+4. Abre `frontend-group/src/routes/natural-disasters/+page.svelte`.
 5. Anade input de busqueda.
 6. Anade el parametro a la query string en la funcion `buscar`.
 7. Revisa `natural-disasters.js` si hace falta.
@@ -1185,7 +1198,7 @@ Ciudades:
 1. Abre `src/back/v2/citys-stats.js`.
 2. Toca el bloque `app.get(BASE_API_URL, ...)`.
 3. Filtra `result` despues de leer los documentos.
-4. Abre `CitysStats.svelte`.
+4. Abre `frontend-group/src/routes/citys-stats/+page.svelte`.
 5. Anade el campo a `emptySearchForm`.
 6. Anade el input.
 7. Anade el parametro en `buildSearchQuery`.
@@ -1196,7 +1209,7 @@ Vinos:
 1. Abre `src/back/v1/wine-stats.js`.
 2. Si el filtro es texto, revisa `TEXT_FILTER_FIELDS` y `applyTextFilters`.
 3. Si el filtro es numerico, revisa `NUMBER_FILTER_FIELDS` y `applyNumberFilters`.
-4. Abre `WineStats.svelte`.
+4. Abre `frontend-group/src/routes/wine-stats/+page.svelte`.
 5. Anade el campo a `filtros`.
 6. Anade input en el buscador.
 7. Anade el parametro en `buscarVinos`.
@@ -1325,7 +1338,7 @@ Frase de defensa:
 5. Abre `index.js`.
 6. Importa el modulo con `require`.
 7. Registralo pasando `app` y la base de datos correspondiente.
-8. Si debe aparecer en portada, actualiza `Home.svelte`.
+8. Si debe aparecer en portada, actualiza `frontend-group/src/routes/+page.svelte`.
 9. Crea tests nuevos o adapta los de v2.
 10. Comprueba `/api/v3/recurso`.
 
@@ -1359,23 +1372,27 @@ Riesgo:
 
 ### 11.17 Cambiar rutas o paginas del frontend
 
-Ruta con `#/`:
+Ruta nueva por carpetas:
 
-1. Crea o edita un componente en `frontend-group/src/routes`.
-2. Abre `frontend-group/src/App.svelte`.
-3. Importa el componente.
-4. Anadelo al objeto `routes`.
+1. Crea una carpeta dentro de `frontend-group/src/routes`.
+2. Crea dentro un archivo `+page.svelte`.
+3. Si la ruta necesita parametros, usa carpetas entre corchetes, por ejemplo `[id]`.
+4. No hace falta importar la pagina en `App.svelte`: se detecta automaticamente.
 5. Abre `Navbar.svelte` si quieres enlace visible.
-6. Usa `href="/#/nueva-ruta"`.
-7. Comprueba abriendo `/#/nueva-ruta`.
+6. Usa `href="/nueva-ruta"`.
+7. Comprueba abriendo `/nueva-ruta`.
 
-Ruta directa sin `#/`:
+Ejemplos:
 
-1. Haz lo anterior en `App.svelte`.
-2. Anadela tambien a `directRoutes`.
-3. Abre `index.js`.
-4. Anade un `app.get("/ruta", ...)` que devuelva `frontendIndexPath`.
-5. Comprueba abriendo `/ruta` directamente.
+- `/ranking` -> `frontend-group/src/routes/ranking/+page.svelte`.
+- `/wine-stats/editar/:id` -> `frontend-group/src/routes/wine-stats/editar/[id]/+page.svelte`.
+- `/analytics/citys-stats/map` -> `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte`.
+
+Ruta directa en produccion:
+
+- `index.js` ya tiene un fallback general para rutas que no empiezan por `/api`.
+- Por eso, normalmente no hay que anadir un `app.get` por cada pantalla.
+- Solo toca `index.js` si cambias el fallback o necesitas una ruta especial del servidor.
 
 ### 11.18 Modificar menu
 
@@ -1392,17 +1409,13 @@ Ejemplos:
 
 Si el enlace apunta a pagina Svelte:
 
-- Usar `/#/ruta`.
-
-Si el enlace apunta a ruta directa servida por Express:
-
-- Usar `/analytics` o `/integrations/citys-stats`.
+- Usar ruta directa, por ejemplo `/analytics` o `/integrations/citys-stats`.
 
 ### 11.19 Modificar portada
 
 Toca:
 
-- `frontend-group/src/routes/Home.svelte`.
+- `frontend-group/src/routes/+page.svelte`.
 
 Que se cambia ahi:
 
@@ -1421,28 +1434,28 @@ Riesgo:
 
 Tablas:
 
-1. Ciudades: `CitysStats.svelte`.
-2. Desastres: `NaturalDisastersStats.svelte`.
-3. Vinos: `WineStats.svelte`.
+1. Ciudades: `frontend-group/src/routes/citys-stats/+page.svelte`.
+2. Desastres: `frontend-group/src/routes/natural-disasters/+page.svelte`.
+3. Vinos: `frontend-group/src/routes/wine-stats/+page.svelte`.
 4. Cambia cabeceras, filas del `{#each ...}` y botones.
 5. Comprueba la pantalla del recurso.
 
 Formularios:
 
-1. Crear ciudad: `CitysStats.svelte`.
-2. Editar ciudad: `EditCitysStats.svelte`.
-3. Crear desastre: `NaturalDisastersStats.svelte`.
-4. Editar desastre: `EditNaturalDisasters.svelte`.
-5. Crear vino: `WineStats.svelte`.
-6. Editar vino: `EditWineStats.svelte`.
+1. Crear ciudad: `frontend-group/src/routes/citys-stats/+page.svelte`.
+2. Editar ciudad: `frontend-group/src/routes/citys-stats/editar/[city]/[country]/+page.svelte`.
+3. Crear desastre: `frontend-group/src/routes/natural-disasters/+page.svelte`.
+4. Editar desastre: `frontend-group/src/routes/natural-disasters/editar/[country]/[year]/+page.svelte`.
+5. Crear vino: `frontend-group/src/routes/wine-stats/+page.svelte`.
+6. Editar vino: `frontend-group/src/routes/wine-stats/editar/[id]/+page.svelte`.
 7. Cambia objeto de formulario, inputs, validacion y payload.
 8. Comprueba creando o editando un registro.
 
 Mensajes:
 
-1. Ciudades: `citysStatsApi.js` y `CitysStats.svelte`.
-2. Desastres: `natural-disasters.js` y `NaturalDisastersStats.svelte`.
-3. Vinos: `wine-stats.js` y `WineStats.svelte`.
+1. Ciudades: `citysStatsApi.js` y `routes/citys-stats/+page.svelte`.
+2. Desastres: `natural-disasters.js` y `routes/natural-disasters/+page.svelte`.
+3. Vinos: `wine-stats.js` y `routes/wine-stats/+page.svelte`.
 4. Busca `friendlyApiMessage`, `mostrarMensaje`, `message` o `error`.
 5. Provoca un exito y un error para ver ambos mensajes.
 
@@ -1450,10 +1463,10 @@ Mensajes:
 
 Toca:
 
-- Analytics grupo: `GroupAnalytics.svelte`.
-- Analytics ciudades: `CitysStatsAnalytics.svelte`.
-- Mapa: `CitysStatsMapAnalytics.svelte`.
-- Integraciones con grafica: `CitysStatsIntegrations.svelte`.
+- Analytics grupo: `frontend-group/src/routes/analytics/+page.svelte`.
+- Analytics ciudades: `frontend-group/src/routes/analytics/citys-stats/+page.svelte`.
+- Mapa: `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte`.
+- Integraciones con grafica: `frontend-group/src/routes/integrations/citys-stats/+page.svelte`.
 
 Patron:
 
@@ -1474,7 +1487,7 @@ Cambios comunes:
 
 Toca:
 
-- `frontend-group/src/routes/CitysStatsMapAnalytics.svelte`
+- `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte`
 - Objeto `coordinates`.
 
 Pasos:
@@ -1500,7 +1513,7 @@ Toca:
 
 - Backend: `src/back/v1/citys-stats.js`.
 - Frontend service: `frontend-group/src/services/citysStatsIntegrations.js`.
-- Pantalla: `CitysStatsIntegrations.svelte`.
+- Pantalla: `frontend-group/src/routes/integrations/citys-stats/+page.svelte`.
 
 Funciones backend:
 
@@ -1732,9 +1745,9 @@ Frase de defensa:
 
 > El frontend Svelte se compila con Vite. El build acaba en `public`, y Express sirve esa carpeta con `express.static`.
 
-### 13.15 Por que algunas rutas directas estan tambien en `index.js`
+### 13.15 Por que las rutas directas funcionan en `index.js`
 
-> Porque al abrir `/analytics` directamente, el navegador pide esa URL al servidor. Express debe devolver `public/index.html` para que Svelte cargue la pantalla correspondiente.
+> Porque al abrir `/analytics` directamente, el navegador pide esa URL al servidor. Express tiene un fallback para cualquier ruta que no sea `/api`, devuelve `public/index.html` y entonces Svelte carga el `+page.svelte` correspondiente.
 
 ### 13.16 Como se protegen las llamadas externas
 
@@ -1785,10 +1798,10 @@ Probar despues:
 - `/api/v2/citys-stats`
 - `/api/v2/natural-disasters`
 - `/api/v1/wine-stats`
-- `/#/citys-stats`
-- `/#/natural-disasters`
-- `/#/wine-stats`
-- `/#/analytics`
+- `/citys-stats`
+- `/natural-disasters`
+- `/wine-stats`
+- `/analytics`
 - `/analytics/citys-stats`
 - `/analytics/citys-stats/map`
 - `/integrations/citys-stats`
@@ -1809,7 +1822,7 @@ npm run test-LCC-e2e
 - Si tocaste frontend y usas `npm start`, ejecuta `npm run build`.
 - Si tocaste una API, prueba la ruta con navegador, Postman o `Invoke-RestMethod`.
 - Si tocaste campos, busca el nombre antiguo con `rg`.
-- Si tocaste rutas, revisa `App.svelte`, `Navbar.svelte` e `index.js`.
+- Si tocaste rutas, revisa la carpeta nueva en `src/routes`, `App.svelte`, `Navbar.svelte` e `index.js`.
 - Si tocaste textos que aparecen en tests, revisa Playwright.
 - Si tocaste un recurso concreto, ejecuta su test Newman.
 

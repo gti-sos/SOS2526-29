@@ -10,12 +10,10 @@
     deleteAllWineStats,
     deleteWineStat
   } from "@/services/wine-stats.js";
+  import { apiPath } from "@/services/apiBase.js";
 
   // Esta URL se usa en busquedas y carga inicial directa desde esta pantalla.
-  const API_BASE =
-    window.location.hostname === "localhost"
-      ? "http://localhost:10000/api/v1/wine-stats"
-      : "/api/v1/wine-stats";
+  const API_BASE = apiPath("/api/v1/wine-stats");
 
   // Lista de vinos que se muestra en la tabla.
   let vinos = [];

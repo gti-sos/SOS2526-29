@@ -1,8 +1,7 @@
 // Elegimos la URL de la API segun estemos en desarrollo local o desplegados.
-const CITYS_STATS_API_BASE =
-  window.location.hostname === "localhost"
-    ? "http://localhost:10000/api/v2/citys-stats"
-    : "/api/v2/citys-stats";
+import { apiPath } from "./apiBase.js";
+
+const CITYS_STATS_API_BASE = apiPath("/api/v2/citys-stats");
 
 // Construye una URL completa de la API y anade parametros de busqueda si existen.
 function buildUrl(path = "", query = {}) {

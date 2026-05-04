@@ -15,6 +15,15 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url))
     }
   },
+  server: {
+    // Si alguna llamada usa /api durante desarrollo, Vite la manda a Express.
+    proxy: {
+      "/api": {
+        target: "http://localhost:10000",
+        changeOrigin: true
+      }
+    }
+  },
   // Configuracion de build, es decir, cuando se genera la version final.
   build: {
     // Guardamos el frontend compilado en ../public para que Express lo sirva.

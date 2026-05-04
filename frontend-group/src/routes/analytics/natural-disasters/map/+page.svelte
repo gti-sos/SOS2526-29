@@ -7,6 +7,7 @@
     // 2. Silenciamos a Vite para que nos deje importar el módulo de mapas
     // @ts-ignore
     import MapModule from "highcharts/modules/map";
+    import { apiPath } from "@/services/apiBase.js";
 
     let mapContainer;
     let mensaje = "Cargando mapa mundial...";
@@ -38,7 +39,7 @@
             const topology = await topologyRes.json();
 
             // Pedimos tus datos a la API
-            const res = await fetch("/api/v2/natural-disasters");
+            const res = await fetch(apiPath("/api/v2/natural-disasters"));
             const data = await res.json();
 
             if (data.length === 0) {

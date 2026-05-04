@@ -1,8 +1,7 @@
 // Elegimos la API v1 porque ahi estan las rutas de integraciones externas.
-const CITYS_STATS_INTEGRATIONS_API_BASE =
-  window.location.hostname === "localhost"
-    ? "http://localhost:10000/api/v1/citys-stats"
-    : "/api/v1/citys-stats";
+import { apiPath } from "./apiBase.js";
+
+const CITYS_STATS_INTEGRATIONS_API_BASE = apiPath("/api/v1/citys-stats");
 
 // Procesa una respuesta de integraciones.
 async function handleResponse(response) {

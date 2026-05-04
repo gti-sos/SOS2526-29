@@ -1,7 +1,7 @@
 // Elegimos la API v2 de desastres en local o en despliegue.
-const NATURAL_DISASTERS_API_BASE = window.location.hostname === "localhost"
-    ? "http://localhost:10000/api/v2/natural-disasters"
-    : "/api/v2/natural-disasters";
+import { apiPath } from "./apiBase.js";
+
+const NATURAL_DISASTERS_API_BASE = apiPath("/api/v2/natural-disasters");
 
 // Obtiene desastres naturales, opcionalmente con una query como ?country=spain.
 export async function getDisasters(searchQuery = "") {

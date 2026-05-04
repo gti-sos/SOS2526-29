@@ -2,13 +2,14 @@
 <script>
     import { onMount } from "svelte";
     import Highcharts from "highcharts";
+    import { apiPath } from "@/services/apiBase.js";
 
     let chartContainer;
     let mensaje = "Cargando analíticas completas...";
 
     async function cargarGrafica() {
         try {
-            const res = await fetch("/api/v2/natural-disasters");
+            const res = await fetch(apiPath("/api/v2/natural-disasters"));
             if (!res.ok) throw new Error("Error al obtener los datos");
             
             const data = await res.json();
