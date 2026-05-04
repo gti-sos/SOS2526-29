@@ -3,8 +3,8 @@
     {
       name: "Rufino Moreno",
       resource: "wine-stats",
-      status: "Pendiente",
-      href: ""
+      status: "Disponible",
+      href: "/integrations/rmp"
     },
     {
       name: "Luis Cortes",
