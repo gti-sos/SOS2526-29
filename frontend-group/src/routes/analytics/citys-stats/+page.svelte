@@ -2,7 +2,7 @@
   // onDestroy limpia la grafica; tick espera a que exista el contenedor.
   import { onDestroy, onMount, tick } from "svelte";
   // Servicio para pedir citys-stats al backend.
-  import { getAllCitysStats } from "../services/citysStatsApi";
+  import { getAllCitysStats } from "@/services/citysStatsApi";
 
   // Libreria Highcharts cargada cuando se necesita.
   let Highcharts;

@@ -8,8 +8,8 @@
     deleteCityStat,
     getAllCitysStats,
     loadInitialCitysStats
-  } from "../services/citysStatsApi";
-  import { navigate } from "../lib/navigation.js";
+  } from "@/services/citysStatsApi";
+  import { navigate } from "@/lib/navigation.js";
 
   // Opciones del desplegable de ordenacion.
   const sortOptions = [

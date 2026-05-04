@@ -7,8 +7,8 @@
     deleteCityStat,
     getOneCityStat,
     updateCityStat
-  } from "../services/citysStatsApi";
-  import { replace } from "../lib/navigation.js";
+  } from "@/services/citysStatsApi";
+  import { replace } from "@/lib/navigation.js";
 
   // params contiene city y country tomados de la URL.
   export let params = {};

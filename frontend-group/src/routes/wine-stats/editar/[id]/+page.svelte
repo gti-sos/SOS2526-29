@@ -2,9 +2,9 @@
   // onMount carga los datos al entrar en la pantalla.
   import { onMount } from "svelte";
   // back vuelve a la pantalla anterior.
-  import { back } from "../lib/navigation.js";
+  import { back } from "@/lib/navigation.js";
   // Funciones para leer y actualizar vinos desde la API.
-  import { getOneWineStat, updateWineStat } from "../services/wine-stats.js";
+  import { getOneWineStat, updateWineStat } from "@/services/wine-stats.js";
 
   // params contiene el id que aparece en la URL.
   export let params = {};

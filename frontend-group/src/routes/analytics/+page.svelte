@@ -1,8 +1,8 @@
 <script>
   import { onDestroy, onMount, tick } from "svelte";
-  import { getAllCitysStats } from "../services/citysStatsApi";
-  import { getDisasters } from "../services/natural-disasters.js";
-  import { getAllWineStats } from "../services/wine-stats.js";
+  import { getAllCitysStats } from "@/services/citysStatsApi";
+  import { getDisasters } from "@/services/natural-disasters.js";
+  import { getAllWineStats } from "@/services/wine-stats.js";
 
   let Highcharts;
   let chartContainer;

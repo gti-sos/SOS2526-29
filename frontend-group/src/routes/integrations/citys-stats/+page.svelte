@@ -2,7 +2,7 @@
   // onDestroy limpia la grafica; tick espera a que Svelte actualice el DOM.
   import { onDestroy, onMount, tick } from "svelte";
   // Servicio que pide el resumen integrado al backend.
-  import { getCitysStatsIntegrationSummary } from "../services/citysStatsIntegrations";
+  import { getCitysStatsIntegrationSummary } from "@/services/citysStatsIntegrations";
 
   // Libreria Highcharts cargada de forma dinamica.
   let Highcharts;

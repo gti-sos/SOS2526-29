@@ -2,9 +2,9 @@
 
 <script>
     // back vuelve a la pantalla anterior.
-    import { back } from "../lib/navigation.js";
+    import { back } from "@/lib/navigation.js";
     // Funciones del servicio para leer y actualizar desastres.
-    import { getOneDisaster, updateDisaster } from "../services/natural-disasters.js";
+    import { getOneDisaster, updateDisaster } from "@/services/natural-disasters.js";
 
     // params contiene los parametros de la URL (country y year).
     export let params = {};

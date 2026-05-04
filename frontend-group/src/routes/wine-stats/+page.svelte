@@ -2,14 +2,14 @@
   // onMount ejecuta una funcion cuando la pantalla aparece por primera vez.
   import { onMount } from "svelte";
   // navigate permite navegar a otra ruta del frontend.
-  import { navigate } from "../lib/navigation.js";
+  import { navigate } from "@/lib/navigation.js";
   // Importamos funciones ya preparadas para llamar a la API de vinos.
   import {
     getAllWineStats,
     createWineStat,
     deleteAllWineStats,
     deleteWineStat
-  } from "../services/wine-stats.js";
+  } from "@/services/wine-stats.js";
 
   // Esta URL se usa en busquedas y carga inicial directa desde esta pantalla.
   const API_BASE =

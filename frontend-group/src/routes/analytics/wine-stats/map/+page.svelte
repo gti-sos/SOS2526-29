@@ -1,6 +1,6 @@
 <script>
   import { onDestroy, onMount, tick } from "svelte";
-  import { getAllWineStats } from "../services/wine-stats.js";
+  import { getAllWineStats } from "@/services/wine-stats.js";
 
   let Highcharts;
   let container;

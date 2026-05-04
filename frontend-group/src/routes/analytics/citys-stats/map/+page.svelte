@@ -4,7 +4,7 @@
   // Mapa mundial en formato TopoJSON para Highcharts Maps.
   import worldMap from "@highcharts/map-collection/custom/world.topo.json";
   // Servicio para pedir registros de citys-stats.
-  import { getAllCitysStats } from "../services/citysStatsApi";
+  import { getAllCitysStats } from "@/services/citysStatsApi";
 
   // Coordenadas locales para colocar cada ciudad en el mapa.
   const coordinates = {

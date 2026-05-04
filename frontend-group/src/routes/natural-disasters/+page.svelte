@@ -4,7 +4,7 @@
     // onMount ejecuta codigo cuando la pantalla se monta.
     import { onMount } from "svelte";
     // navigate permite ir a la pantalla de edicion.
-    import { navigate } from "../lib/navigation.js";
+    import { navigate } from "@/lib/navigation.js";
     // Importamos funciones para comunicarnos con la API de desastres.
     import {
         getDisasters,
@@ -12,7 +12,7 @@
         deleteAllDisasters,
         deleteDisaster,
         loadInitialData
-    } from "../services/natural-disasters.js";
+    } from "@/services/natural-disasters.js";
 
     // Lista de desastres que aparece en la tabla.
     let disasters = [];
