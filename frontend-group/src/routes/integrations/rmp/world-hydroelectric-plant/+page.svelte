@@ -592,6 +592,7 @@
     margin: 0.5em auto;
   }
 
+  
   .button-row {
     max-width: 800px;
     margin: 0.5em auto;
