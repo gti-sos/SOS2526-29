@@ -195,25 +195,27 @@
 </script>
 
 <svelte:head>
-  <title>Exportations Stats | Integraciones RMP</title>
+  <title>Exportations Stats – RMP</title>
 </svelte:head>
 
-<main class="page">
-  <div class="topbar">
-    <a href="/integrations/rmp" class="btn-back">← Volver</a>
+<div class="page">
+  <div class="hero">
+    <a href="/integrations/rmp" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Integraciones RMP
+    </a>
+    <div class="hero-badge">USO 02 · Integración externa</div>
+    <h1>
+      Exportations Stats <span class="accent">(SOS2526-13)</span>
+    </h1>
+    <p class="hero-desc">
+      Cruce entre el catálogo de vinos de wine-stats y las exportaciones de armamento
+      de SOS2526‑13, con resumen y gráfico de tarta.
+    </p>
   </div>
 
-  <header class="hero">
-    <p class="eyebrow">RMP · wine-stats × SOS2526-13</p>
-    <h1>Exportations Stats</h1>
-    <p class="subtitle">
-      Cruce de los vinos locales con los datos de exportaciones de armamento de
-      <strong>SOS2526-13</strong>. Para cada país productor de vino se muestra
-      el armamento recibido y exportado según el TIV (Transfer Impact Value).
-    </p>
-  </header>
-
-  <!-- Fuentes -->
   <section class="source-grid">
     <a
       class="source-card"
@@ -244,46 +246,50 @@
   </div>
 
   {#if loading}
-    <div class="state">Cargando integración…</div>
+    <div class="status-box">Cargando integración…</div>
   {:else if error}
-    <div class="state error">{error}</div>
+    <div class="status-box error">{error}</div>
   {:else}
-    <!-- Tarjetas resumen -->
-    <section class="stats-row">
-      <div class="stat-card">
-        <span>Vinos en wine-stats</span>
-        <strong>{fmtInt.format(totalWines)}</strong>
+    <div class="summary-row">
+      <div class="summary-card">
+        <span class="summary-num">{fmtInt.format(totalWines)}</span>
+        <span class="summary-label">vinos en wine-stats</span>
       </div>
-      <div class="stat-card">
-        <span>Exportaciones SOS2526-13</span>
-        <strong>{fmtInt.format(totalExportations)}</strong>
+      <div class="summary-card">
+        <span class="summary-num">{fmtInt.format(totalExportations)}</span>
+        <span class="summary-label">exportaciones SOS2526-13</span>
       </div>
-      <div class="stat-card">
-        <span>Países productores de vino</span>
-        <strong>{crossRows.length}</strong>
+      <div class="summary-card">
+        <span class="summary-num">
+          {crossRows.length}
+        </span>
+        <span class="summary-label">países productores de vino</span>
       </div>
-      <div class="stat-card">
-        <span>Con datos de armamento</span>
-        <strong>
+      <div class="summary-card">
+        <span class="summary-num">
           {crossRows.filter((r) => r.receivedTiv !== null || r.exportedTiv !== null).length}
-        </strong>
+        </span>
+        <span class="summary-label">con datos de armamento</span>
       </div>
-    </section>
+    </div>
 
-    <!-- Gráfica Highcharts pie -->
     <section class="chart-panel">
-      <h2>Top proveedores de armamento — Highcharts de pie</h2>
+      <h2 class="section-title">Top proveedores de armamento</h2>
+      <p class="chart-note">
+        Distribución de TIV total exportado por los principales proveedores.
+      </p>
       <div bind:this={pieContainer} class="chart-frame"></div>
     </section>
 
-    <!-- Tabla cruzada -->
-    <section class="table-panel">
-      <h2>Cruce: países productores de vino vs. exportaciones de armamento</h2>
+    <section>
+      <h2 class="section-title">
+        Cruce: países productores de vino vs. exportaciones de armamento
+      </h2>
       <p class="table-note">
-        Datos de armamento (TIV) de <strong>SOS2526-13</strong>.
-        "Sin datos" significa que ese país no aparece en el dataset de exportaciones.
+        Fuente: SOS2526-13 y SOS2526-29 · Los valores de TIV se obtienen desde
+        <code>exportations-stats</code>.
       </p>
-      <div class="table-wrapper">
+      <div class="table-wrap">
         <table>
           <thead>
             <tr>
@@ -300,15 +306,18 @@
           <tbody>
             {#each crossRows as row}
               <tr>
-                <td class="country-cell">{titleCase(row.country)}</td>
-                <td class="num">{row.wineCount}</td>
-                <td class="num">{fmtDec.format(row.avgPrice)}</td>
-                <td class="num">{fmtDec.format(row.avgAbv)}</td>
+                <td class="td-country">{titleCase(row.country)}</td>
+                <td class="td-num">{row.wineCount}</td>
+                <td class="td-num">{fmtDec.format(row.avgPrice)}</td>
+                <td class="td-num">{fmtDec.format(row.avgAbv)}</td>
                 <td>{row.dominantType}</td>
-                <td class="num">
+                <td class="td-num">
                   {#if row.receivedTiv !== null}
                     {fmtDec.format(row.receivedTiv)}
-                    <small>({row.receivedCount} pedido{row.receivedCount !== 1 ? "s" : ""})</small>
+                    <small>
+                      ({row.receivedCount}
+                      pedido{row.receivedCount !== 1 ? "s" : ""})
+                    </small>
                   {:else}
                     <span class="na">Sin datos</span>
                   {/if}
@@ -320,10 +329,13 @@
                     <span class="na">—</span>
                   {/if}
                 </td>
-                <td class="num">
+                <td class="td-num">
                   {#if row.exportedTiv !== null}
                     {fmtDec.format(row.exportedTiv)}
-                    <small>({row.exportedCount} pedido{row.exportedCount !== 1 ? "s" : ""})</small>
+                    <small>
+                      ({row.exportedCount}
+                      pedido{row.exportedCount !== 1 ? "s" : ""})
+                    </small>
                   {:else}
                     <span class="na">Sin datos</span>
                   {/if}
@@ -335,144 +347,228 @@
       </div>
     </section>
   {/if}
-</main>
+</div>
 
 <style>
-  :global(body) {
-    margin: 0;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: #f6f7fb;
-    color: #111827;
+  .page {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
   }
-  .page { max-width: 1200px; margin: 0 auto; padding: 28px 16px 60px; }
-  .topbar { margin-bottom: 20px; }
-  .btn-back {
-    display: inline-block;
-    background: #7c3aed;
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 8px;
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+    color: #6b6b6b;
     text-decoration: none;
-    font-weight: 700;
-    font-size: 0.9rem;
+    margin-bottom: 1.75rem;
+    transition: color 160ms ease;
   }
-  .btn-back:hover { background: #6d28d9; }
-  .hero { margin-bottom: 24px; }
-  .eyebrow {
-    color: #7c3aed;
-    font-size: 0.82rem;
+  .back-link:hover { color: #01696f; }
+
+  .hero {
+    margin-bottom: 2rem;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.7rem;
     font-weight: 700;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    margin: 0;
+    color: #01696f;
+    background: color-mix(in oklch, #01696f 12%, transparent);
+    border: 1px solid color-mix(in oklch, #01696f 25%, transparent);
+    border-radius: 9999px;
+    padding: 0.2rem 0.65rem;
+    margin-bottom: 0.75rem;
   }
-  h1 { margin: 8px 0 6px; font-size: clamp(1.7rem, 4vw, 2.6rem); color: #0f172a; }
-  h2 { color: #0f172a; font-size: 1.1rem; margin: 0 0 12px; }
-  .subtitle { color: #526174; margin: 0; max-width: 700px; }
+
+  h1 {
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #1a1a1a;
+    margin-bottom: 0.6rem;
+  }
+  .accent { color: #01696f; }
+
+  .hero-desc {
+    font-size: 0.9375rem;
+    color: #6b6b6b;
+    max-width: 56ch;
+    line-height: 1.6;
+  }
+
+  .status-box {
+    padding: 1.5rem;
+    border-radius: 8px;
+    background: #f9f8f5;
+    color: #777;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .status-box.error { color: #a12c7b; }
 
   .source-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
-    margin-bottom: 20px;
+    margin: 1rem 0 1.5rem;
   }
   .source-card {
     display: grid;
     gap: 4px;
     padding: 14px;
-    border: 1px solid #d9e0ea;
-    border-radius: 8px;
+    border: 1px solid #e8e6e2;
+    border-radius: 10px;
     background: #fff;
     text-decoration: none;
     color: inherit;
-    box-shadow: 0 4px 12px rgba(15,23,42,0.05);
-    transition: box-shadow 0.15s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 160ms ease;
   }
-  .source-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,0.10); }
-  .source-card span { color: #64748b; font-size: 0.82rem; }
-  .source-card strong { color: #0f172a; font-size: 0.95rem; }
+  .source-card:hover { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); }
+  .source-card span { color: #777; font-size: 0.82rem; }
+  .source-card strong { color: #1a1a1a; font-size: 0.95rem; word-break: break-all; }
 
-  .toolbar { margin-bottom: 20px; }
+  .toolbar {
+    margin-bottom: 1.5rem;
+  }
   button {
     min-height: 40px;
     border: 0;
-    border-radius: 8px;
-    background: #7c3aed;
+    border-radius: 9999px;
+    background: #01696f;
     color: #fff;
     padding: 0 18px;
     font: inherit;
     font-weight: 700;
+    font-size: 0.875rem;
     cursor: pointer;
+    transition: background 160ms ease;
   }
-  button:hover { background: #6d28d9; }
+  button:hover { background: #005a5f; }
 
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 24px;
+  .summary-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
   }
-  .stat-card {
+  .summary-card {
+    flex: 1;
+    min-width: 140px;
     background: #fff;
-    border: 1px solid #d9e0ea;
-    border-radius: 8px;
-    padding: 16px;
-    display: grid;
-    gap: 6px;
-    box-shadow: 0 4px 12px rgba(15,23,42,0.05);
+    border: 1px solid #e8e6e2;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
-  .stat-card span { color: #64748b; font-size: 0.83rem; }
-  .stat-card strong { color: #0f172a; font-size: 1.5rem; font-weight: 800; }
+  .summary-num {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #01696f;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .summary-label {
+    font-size: 0.8rem;
+    color: #777;
+  }
 
   .chart-panel {
     background: #fff;
-    border: 1px solid #d9e0ea;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(15,23,42,0.05);
-    margin-bottom: 24px;
+    border: 1px solid #e8e6e2;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+    overflow: hidden;
   }
-  .chart-frame { min-height: 420px; }
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.75rem;
+  }
+  .chart-note {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 1rem;
+  }
+  .chart-frame {
+    min-height: 340px;
+  }
 
-  .table-panel {
-    background: #fff;
-    border: 1px solid #d9e0ea;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(15,23,42,0.05);
+  section { margin-bottom: 3rem; }
+
+  .table-note {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 1rem;
   }
-  .table-note { color: #64748b; font-size: 0.88rem; margin: 0 0 14px; }
-  .table-wrapper { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-  thead th {
-    background: #f1f5f9;
-    color: #0f172a;
-    padding: 10px 12px;
+  .table-note code {
+    background: #f3f0ec;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.78rem;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid #e8e6e2;
+    border-radius: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8375rem;
+  }
+  thead tr { background: #f3f0ec; }
+  th {
     text-align: left;
-    border-bottom: 2px solid #e2e8f0;
+    padding: 0.65rem 1rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #777;
     white-space: nowrap;
+    border-bottom: 1px solid #e8e6e2;
   }
-  tbody tr:nth-child(even) { background: #f8fafc; }
-  tbody tr:hover { background: #ede9fe; }
   td {
-    padding: 9px 12px;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid #ebebeb;
+    color: #1a1a1a;
     vertical-align: middle;
   }
-  .country-cell { font-weight: 600; color: #0f172a; }
-  .num { text-align: right; font-variant-numeric: tabular-nums; }
-  small { color: #64748b; font-size: 0.78rem; display: block; }
-  .na { color: #94a3b8; font-style: italic; }
-  .state {
-    padding: 20px;
-    border-radius: 8px;
-    background: #fff;
-    border: 1px solid #d9e0ea;
-    color: #475569;
-  }
-  .error { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) { background: #f9f8f5; }
+  tbody tr:hover { background: #f3f0ec; }
 
-  @media (max-width: 700px) {
-    .stats-row, .source-grid { grid-template-columns: 1fr; }
-    .chart-frame { min-height: 300px; }
+  .td-country { font-weight: 500; white-space: nowrap; }
+  .td-num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+  small {
+    display: block;
+    color: #777;
+    font-size: 0.78rem;
+  }
+  .na {
+    color: #999;
+    font-style: italic;
+  }
+
+  @media (max-width: 480px) {
+    .page { padding: 1.5rem 1rem 3rem; }
+    .summary-row { flex-direction: column; }
   }
 </style>

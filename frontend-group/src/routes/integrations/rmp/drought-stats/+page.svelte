@@ -49,7 +49,7 @@
       </svg>
       Integraciones RMP
     </a>
-    <div class="hero-badge">Integración 01 · Proxy propio</div>
+    <div class="hero-badge">USO 01 · Proxy propio</div>
     <h1>Drought Stats <span class="accent">(SOS2526-19)</span></h1>
     <p class="hero-desc">
       Sequías agrícolas globales obtenidas a través de un proxy propio.

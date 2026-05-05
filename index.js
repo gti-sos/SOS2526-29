@@ -65,23 +65,66 @@ wineStatsApiV1(app, wineStatsDb);
 // =============================================================================
 
 app.get("/api/proxy/drought-stats", async (req, res) => {
-    try {
-        const response = await fetch("https://sos2526-19-integracion.onrender.com/api/v1/drought-stats");
-        const data = await response.json();
-        res.status(200).json(data);
-    } catch (err) {
-        res.status(500).json({ error: "No se pudo conectar con la API externa." });
+  try {
+    const baseUrl = "https://sos2526-19-integracion.onrender.com/api/v1/drought-stats";
+
+    let response = await fetch(baseUrl);
+    if (!response.ok) {
+      throw new Error(`Error API externa: ${response.status}`);
     }
+
+    let data = await response.json();
+
+    if (Array.isArray(data) && data.length === 0) {
+      const loadResponse = await fetch(`${baseUrl}/loadInitialData`);
+      if (!loadResponse.ok) {
+        throw new Error(`Error loadInitialData: ${loadResponse.status}`);
+      }
+
+      response = await fetch(baseUrl);
+      if (!response.ok) {
+        throw new Error(`Error API externa tras loadInitialData: ${response.status}`);
+      }
+
+      data = await response.json();
+    }
+
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ error: "No se pudo conectar con la API externa." });
+  }
 });
+
 app.get("/api/proxy/age-specific-fertility-rates", async (req, res) => {
-    try {
-        const response = await fetch("https://sos2526-12.onrender.com/api/v2/age-specific-fertility-rates");
-        const data = await response.json();
-        res.status(200).json(data);
-    } catch (err) {
-        res.status(500).json({ error: "No se pudo conectar con la API externa." });
+  try {
+    const baseUrl = "https://sos2526-12.onrender.com/api/v2/age-specific-fertility-rates";
+
+    let response = await fetch(baseUrl);
+    if (!response.ok) {
+      throw new Error(`Error API externa: ${response.status}`);
     }
-});
+
+    let data = await response.json();
+
+    if (Array.isArray(data) && data.length === 0) {
+      const loadResponse = await fetch(`${baseUrl}/loadInitialData`);
+      if (!loadResponse.ok) {
+        throw new Error(`Error loadInitialData: ${loadResponse.status}`);
+      }
+
+      response = await fetch(baseUrl);
+      if (!response.ok) {
+        throw new Error(`Error API externa tras loadInitialData: ${response.status}`);
+      }
+
+      data = await response.json();
+    }
+
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ error: "No se pudo conectar con la API externa." });
+  }
+}); 
 
 // =============================================================================
 // 4. FRONTEND ESTATICO Y RUTAS DE NAVEGACION

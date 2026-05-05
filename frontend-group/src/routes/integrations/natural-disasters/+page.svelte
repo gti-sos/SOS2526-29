@@ -1,7 +1,6 @@
 
 
 <script>
-    import { log } from "node:console";
     import { onMount } from "svelte";
 
     // Variables G19 (Productividad)

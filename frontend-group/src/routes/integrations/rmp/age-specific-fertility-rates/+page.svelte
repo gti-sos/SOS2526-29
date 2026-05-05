@@ -67,7 +67,7 @@
       </svg>
       Integraciones RMP
     </a>
-    <div class="hero-badge">USO WIDGET 02</div>
+    <div class="hero-badge">USO 01 · Proxy propio</div>
     <h1>Age-Specific <span class="accent">Fertility Rates</span></h1>
     <p class="hero-desc">
       Tasas de fertilidad por franja de edad y país. Datos obtenidos de la API externa.
