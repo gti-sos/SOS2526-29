@@ -273,30 +273,40 @@ module.exports = function registerNaturalDisastersV2(app, db) {
 
 
     // ====================================================================
-    // 🚀 PROXY PARA LA INTEGRACIÓN 4 (API EXTERNA)
+    // 🚀 PROXY PARA LA INTEGRACIÓN 4 (Cambio Climático - Temperatura Global)
     // ====================================================================
     app.get(`/api/v2/proxy-integracion-4`, async (request, response) => {
         try {
-            // 1. Pon aquí la URL de la API de la Integración 4
-            const urlExterna = "LA_URL_DE_LA_NUEVA_API_AQUI"; 
+            // API pública de temperatura global. ¡Rápida y súper estable!
+            const urlExterna = "https://global-warming.org/api/temperature-api"; 
             
-            // 2. Tu backend hace la petición
             const peticion = await fetch(urlExterna);
             
             if (!peticion.ok) {
-                return response.status(peticion.status).json({ error: "Fallo en la API externa" });
+                return response.status(peticion.status).json({ error: "Fallo al conectar con la API del Clima" });
             }
 
-            // 3. Convertimos los datos a JSON
-            const datosExternos = await peticion.json();
+            const datosBrutos = await peticion.json();
+            let temperaturaPorAno = {};
 
-            // 4. Se los mandamos a tu frontend de Svelte
-            return response.json(datosExternos);
+            // La API devuelve datos como: { time: "1950.04", station: "-0.12" }
+            // Vamos a extraer solo el año y guardar la temperatura de ese año
+            if (datosBrutos.result) {
+                datosBrutos.result.forEach(item => {
+                    // Cortamos "1950.04" por el punto y nos quedamos con "1950" (número entero)
+                    let ano = parseInt(item.time.split('.')[0]);
+                    
+                    // Guardamos la temperatura de la estación global
+                    temperaturaPorAno[ano] = parseFloat(item.station);
+                });
+            }
+
+            // El backend devuelve esto al frontend: {"1950": -0.12, "1951": -0.07, ...}
+            return response.json(temperaturaPorAno);
 
         } catch (error) {
             console.error("Error en el proxy de la integración 4:", error);
             return response.status(500).json({ error: "Fallo interno en el servidor proxy" });
         }
     });
-
 };

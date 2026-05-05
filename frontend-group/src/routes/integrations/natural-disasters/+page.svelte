@@ -1,6 +1,7 @@
 
 
 <script>
+    import { log } from "node:console";
     import { onMount } from "svelte";
 
     // Variables G19 (Productividad)
@@ -14,6 +15,15 @@
 
     let cargando3 = true;
     let errorMensaje3 = "";
+
+
+    // Variables API Ayuda Humanitaria (Proxy)
+    let cargando4 = true;
+    let errorMensaje4 = "";
+    let miGraficaExterna2;
+
+    let cargando5 = true;
+    let errorMensaje5 = "";
 
     // URLs de las APIs
     const MI_API = "/api/v2/natural-disasters";
@@ -421,16 +431,232 @@
     }
 
 
+    // --- INTEGRACIÓN 4: Cambio Climático (MEDIANTE PROXY) ---
+    async function cargarIntegracion4() {
+        try {
+            const [resMia, resProxy] = await Promise.all([
+                fetch(MI_API), 
+                fetch('/api/v2/proxy-integracion-4') 
+            ]);
+
+            if (!resMia.ok) throw new Error("Error cargando los datos de tu API local");
+            if (!resProxy.ok) throw new Error("Error cargando el proxy de Temperatura Global");
+
+            const misDatos = await resMia.json();
+            const tempPorAno = await resProxy.json(); 
+
+            // 1. Agrupamos tus muertes por AÑO
+            let misMuertesPorAno = {};
+            for (let miDato of misDatos) {
+                let ano = miDato.year;
+                if (!misMuertesPorAno[ano]) misMuertesPorAno[ano] = 0;
+                misMuertesPorAno[ano] += (parseFloat(miDato.death_count) || 0);
+            }
+
+            let etiquetasAnos = [];
+            let barrasMuertes = [];
+            let lineaTemperatura = [];
+
+            // 2. Ordenamos los años de menor a mayor para que la línea del tiempo tenga sentido
+            let anosOrdenados = Object.keys(misMuertesPorAno).sort((a, b) => a - b);
+
+            // 3. Cruzamos los datos
+            for (let ano of anosOrdenados) {
+                if (tempPorAno[ano] !== undefined) {
+                    etiquetasAnos.push(ano);
+                    barrasMuertes.push(misMuertesPorAno[ano]);
+                    lineaTemperatura.push(tempPorAno[ano]);
+                }
+            }
+
+            if (etiquetasAnos.length === 0) {
+                throw new Error("No hay años en común entre tus datos y la API climática.");
+            }
+
+            // 4. Dibujamos la gráfica mixta con APEXCHARTS
+            setTimeout(() => {
+                // Si la gráfica ya existía (por ejemplo, al recargar la página), la destruimos primero
+                if (window.miGraficaExterna2) {
+                    window.miGraficaExterna2.destroy();
+                }
+
+                var options = {
+                    series: [
+                        {
+                            name: 'Mis Muertes Totales',
+                            type: 'column', // Barras
+                            data: barrasMuertes
+                        }, 
+                        {
+                            name: 'Anomalía Temp (ºC)',
+                            type: 'line', // Línea
+                            data: lineaTemperatura
+                        }
+                    ],
+                    chart: {
+                        height: 400,
+                        type: 'line',
+                        toolbar: { show: true } // Botones para descargar la gráfica
+                    },
+                    stroke: {
+                        width: [0, 4], // 0 ancho para las barras, 4px de grosor para la línea
+                        curve: 'smooth' // Hace que la línea roja sea curva y elegante
+                    },
+                    title: {
+                        text: 'Impacto de Desastres vs Subida de Temperatura',
+                        align: 'left'
+                    },
+                    colors: ['#3b82f6', '#ef4444'], // Azul para muertes, Rojo para temperatura
+                    xaxis: {
+                        categories: etiquetasAnos.map(String),
+                        title: { text: 'Años' }
+                    },
+                    yaxis: [
+                        { // Eje Y de la izquierda (Muertes)
+                            title: {
+                                text: 'Nº de Muertes',
+                                style: { color: '#3b82f6' }
+                            },
+                            labels: { style: { colors: '#3b82f6' } }
+                        }, 
+                        { // Eje Y de la derecha (Temperatura)
+                            opposite: true,
+                            title: {
+                                text: 'Anomalía (ºC)',
+                                style: { color: '#ef4444' }
+                            },
+                            labels: { style: { colors: '#ef4444' } }
+                        }
+                    ],
+                    tooltip: {
+                        shared: true,
+                        intersect: false
+                    }
+                };
+
+                // Seleccionamos el div y renderizamos la gráfica
+                window.miGraficaExterna2 = new ApexCharts(document.querySelector("#grafica-proxy-4"), options);
+                window.miGraficaExterna2.render();
+                
+                cargando4 = false;
+            }, 500);
+
+        } catch (error) {
+            errorMensaje4 = error.message;
+            cargando4 = false;
+        }
+    }
+
+    // --- INTEGRACIÓN 5: COVID-19 API (DIRECTA SIN PROXY - PLOTLY.JS) ---
+    async function cargarIntegracion5() {
+        try {
+            // Llamada directa desde el frontend a la API del COVID (Sin Proxy)
+            const urlExterna = "https://disease.sh/v3/covid-19/countries";
+
+            const [resMia, resExterna] = await Promise.all([
+                fetch(MI_API), 
+                fetch(urlExterna) 
+            ]);
+
+            if (!resMia.ok) throw new Error("Error cargando los datos de tu API local");
+            if (!resExterna.ok) throw new Error("Error cargando la API de COVID-19");
+
+            const misDatos = await resMia.json();
+            const datosCovid = await resExterna.json(); 
+
+            // 1. Masticamos la API del COVID (Guardamos las muertes por país)
+            let muertesCovidPorPais = {};
+            for (let pais of datosCovid) {
+                if (pais.country) {
+                    let nombrePais = pais.country.toLowerCase();
+                    muertesCovidPorPais[nombrePais] = pais.deaths;
+                }
+            }
+
+            // 2. Agrupamos tus Muertes Históricas por país
+            let misMuertesPorPais = {};
+            for (let miDato of misDatos) {
+                let pais = miDato.country.toLowerCase();
+                if (!misMuertesPorPais[pais]) misMuertesPorPais[pais] = 0;
+                misMuertesPorPais[pais] += (parseFloat(miDato.death_count) || 0);
+            }
+
+            let etiquetasPaises = [];
+            let barrasDesastres = [];
+            let barrasCovid = [];
+
+            // 3. Cruzamos los datos
+            for (let pais in misMuertesPorPais) {
+                if (muertesCovidPorPais[pais]) {
+                    const paisBonito = pais.charAt(0).toUpperCase() + pais.slice(1);
+                    etiquetasPaises.push(paisBonito);
+                    barrasDesastres.push(misMuertesPorPais[pais]);
+                    barrasCovid.push(muertesCovidPorPais[pais]);
+                }
+            }
+
+            if (etiquetasPaises.length === 0) {
+                throw new Error("No hay países en común con la API del COVID-19.");
+            }
+
+            // 4. Dibujamos la gráfica con PLOTLY.JS
+            setTimeout(() => {
+                // Trazo 1: Tus desastres naturales
+                var trazoDesastres = {
+                    x: etiquetasPaises,
+                    y: barrasDesastres,
+                    name: 'Muertes Desastres Naturales',
+                    type: 'bar',
+                    marker: { color: '#0ea5e9' } // Azul claro
+                };
+
+                // Trazo 2: COVID-19
+                var trazoCovid = {
+                    x: etiquetasPaises,
+                    y: barrasCovid,
+                    name: 'Muertes COVID-19',
+                    type: 'bar',
+                    marker: { color: '#ef4444' } // Rojo peligro
+                };
+
+                var configuracionLayout = {
+                    title: '',
+                    barmode: 'group', // Agrupa las barras una al lado de la otra
+                    xaxis: { title: 'Países' },
+                    yaxis: { title: 'Nº Total de Muertes',
+                        type: 'log'
+                     },
+                    margin: { l: 60, r: 40, t: 50, b: 50 },
+                    legend: { x: 0.5, y: 1.1, orientation: 'h', xanchor: 'center' } // Leyenda arriba horizontal
+                };
+
+                // Renderizamos la gráfica en el div
+                Plotly.newPlot('grafica-directa-5', [trazoDesastres, trazoCovid], configuracionLayout, {responsive: true});
+                
+                cargando5 = false;
+            }, 500);
+
+        } catch (error) {
+            errorMensaje5 = error.message;
+            cargando5 = false;
+        }
+    }
+
+
     // Al montar la página, ejecutamos TODAS simultáneamente
     onMount(() => {
         cargarIntegracion1();
         cargarIntegracion2();
         cargarIntegracionExterna();
+        cargarIntegracion4();
+        cargarIntegracion5();
     });
 </script>
 
 <svelte:head>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 </svelte:head>
 
 <div class="page">
@@ -478,6 +704,29 @@
         <div style="width: 100%; height: 400px; display: flex; justify-content: center;">
             <canvas id="grafica-externa-1"></canvas>
         </div>
+    </section>
+
+    <!-- BLOQUE DE LA INTEGRACIÓN 4 (ApexCharts) -->
+    <section class="card integration-card">
+        <h2>4. Mis Datos VS Calentamiento Global (ApexCharts Vía Proxy)</h2>
+        <p>Evolución de las muertes por desastres naturales y subida de la temperatura global, renderizado con la librería ApexCharts.</p>
+        
+        {#if errorMensaje4} <p class="error">❌ {errorMensaje4}</p> {/if}
+        {#if cargando4 && !errorMensaje4} <p>⏳ Carga de Temperatura Global...</p> {/if}
+        
+        <!-- APEXCHARTS USA UN DIV -->
+        <div id="grafica-proxy-4" style="width: 100%; height: 400px; margin: 0 auto;"></div>
+    </section>
+
+    <!-- BLOQUE DE LA INTEGRACIÓN 5 (Plotly.js Directo - COVID) -->
+    <section class="card integration-card">
+        <h2>5. Desastres Naturales VS COVID-19 (Plotly.js Directo)</h2>
+        <p>Comparativa del total de muertes históricas por desastres naturales frente a las muertes provocadas por la pandemia de COVID-19 por país (API Externa Directa).</p>
+        
+        {#if errorMensaje5} <p class="error">❌ {errorMensaje5}</p> {/if}
+        {#if cargando5 && !errorMensaje5} <p>⏳ Carga de Datos Pandémicos...</p> {/if}
+        
+        <div id="grafica-directa-5" style="width: 100%; height: 450px;"></div>
     </section>
 
 </div>
