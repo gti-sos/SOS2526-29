@@ -250,7 +250,7 @@
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.06em;
-    color: var( #340000);
+    color: #340000;
     font-variant-numeric: tabular-nums;
     margin-left: 0.5rem;
   }
