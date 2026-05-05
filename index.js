@@ -7,10 +7,6 @@ const Datastore = require("@seald-io/nedb");
 // Importamos cors para permitir llamadas al backend desde el frontend en desarrollo.
 const cors = require("cors");
 
-// Estructura alineada con la arquitectura del curso:
-// navegador/Svelte -> API REST/Express -> persistencia NeDB e integraciones externas.
-// El contrato publico vive bajo /api; el resto de rutas sirven la SPA compilada.
-
 // Creamos la aplicacion principal de Express.
 const app = express();
 // Usamos el puerto de Render si existe; si no, usamos 10000 en local.
@@ -23,108 +19,102 @@ app.use(cors());
 // Indicamos a Express que lea cuerpos JSON en peticiones POST y PUT.
 app.use(express.json());
 
+
 // =============================================================================
 // 1. CONFIGURACION DE BASES DE DATOS
 // =============================================================================
 
-// Esta base guarda los registros de desastres naturales de Alberto.
 const naturalDisastersDb = new Datastore({
-    // Guardamos el archivo dentro de src/back para tener los datos junto al backend.
     filename: path.join(__dirname, "src", "back", "natural-disasters.db"),
-    // autoload hace que NeDB abra el archivo automaticamente al arrancar.
     autoload: true
 });
 
-// Esta base guarda los registros de estadisticas de ciudades de Luis.
 const citysStatsDb = new Datastore({
-    // El nombre del archivo coincide con el recurso citys-stats.
     filename: path.join(__dirname, "src", "back", "citys-stats.db"),
-    // Cargamos la base automaticamente igual que las demas.
     autoload: true
 });
 
-// Esta base guarda los registros de vinos de Rufino.
 const wineStatsDb = new Datastore({
-    // Cada recurso tiene su propio archivo para no mezclar datos.
     filename: path.join(__dirname, "src", "back", "wine-stats.db"),
-    // Cargamos el archivo nada mas crear el objeto.
     autoload: true
 });
+
 
 // =============================================================================
 // 2. CARGA DE MODULOS DE LA API
 // =============================================================================
 
-// Cargamos la API v1 de desastres naturales y le pasamos Express y su base de datos.
 const naturalDisastersApiV1 = require("./src/back/v1/natural-disasters");
 naturalDisastersApiV1(app, naturalDisastersDb);
 
-// Cargamos la API v2 de desastres naturales usando la misma base de datos.
 const naturalDisastersApiV2 = require("./src/back/v2/natural-disasters");
 naturalDisastersApiV2(app, naturalDisastersDb);
 
-// Cargamos la API v1 de estadisticas de ciudades.
 const citysStatsApiV1 = require("./src/back/v1/citys-stats");
 citysStatsApiV1(app, citysStatsDb);
 
-// Cargamos la API v2 de estadisticas de ciudades.
 const citysStatsApiV2 = require("./src/back/v2/citys-stats");
 citysStatsApiV2(app, citysStatsDb);
 
-// Cargamos la API v1 de vinos.
 const wineStatsApiV1 = require("./src/back/v1/wine-stats");
 wineStatsApiV1(app, wineStatsDb);
 
+
 // =============================================================================
-// 3. FRONTEND ESTATICO Y RUTAS DE NAVEGACION
+// 3. PROXIES PARA APIS EXTERNAS (evita CORS desde el frontend)
 // =============================================================================
 
-// Servimos los archivos ya compilados del frontend desde la carpeta public.
-app.use("/", express.static(path.join(__dirname, "public")));
-
-// Enviamos el mismo index.html para la portada.
-app.get("/", (request, response) => {
-    response.sendFile(frontendIndexPath);
-});
-
-// Enviamos el mismo frontend para la ruta informativa /about.
-app.get("/about", (request, response) => {
-    response.sendFile(frontendIndexPath);
-});
-
-app.get("/api/proxy/exportations-stats", async (req, res) => {
+app.get("/api/proxy/drought-stats", async (req, res) => {
     try {
-        const response = await fetch("https://sos2526-13.onrender.com/api/v2/exportations-stats");
+        const response = await fetch("https://sos2526-19-integracion.onrender.com/api/v1/drought-stats");
         const data = await response.json();
         res.status(200).json(data);
     } catch (err) {
         res.status(500).json({ error: "No se pudo conectar con la API externa." });
     }
 });
+app.get("/api/proxy/age-specific-fertility-rates", async (req, res) => {
+    try {
+        const response = await fetch("https://sos2526-12.onrender.com/api/v2/age-specific-fertility-rates");
+        const data = await response.json();
+        res.status(200).json(data);
+    } catch (err) {
+        res.status(500).json({ error: "No se pudo conectar con la API externa." });
+    }
+});
+
+// =============================================================================
+// 4. FRONTEND ESTATICO Y RUTAS DE NAVEGACION
+// =============================================================================
+
+app.use("/", express.static(path.join(__dirname, "public")));
+
+app.get("/", (request, response) => {
+    response.sendFile(frontendIndexPath);
+});
+
+app.get("/about", (request, response) => {
+    response.sendFile(frontendIndexPath);
+});
+
 // Cualquier ruta del frontend (que no sea /api) devuelve la SPA.
 app.get(/^\/(?!api\/).*/, (request, response) => {
     response.sendFile(frontendIndexPath);
 });
 
-// =============================================================================
-// 4. ARRANQUE DEL SERVIDOR
-// =============================================================================
 
-// Ponemos el servidor a escuchar peticiones HTTP en el puerto elegido.
+// =============================================================================
+// 5. ARRANQUE DEL SERVIDOR
+// =============================================================================
 
 app.listen(port, () => {
-    
-    // Mostramos por consola la direccion principal del servidor.
     console.log(`>>> Servidor SOS2526-29 listo en puerto ${port}`);
     console.log(`>>> pagina: http://localhost:${port}`);
-    // Mostramos la ruta de la API de desastres naturales v1.
     console.log(`>>> API ALG: http://localhost:${port}/api/v1/natural-disasters`);
-    // Mostramos la ruta de la API de ciudades v1.
     console.log(`>>> API LCC: http://localhost:${port}/api/v1/citys-stats`);
-    // Mostramos la ruta de la API de vinos v1.
     console.log(`>>> API RMP: http://localhost:${port}/api/v1/wine-stats`);
-    // Mostramos la ruta de la API de ciudades v2.
     console.log(`>>> API LCC v2: http://localhost:${port}/api/v2/citys-stats`);
-    // Mostramos la ruta de la API de desastres naturales v2.
     console.log(`>>> API ALG v2: http://localhost:${port}/api/v2/natural-disasters`);
+    console.log(`>>> PROXY drought-stats: http://localhost:${port}/api/proxy/drought-stats`);
+    console.log(`>>> PROXY age-specific-fertility-rates: http://localhost:${port}/api/proxy/age-specific-fertility-rates`);
 });

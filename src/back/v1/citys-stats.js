@@ -15,7 +15,7 @@ module.exports = (app, db) => {
     const FIFA_SQUAD_VALUES_API_URL =
         "https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years";
     const ESPORTS_EARNINGS_API_URL =
-        "https://sos2526-30.onrender.com/api/v2/esportsearnings-stats";
+        "https://sos2526-30.onrender.com/api/v1/esportsearnings-stats";
 
     // Las integraciones viven en backend como proxy propio: el navegador llama
     // a nuestra API y Express normaliza fuentes externas antes de responder JSON.

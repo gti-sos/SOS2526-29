@@ -1,79 +1,99 @@
 <script>
-  // onDestroy limpia la grafica; tick espera a que Svelte actualice el DOM.
   import { onDestroy, onMount, tick } from "svelte";
-  // Servicio que pide el resumen integrado al backend.
-  import { getCitysStatsIntegrationSummary } from "@/services/citysStatsIntegrations";
+  import {
+    getCountryInfo,
+    getCountrySummaries,
+    getGeocoding,
+    getSosEarthquakes,
+    getSosEsportsEarnings,
+    getSosFifaSquadValues,
+    getSosTouristArrivals,
+    getWorldBankPopulation
+  } from "@/services/citysStatsIntegrations";
+  import { loadInitialCitysStats } from "@/services/citysStatsApi";
 
-  // Libreria Highcharts cargada de forma dinamica.
   let Highcharts;
-  // Contenedor HTML de la grafica.
-  let chartContainer;
-  let sosChartContainer;
-  // Objeto de grafica.
-  let chart;
-  let sosChart;
-  // Resumen completo devuelto por el backend.
-  let summary = null;
-  // Lista de ciudades integradas.
-  let items = [];
-  // Estado de carga.
-  let loading = true;
-  // Mensaje de error.
-  let error = "";
-  // Numero de paises que se piden al resumen.
-  let selectedLimit = 8;
+  let geocodingChartContainer;
+  let countryChartContainer;
+  let worldBankChartContainer;
+  let tourismChartContainer;
+  let earthquakeChartContainer;
+  let fifaChartContainer;
+  let esportsChartContainer;
+  let integrationCharts = [];
 
-  // Formateador normal para numeros grandes.
+  let loading = true;
+  let error = "";
+  let selectedLimit = 8;
+  let countrySummaries = [];
+  let geocodingRows = [];
+  let countryCards = [];
+  let worldBankRows = [];
+  let touristCountries = [];
+  let earthquakeCountries = [];
+  let fifaCountries = [];
+  let esportsCountries = [];
+  let integrationErrors = [];
+  let restoredInitialData = false;
+
   const formatter = new Intl.NumberFormat("es-ES", {
     maximumFractionDigits: 0
   });
 
-  // Formateador compacto, por ejemplo 1,2 M.
+  const decimalFormatter = new Intl.NumberFormat("es-ES", {
+    maximumFractionDigits: 2
+  });
+
   const compactFormatter = new Intl.NumberFormat("es-ES", {
     notation: "compact",
     maximumFractionDigits: 1
   });
 
-  // Enlaces a las APIs externas que usa esta integracion.
-  const apiLinks = [
+  const sourceCards = [
     {
       name: "Open-Meteo",
-      label: "Geocoding",
+      detail: "Geocoding JSON",
+      proxy: "/api/v1/citys-stats/integrations/geocoding/:city",
       url: "https://open-meteo.com/en/docs/geocoding-api"
     },
     {
       name: "REST Countries",
-      label: "Country data",
+      detail: "Country profile JSON",
+      proxy: "/api/v1/citys-stats/integrations/country/:country",
       url: "https://restcountries.com/"
     },
     {
       name: "World Bank",
-      label: "Indicators",
+      detail: "Indicator JSON",
+      proxy: "/api/v1/citys-stats/integrations/world-bank/:code",
       url: "https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation"
     },
     {
       name: "SOS2526-25",
-      label: "Tourist arrivals",
+      detail: "Tourist arrivals",
+      proxy: "/api/v1/citys-stats/integrations/sos-tourist-arrivals",
       url: "https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals/docs"
     },
     {
       name: "SOS2526-19",
-      label: "Earthquakes",
+      detail: "Earthquakes",
+      proxy: "/api/v1/citys-stats/integrations/sos-earthquakes",
       url: "https://sos2526-19.onrender.com/api/v1/earthquakes/docs"
     },
     {
       name: "SOS2526-26",
-      label: "FIFA squad values",
+      detail: "FIFA squad values",
+      proxy: "/api/v1/citys-stats/integrations/sos-fifa-squad-values",
       url: "https://documenter.getpostman.com/view/52260149/2sBXinGW4o"
     },
     {
       name: "SOS2526-30",
-      label: "Esports earnings",
+      detail: "Esports earnings",
+      proxy: "/api/v1/citys-stats/integrations/sos-esports-earnings",
       url: "https://documenter.getpostman.com/view/52332561/2sBXijJWy6"
     }
   ];
 
-  // Convierte textos como south-korea en South Korea.
   function titleCase(value) {
     return String(value ?? "")
       .split(/[-\s]+/)
@@ -82,142 +102,412 @@
       .join(" ");
   }
 
-  // Convierte a numero o devuelve null si no se puede.
   function numberOrNull(value) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : null;
   }
 
-  // Lee la poblacion local agregada por pais de citys-stats.
-  function localPopulation(item) {
-    return numberOrNull(item.un_2025_population) ?? 0;
+  function countryName(row) {
+    return row.countryInfo?.name || row.countryData?.name || titleCase(row.country);
   }
 
-  // Lee la poblacion devuelta por Open-Meteo.
-  function geocodingPopulation(item) {
-    return numberOrNull(item.geocoding?.population);
-  }
-
-  // Lee la poblacion del pais segun World Bank.
-  function worldBankPopulation(item) {
-    return numberOrNull(item.worldBankPopulation?.value);
-  }
-
-  // Lee las llegadas turisticas agregadas del proxy SOS2526-25.
-  function touristArrivals(item) {
-    return numberOrNull(item.touristArrivals?.totalArrivals);
-  }
-
-  // Lee la poblacion expuesta agregada del proxy SOS2526-19.
-  function earthquakeExposedPopulation(item) {
-    return numberOrNull(item.earthquakeStats?.exposedPopulation);
-  }
-
-  // Lee el valor de plantilla FIFA agregado del proxy SOS2526-26.
-  function fifaSquadValue(item) {
-    return numberOrNull(item.fifaSquadValue?.latestTotalMarketValue);
-  }
-
-  // Lee los premios de eSports agregados del proxy SOS2526-30.
-  function esportsEarnings(item) {
-    return numberOrNull(item.esportsEarnings?.topCountryEarnings);
-  }
-
-  function positiveOrNull(value) {
+  function displayNumber(value, fallback = "Sin dato") {
     const parsed = numberOrNull(value);
-    return parsed && parsed > 0 ? parsed : null;
+    return parsed === null ? fallback : formatter.format(parsed);
   }
 
-  function studentMetricValue(value) {
+  function displayCompact(value, fallback = "Sin dato") {
     const parsed = numberOrNull(value);
-    if (parsed === null) return "Sin dato";
+    return parsed === null ? fallback : compactFormatter.format(parsed);
+  }
 
-    if (Number.isInteger(parsed)) return formatter.format(parsed);
+  function displayDecimal(value, fallback = "Sin dato") {
+    const parsed = numberOrNull(value);
+    return parsed === null ? fallback : decimalFormatter.format(parsed);
+  }
 
-    return parsed.toLocaleString("es-ES", {
-      maximumFractionDigits: 1
+  function topCountries(data, metric, limit = 6) {
+    return (Array.isArray(data?.countries) ? data.countries : [])
+      .filter((item) => numberOrNull(item?.[metric]) !== null)
+      .sort((a, b) => Number(b[metric] ?? 0) - Number(a[metric] ?? 0))
+      .slice(0, limit);
+  }
+
+  function normalizeCountryKey(value) {
+    return String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[-_]+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function localCountryIndex() {
+    const index = new Map();
+
+    countrySummaries.forEach((country) => {
+      index.set(normalizeCountryKey(country.country), country);
     });
+
+    return index;
   }
 
-  function shortApiName(source) {
-    source = String(source ?? "");
-    if (source.includes("SOS2526-25")) return "SOS25 turismo";
-    if (source.includes("SOS2526-19")) return "SOS19 terremotos";
-    if (source.includes("SOS2526-26")) return "SOS26 FIFA";
-    if (source.includes("SOS2526-30")) return "SOS30 eSports";
-    return source;
+  function findLocalCountry(country) {
+    return localCountryIndex().get(normalizeCountryKey(country));
   }
 
-  function topStudentCountry(api) {
-    return Array.isArray(api?.countries) ? api.countries[0] : null;
+  function localAveragePopulation() {
+    const values = countrySummaries
+      .map((country) => numberOrNull(country.un_2025_population))
+      .filter((value) => value !== null);
+
+    if (!values.length) return 0;
+    return values.reduce((total, value) => total + value, 0) / values.length;
   }
 
-  function studentApiRecordCount(api) {
-    return numberOrNull(api?.count) ?? 0;
+  function localPopulationFor(match) {
+    return numberOrNull(match?.local?.un_2025_population) ??
+      numberOrNull(match?.localPopulation) ??
+      localAveragePopulation();
   }
 
-  // Carga Highcharts cuando se va a pintar la grafica.
+  function combinedCountryRows(rows, metric, limit = 6) {
+    const sortedRows = (Array.isArray(rows) ? rows : [])
+      .filter((row) => numberOrNull(row?.[metric]) !== null)
+      .sort((a, b) => Number(b[metric] ?? 0) - Number(a[metric] ?? 0));
+
+    const exactMatches = sortedRows
+      .map((external) => ({
+        external,
+        local: findLocalCountry(external.country),
+        localLabel: "Pais en citys-stats"
+      }))
+      .filter((match) => match.local)
+      .slice(0, limit);
+
+    if (exactMatches.length) return exactMatches;
+
+    const localPopulation = localAveragePopulation();
+    return sortedRows.slice(0, limit).map((external) => ({
+      external,
+      local: null,
+      localPopulation,
+      localLabel: "Media citys-stats"
+    }));
+  }
+
+  function normalizedIndex(value, max, scale = 100) {
+    const parsed = numberOrNull(value);
+    const parsedMax = numberOrNull(max);
+
+    if (parsed === null || !parsedMax || parsedMax <= 0) return 0;
+    return Math.max(1, Math.min(scale, (parsed / parsedMax) * scale));
+  }
+
+  function collectError(list, label, result, context = "") {
+    if (result.error) {
+      list.push({
+        label,
+        context,
+        message: result.error
+      });
+    }
+  }
+
+  async function safeLoad(task) {
+    try {
+      return { data: await task(), error: "" };
+    } catch (e) {
+      return { data: null, error: e.message || "No se pudo cargar la integracion." };
+    }
+  }
+
   async function loadHighcharts() {
     if (Highcharts) return Highcharts;
 
     const module = await import("highcharts");
     Highcharts = module.default;
     window._Highcharts = Highcharts;
-    await import("highcharts/modules/accessibility.js");
+
+    const moreModule = await import("highcharts/highcharts-more.js");
+    const morePlugin = moreModule.default ?? moreModule;
+    if (typeof morePlugin === "function") morePlugin(Highcharts);
+
+    async function loadPlugin(pluginLoader) {
+      const pluginModule = await pluginLoader();
+      const plugin = pluginModule.default ?? pluginModule;
+      if (typeof plugin === "function") plugin(Highcharts);
+    }
+
+    await loadPlugin(() => import("highcharts/modules/dumbbell.js"));
+    await loadPlugin(() => import("highcharts/modules/lollipop.js"));
+    await loadPlugin(() => import("highcharts/modules/variwide.js"));
+    await loadPlugin(() => import("highcharts/modules/bullet.js"));
+    await loadPlugin(() => import("highcharts/modules/sankey.js"));
+    await loadPlugin(() => import("highcharts/modules/treemap.js"));
+    await loadPlugin(() => import("highcharts/modules/sunburst.js"));
+    await loadPlugin(() => import("highcharts/modules/accessibility.js"));
 
     return Highcharts;
   }
 
-  // Dibuja la grafica comparativa de poblaciones.
-  function renderChart() {
-    if (!chartContainer || !Highcharts || items.length === 0) return;
+  function destroyIntegrationCharts() {
+    integrationCharts.forEach((chart) => chart?.destroy());
+    integrationCharts = [];
+  }
 
-    chart?.destroy();
+  function createChart(container, config) {
+    if (!Highcharts || !container) return;
 
-    chart = Highcharts.chart(chartContainer, {
+    integrationCharts.push(Highcharts.chart(container, {
+      ...config,
       chart: {
-        type: "column",
-        backgroundColor: "transparent"
+        backgroundColor: "transparent",
+        ...(config.chart ?? {})
+      },
+      credits: {
+        enabled: false,
+        ...(config.credits ?? {})
+      }
+    }));
+  }
+
+  function renderGeocodingChart() {
+    const chartRows = geocodingRows
+      .filter((row) =>
+        numberOrNull(row.geocoding?.longitude) !== null &&
+        numberOrNull(row.geocoding?.latitude) !== null
+      )
+      .map((row) => {
+        const latitude = Number(row.geocoding.latitude);
+        const color = latitude < 0
+          ? "#0284c7"
+          : latitude < 20
+            ? "#0d9488"
+            : latitude < 35
+              ? "#16a34a"
+              : latitude < 45
+                ? "#ca8a04"
+                : "#dc2626";
+
+        return {
+          name: titleCase(row.topCity),
+          value: Math.max(Number(row.topCityPopulation ?? row.un_2025_population ?? 1), 1),
+          color,
+          custom: {
+            country: titleCase(row.country),
+            lat: latitude,
+            lon: Number(row.geocoding.longitude),
+            externalPopulation: row.geocoding.population,
+            localPopulation: row.topCityPopulation ?? row.un_2025_population,
+            timezone: row.geocoding.timezone,
+            elevation: row.geocoding.elevation
+          }
+        };
+      });
+
+    createChart(geocodingChartContainer, {
+      chart: {
+        type: "treemap",
+        spacing: [8, 8, 8, 8]
       },
       title: {
-        text: "Indicadores integrados por pais"
+        text: "Open-Meteo: geocoding y poblacion local",
+        align: "left"
       },
       subtitle: {
-        text: "citys-stats agregado por pais frente a APIs externas y SOS"
+        text: "Widget treemap: area por citys-stats y color por latitud Open-Meteo",
+        align: "left"
       },
       accessibility: {
         enabled: true,
         description:
-          "Comparacion por pais de citys-stats, Open-Meteo, World Bank, llegadas turisticas, terremotos, valor de plantillas FIFA y premios de eSports."
+          "Treemap donde el area de cada rectangulo usa poblacion de citys-stats y el color agrupa la latitud obtenida desde Open-Meteo."
+      },
+      tooltip: {
+        pointFormatter() {
+          return `<strong>${this.name}, ${this.custom.country}</strong><br/>Poblacion citys-stats: ${displayNumber(this.custom.localPopulation)}<br/>Latitud Open-Meteo: ${displayDecimal(this.custom.lat)}<br/>Longitud Open-Meteo: ${displayDecimal(this.custom.lon)}<br/>Zona: ${this.custom.timezone ?? "Sin dato"}<br/>Altitud: ${displayNumber(this.custom.elevation)} m<br/>Poblacion Open-Meteo: ${displayNumber(this.custom.externalPopulation)}`;
+        }
+      },
+      plotOptions: {
+        treemap: {
+          layoutAlgorithm: "squarified",
+          borderColor: "#ffffff",
+          borderWidth: 3,
+          dataLabels: {
+            enabled: true,
+            format: "{point.name}",
+            style: {
+              color: "#ffffff",
+              fontWeight: "800",
+              textOutline: "0 1px 2px rgba(15,23,42,0.65)"
+            }
+          }
+        }
+      },
+      series: [
+        {
+          name: "Ciudad principal",
+          data: chartRows
+        }
+      ]
+    });
+  }
+
+  function renderCountryChart() {
+    const chartRows = countryCards
+      .filter((row) => numberOrNull(row.countryData?.population) !== null)
+      .map((row) => ({
+        name: countryName(row),
+        countryPopulation: Number(row.countryData.population),
+        localPopulation: Number(row.un_2025_population ?? 0),
+        custom: {
+          capital: row.countryData.capital,
+          region: row.countryData.region,
+          area: row.countryData.area
+        }
+      }));
+    const sankeyRows = chartRows.flatMap((row) => {
+      const localWeight = Math.max(Math.log10(Math.max(row.localPopulation, 1)), 1);
+      const countryWeight = Math.max(Math.log10(Math.max(row.countryPopulation, 1)), 1);
+
+      return [
+        {
+          from: "citys-stats",
+          to: row.name,
+          weight: localWeight,
+          custom: {
+            ...row.custom,
+            metric: "Poblacion agregada de citys-stats",
+            localPopulation: row.localPopulation,
+            countryPopulation: row.countryPopulation
+          }
+        },
+        {
+          from: row.name,
+          to: "REST Countries",
+          weight: countryWeight,
+          custom: {
+            ...row.custom,
+            metric: "Poblacion oficial de REST Countries",
+            localPopulation: row.localPopulation,
+            countryPopulation: row.countryPopulation
+          }
+        }
+      ];
+    });
+
+    createChart(countryChartContainer, {
+      chart: {
+        type: "sankey"
+      },
+      title: {
+        text: "REST Countries: relacion local-oficial",
+        align: "left"
+      },
+      subtitle: {
+        text: "Widget sankey: citys-stats, pais y REST Countries en flujo logaritmico",
+        align: "left"
+      },
+      accessibility: {
+        enabled: true,
+        description:
+          "Diagrama Sankey que conecta la poblacion agregada de citys-stats con la poblacion nacional recuperada desde REST Countries."
+      },
+      tooltip: {
+        pointFormatter() {
+          if (!this.custom) {
+            return `<strong>${this.name}</strong>`;
+          }
+
+          return `<strong>${this.from} -> ${this.to}</strong><br/>Metrica visual: ${this.custom.metric}<br/>citys-stats pais: ${displayNumber(this.custom.localPopulation)}<br/>REST Countries pais: ${displayNumber(this.custom.countryPopulation)}<br/>Area: ${displayCompact(this.custom.area)} km2<br/>Capital: ${this.custom.capital ?? "Sin dato"}`;
+        }
+      },
+      plotOptions: {
+        sankey: {
+          curveFactor: 0.42,
+          nodeWidth: 18,
+          nodePadding: 18,
+          dataLabels: {
+            enabled: true,
+            style: {
+              color: "#0f172a",
+              textOutline: "none"
+            }
+          }
+        }
+      },
+      series: [
+        {
+          name: "Relacion local-oficial",
+          keys: ["from", "to", "weight"],
+          data: sankeyRows,
+          nodes: [
+            { id: "citys-stats", color: "#0f766e" },
+            { id: "REST Countries", color: "#2563eb" }
+          ]
+        }
+      ]
+    });
+  }
+
+  function renderWorldBankChart() {
+    const chartRows = worldBankRows
+      .filter((row) => numberOrNull(row.worldBank?.value) !== null)
+      .map((row) => ({
+        name: countryName(row),
+        worldPopulation: Number(row.worldBank.value),
+        localPopulation: Number(row.localPopulation ?? 0),
+        custom: {
+          date: row.worldBank.date,
+          code: row.countryInfo?.cca3
+        }
+      }));
+
+    createChart(worldBankChartContainer, {
+      chart: {
+        type: "lollipop",
+        inverted: true
+      },
+      title: {
+        text: "World Bank: poblacion nacional",
+        align: "left"
+      },
+      subtitle: {
+        text: "Widget lollipop: citys-stats agregado frente a World Bank",
+        align: "left"
+      },
+      accessibility: {
+        enabled: true,
+        description:
+          "Grafico de barras horizontales con la poblacion nacional recuperada desde World Bank para los paises presentes en citys-stats."
       },
       xAxis: {
-        categories: items.map((item) => titleCase(item.country)),
-        title: {
-          text: "Pais"
-        }
+        type: "category",
+        title: { text: null }
       },
       yAxis: {
         type: "logarithmic",
         min: 1,
-        title: {
-          text: "Indicador integrado"
+        title: { text: "Poblacion" },
+        labels: {
+          formatter() {
+            return compactFormatter.format(this.value);
+          }
         }
       },
       tooltip: {
-        formatter() {
-          if (this.y === null || this.y === undefined) {
-            return `<strong>${this.series.name}</strong><br/>${this.x}: sin dato`;
-          }
-          return `<strong>${this.series.name}</strong><br/>${this.x}: ${formatter.format(this.y)}`;
+        pointFormatter() {
+          return `<strong>${this.name}</strong><br/>Serie: ${this.series.name}<br/>Valor visualizado: <b>${displayNumber(this.y)}</b><br/>citys-stats pais: <b>${displayNumber(this.custom.localPopulation)}</b><br/>World Bank ${this.custom.date ?? ""}: <b>${displayNumber(this.custom.worldPopulation)}</b><br/>ISO3: ${this.custom.code ?? "N/D"}`;
         }
       },
       plotOptions: {
-        column: {
-          borderRadius: 3,
+        lollipop: {
+          color: "#2563eb",
+          connectorWidth: 2,
           dataLabels: {
             enabled: true,
             formatter() {
-              if (this.y === null || this.y === undefined) return "";
               return compactFormatter.format(this.y);
             }
           }
@@ -225,164 +515,514 @@
       },
       series: [
         {
-          name: "citys-stats pais",
+          name: "citys-stats agregado",
           color: "#0f766e",
-          data: items.map(localPopulation)
-        },
-        {
-          name: "Open-Meteo ciudad",
-          color: "#2563eb",
-          data: items.map((item) => geocodingPopulation(item))
+          data: chartRows.map((row) => ({
+            name: row.name,
+            y: Math.max(row.localPopulation, 1),
+            custom: {
+              ...row.custom,
+              localPopulation: row.localPopulation,
+              worldPopulation: row.worldPopulation
+            }
+          }))
         },
         {
           name: "World Bank pais",
-          color: "#b45309",
-          data: items.map((item) => positiveOrNull(worldBankPopulation(item)))
-        },
-        {
-          name: "SOS25 turistas pais",
-          color: "#db2777",
-          data: items.map((item) => positiveOrNull(touristArrivals(item)))
-        },
-        {
-          name: "SOS19 poblacion expuesta",
-          color: "#4f46e5",
-          data: items.map((item) => positiveOrNull(earthquakeExposedPopulation(item)))
-        },
-        {
-          name: "SOS26 valor FIFA",
-          color: "#0891b2",
-          data: items.map((item) => positiveOrNull(fifaSquadValue(item)))
-        },
-        {
-          name: "SOS30 premios eSports",
-          color: "#7c3aed",
-          data: items.map((item) => positiveOrNull(esportsEarnings(item)))
+          color: "#2563eb",
+          data: chartRows.map((row) => ({
+            name: row.name,
+            y: Math.max(row.worldPopulation, 1),
+            custom: {
+              ...row.custom,
+              localPopulation: row.localPopulation,
+              worldPopulation: row.worldPopulation
+            }
+          }))
         }
-      ],
-      credits: {
-        enabled: false
-      }
+      ]
     });
   }
 
-  function renderSosChart() {
-    const apis = Array.isArray(summary?.studentApis) ? summary.studentApis : [];
-    if (!sosChartContainer || !Highcharts || apis.length === 0) return;
+  function renderTourismChart() {
+    const chartRows = combinedCountryRows(touristCountries, "totalArrivals");
 
-    sosChart?.destroy();
-
-    sosChart = Highcharts.chart(sosChartContainer, {
+    createChart(tourismChartContainer, {
       chart: {
-        type: "column",
-        backgroundColor: "transparent"
+        type: "variwide"
       },
       title: {
-        text: "Registros recibidos de APIs SOS"
+        text: "SOS2526-25: llegadas turisticas",
+        align: "left"
       },
       subtitle: {
-        text: "Permite ver rapidamente que APIs traen datos y cuales responden vacias"
+        text: "Widget variwide: altura por llegadas y anchura por poblacion citys-stats",
+        align: "left"
       },
       accessibility: {
         enabled: true,
         description:
-          "Grafica de columnas con las cuatro APIs SOS externas y el numero de registros recibidos desde cada una."
+          "Grafico variwide con llegadas turisticas por pais y anchura proporcional al numero de registros desde SOS2526-25."
       },
       xAxis: {
-        categories: apis.map((api) => shortApiName(api.source)),
-        title: {
-          text: "API SOS"
-        }
+        type: "category",
+        title: { text: "Pais" }
       },
       yAxis: {
         min: 0,
-        allowDecimals: false,
-        title: {
-          text: "Registros recibidos"
+        title: { text: "Llegadas totales" },
+        labels: {
+          formatter() {
+            return compactFormatter.format(this.value);
+          }
         }
       },
       tooltip: {
-        formatter() {
-          const detail = this.point.custom ?? {};
-          if (detail.error) {
-            return `<strong>${detail.source}</strong><br/>${detail.error}`;
-          }
-
-          if (this.y === 0) {
-            return `<strong>${detail.source}</strong><br/>La API responde, pero ahora mismo no devuelve registros.`;
-          }
-
-          const countryLine = detail.country
-            ? `<br/>Pais destacado: ${titleCase(detail.country)}<br/>${detail.metricLabel}: ${studentMetricValue(detail.metric)}`
-            : "";
-
-          return `<strong>${detail.source}</strong><br/>Registros recibidos: ${formatter.format(this.y)}${countryLine}${detail.detail ? `<br/>${detail.detail}` : ""}`;
+        pointFormatter() {
+          return `<strong>${this.name}</strong><br/>Llegadas SOS2526-25: ${displayNumber(this.y)}<br/>Poblacion citys-stats: ${displayNumber(this.options.custom.localPopulation)}<br/>Base local: ${this.options.custom.localLabel}<br/>Registros turismo: ${this.options.custom.records}<br/>Ultimo anio: ${this.options.custom.latestYear ?? "N/D"}`;
         }
       },
       plotOptions: {
-        column: {
-          borderRadius: 3,
+        variwide: {
+          borderRadius: 5,
+          color: "#db2777",
           dataLabels: {
             enabled: true,
             formatter() {
-              return this.y === 0 ? "0" : compactFormatter.format(this.y);
+              return compactFormatter.format(this.y);
             }
           }
         }
       },
       series: [
         {
-          name: "APIs SOS",
-          colorByPoint: true,
-          data: apis.map((api, index) => {
-            const topCountry = topStudentCountry(api);
+          name: "Llegadas",
+          data: chartRows.map((match) => ({
+            name: titleCase(match.external.country),
+            y: Number(match.external.totalArrivals ?? 0),
+            z: Math.max(Math.sqrt(localPopulationFor(match)), 1),
+            custom: {
+              latestYear: match.external.latestYear,
+              records: match.external.records,
+              localPopulation: localPopulationFor(match),
+              localLabel: match.localLabel
+            }
+          }))
+        }
+      ]
+    });
+  }
+
+  function renderEarthquakeChart() {
+    const chartRows = combinedCountryRows(earthquakeCountries, "maxSeverity");
+    const localMax = Math.max(...chartRows.map((match) => localPopulationFor(match)), 1);
+
+    createChart(earthquakeChartContainer, {
+      chart: {
+        type: "bullet",
+        inverted: true
+      },
+      title: {
+        text: "SOS2526-19: severidad maxima",
+        align: "left"
+      },
+      subtitle: {
+        text: "Widget bullet: severidad externa frente a indice citys-stats",
+        align: "left"
+      },
+      accessibility: {
+        enabled: true,
+        description:
+          "Grafico bullet con la severidad maxima de terremotos por pais desde SOS2526-19 y un umbral de referencia alto."
+      },
+      xAxis: {
+        categories: chartRows.map((match) => titleCase(match.external.country)),
+        title: { text: "Pais" }
+      },
+      yAxis: {
+        min: 0,
+        max: 10,
+        plotBands: [
+          { from: 0, to: 4, color: "#dcfce7" },
+          { from: 4, to: 6, color: "#fef9c3" },
+          { from: 6, to: 10, color: "#fee2e2" }
+        ],
+        title: { text: "Severidad maxima" }
+      },
+      tooltip: {
+        pointFormatter() {
+          return `<strong>${this.category}</strong><br/>Severidad SOS2526-19: ${displayDecimal(this.y)}<br/>Indice citys-stats poblacion: ${displayDecimal(this.target)} / 10<br/>Poblacion citys-stats: ${displayNumber(this.options.custom.localPopulation)}<br/>Base local: ${this.options.custom.localLabel}<br/>Eventos: ${this.options.custom.records}<br/>Ultima fecha: ${this.options.custom.latestDate ?? "N/D"}`;
+        }
+      },
+      plotOptions: {
+        bullet: {
+          color: "#dc2626",
+          pointPadding: 0.22,
+          borderWidth: 0,
+          targetOptions: {
+            width: "140%",
+            height: 3,
+            borderWidth: 0,
+            color: "#111827"
+          }
+        }
+      },
+      series: [
+        {
+          name: "Severidad",
+          data: chartRows.map((match) => ({
+            y: Number(match.external.maxSeverity ?? 0),
+            target: normalizedIndex(localPopulationFor(match), localMax, 10),
+            custom: {
+              records: match.external.records,
+              latestDate: match.external.latestDate,
+              localPopulation: localPopulationFor(match),
+              localLabel: match.localLabel
+            }
+          }))
+        }
+      ]
+    });
+  }
+
+  function renderFifaChart() {
+    const chartRows = fifaCountries
+      .filter((country) => numberOrNull(country.latestTotalMarketValue) !== null)
+      .slice(0, 6);
+    const localRanks = countrySummaries.slice(0, chartRows.length);
+    const maxFifaValue = Math.max(
+      ...chartRows.map((country) => Number(country.latestTotalMarketValue ?? 0)),
+      1
+    );
+    const maxLocalPopulation = Math.max(
+      ...localRanks.map((country) => Number(country.un_2025_population ?? 0)),
+      1
+    );
+
+    createChart(fifaChartContainer, {
+      chart: {
+        type: "dumbbell",
+        inverted: true
+      },
+      title: {
+        text: "SOS2526-26: valor de plantillas FIFA",
+        align: "left"
+      },
+      subtitle: {
+        text: "Widget dumbbell: ranking citys-stats frente a ranking FIFA",
+        align: "left"
+      },
+      accessibility: {
+        enabled: true,
+        description:
+          "Grafico dumbbell que compara por posicion de ranking la poblacion agregada de citys-stats con el valor de plantilla de selecciones desde SOS2526-26."
+      },
+      xAxis: {
+        categories: chartRows.map((_, index) => `Top ${index + 1}`),
+        title: { text: "Pais" }
+      },
+      yAxis: {
+        min: 0,
+        max: 100,
+        title: { text: "Indice normalizado" },
+        labels: {
+          format: "{value}%"
+        }
+      },
+      tooltip: {
+        pointFormatter() {
+          return `<strong>${this.category}</strong><br/>citys-stats: ${this.options.custom.localCountry} (${displayNumber(this.options.custom.localPopulation)})<br/>Indice local: ${displayDecimal(this.options.custom.localIndex)}%<br/>FIFA: ${this.options.custom.fifaCountry} (${displayCompact(this.options.custom.totalValue)})<br/>Indice FIFA: ${displayDecimal(this.options.custom.fifaIndex)}%<br/>Plantilla: ${displayNumber(this.options.custom.squadSize)} jugadores<br/>Anio: ${this.options.custom.latestYear ?? "N/D"}`;
+        }
+      },
+      plotOptions: {
+        dumbbell: {
+          color: "#0891b2",
+          lowColor: "#0f766e",
+          connectorWidth: 2,
+          dataLabels: {
+            enabled: false
+          }
+        }
+      },
+      series: [
+        {
+          name: "citys-stats / FIFA",
+          data: chartRows.map((country, index) => {
+            const local = localRanks[index] ?? countrySummaries[index % Math.max(countrySummaries.length, 1)];
+            const squadSize = Number(country.latestSquadSize ?? country.squadSize ?? 0);
+            const totalValue = Number(country.latestTotalMarketValue ?? 0);
+            const localPopulation = Number(local?.un_2025_population ?? 0);
+            const localIndex = normalizedIndex(localPopulation, maxLocalPopulation);
+            const fifaIndex = normalizedIndex(totalValue, maxFifaValue);
+
             return {
-              y: studentApiRecordCount(api),
-              color: ["#db2777", "#4f46e5", "#0891b2", "#7c3aed"][index] ?? "#0f766e",
+              name: `Top ${index + 1}`,
+              low: Math.min(localIndex, fifaIndex),
+              high: Math.max(localIndex, fifaIndex),
               custom: {
-                source: api.source,
-                metricLabel: api.metricLabel,
-                metric: topCountry?.metric,
-                country: topCountry?.country,
-                detail: topCountry?.detail,
-                error: api.error
+                latestYear: country.latestYear,
+                squadSize,
+                totalValue,
+                localPopulation,
+                localCountry: titleCase(local?.country),
+                fifaCountry: titleCase(country.country),
+                localIndex,
+                fifaIndex
               }
             };
           })
         }
-      ],
-      credits: {
-        enabled: false
-      }
+      ]
     });
   }
 
-  // Carga los datos integrados y actualiza la grafica.
+  function renderEsportsChart() {
+    const chartRows = combinedCountryRows(esportsCountries, "topCountryEarnings");
+    const maxEarnings = Math.max(
+      ...chartRows.map((match) => Number(match.external.topCountryEarnings ?? 0)),
+      1
+    );
+    const maxLocalPopulation = Math.max(...chartRows.map((match) => localPopulationFor(match)), 1);
+    const sunburstData = [
+      {
+        id: "root",
+        name: "eSports + citys-stats"
+      },
+      ...chartRows.flatMap((match, index) => {
+        const countryId = `country-${index}`;
+        const earnings = Number(match.external.topCountryEarnings ?? 0);
+        const gameName = match.external.topGameName ?? match.external.latestGameName ?? "Juego sin dato";
+        const localPopulation = localPopulationFor(match);
+
+        return [
+          {
+            id: countryId,
+            parent: "root",
+            name: titleCase(match.external.country),
+            custom: {
+              earnings,
+              gameName,
+              records: match.external.records,
+              localPopulation,
+              localLabel: match.localLabel
+            }
+          },
+          {
+            parent: countryId,
+            name: "citys-stats",
+            value: normalizedIndex(localPopulation, maxLocalPopulation),
+            color: "#0f766e",
+            custom: {
+              metric: "Poblacion citys-stats",
+              earnings,
+              gameName,
+              records: match.external.records,
+              localPopulation,
+              localLabel: match.localLabel
+            }
+          },
+          {
+            parent: countryId,
+            name: gameName,
+            value: normalizedIndex(earnings, maxEarnings),
+            color: "#9333ea",
+            custom: {
+              metric: "Premios eSports",
+              earnings,
+              gameName,
+              records: match.external.records,
+              localPopulation,
+              localLabel: match.localLabel
+            }
+          }
+        ];
+      })
+    ];
+
+    createChart(esportsChartContainer, {
+      chart: {
+        type: "sunburst"
+      },
+      title: {
+        text: "SOS2526-30: premios eSports",
+        align: "left"
+      },
+      subtitle: {
+        text: "Widget sunburst: ramas locales citys-stats y premios eSports",
+        align: "left"
+      },
+      accessibility: {
+        enabled: true,
+        description:
+          "Grafico sunburst con paises y juegos destacados segun premios de eSports desde SOS2526-30."
+      },
+      tooltip: {
+        pointFormatter() {
+          return `<strong>${this.name}</strong><br/>Metrica visual: ${this.custom?.metric ?? "Pais integrado"}<br/>Poblacion citys-stats: ${displayNumber(this.custom?.localPopulation)}<br/>Base local: ${this.custom?.localLabel ?? "N/D"}<br/>Premios eSports: ${displayCompact(this.custom?.earnings)}<br/>Juego principal: ${this.custom?.gameName ?? "Sin dato"}<br/>Registros: ${this.custom?.records ?? "N/D"}`;
+        }
+      },
+      plotOptions: {
+        sunburst: {
+          allowDrillToNode: true,
+          cursor: "pointer",
+          dataLabels: {
+            enabled: true,
+            format: "{point.name}",
+            filter: {
+              property: "innerArcLength",
+              operator: ">",
+              value: 16
+            }
+          }
+        }
+      },
+      series: [
+        {
+          name: "Premios eSports",
+          size: "95%",
+          center: ["50%", "50%"],
+          data: sunburstData,
+          levels: [
+            {
+              level: 1,
+              colorByPoint: true,
+              levelSize: {
+                unit: "percentage",
+                value: 40
+              }
+            },
+            {
+              level: 2,
+              levelSize: {
+                unit: "percentage",
+                value: 60
+              },
+              colorVariation: {
+                key: "brightness",
+                to: -0.25
+              }
+            }
+          ]
+        }
+      ]
+    });
+  }
+
+  function renderIntegrationCharts() {
+    destroyIntegrationCharts();
+    renderGeocodingChart();
+    renderCountryChart();
+    renderWorldBankChart();
+    renderTourismChart();
+    renderEarthquakeChart();
+    renderFifaChart();
+    renderEsportsChart();
+  }
+
   async function loadIntegrations() {
     loading = true;
     error = "";
+    integrationErrors = [];
+    restoredInitialData = false;
+    destroyIntegrationCharts();
 
     try {
-      summary = await getCitysStatsIntegrationSummary(selectedLimit);
-      items = Array.isArray(summary?.items) ? summary.items : [];
+      countrySummaries = await getCountrySummaries(selectedLimit);
+
+      if (countrySummaries.length === 0) {
+        await loadInitialCitysStats();
+        countrySummaries = await getCountrySummaries(selectedLimit);
+        restoredInitialData = countrySummaries.length > 0;
+      }
+
+      const errors = [];
+
+      const geocodingResults = await Promise.all(
+        countrySummaries.map((item) =>
+          safeLoad(() => getGeocoding(item.topCity, item.country))
+        )
+      );
+      geocodingRows = geocodingResults.map((result, index) => {
+        const local = countrySummaries[index];
+        collectError(errors, "Open-Meteo", result, `${titleCase(local.topCity)}, ${titleCase(local.country)}`);
+        return {
+          ...local,
+          geocoding: result.data,
+          error: result.error
+        };
+      });
+
+      const countryResults = await Promise.all(
+        countrySummaries.map((item) => safeLoad(() => getCountryInfo(item.country)))
+      );
+      countryCards = countryResults.map((result, index) => {
+        const local = countrySummaries[index];
+        collectError(errors, "REST Countries", result, titleCase(local.country));
+        return {
+          ...local,
+          countryData: result.data,
+          error: result.error
+        };
+      });
+
+      const worldBankResults = await Promise.all(
+        countryCards.map((row) => {
+          if (!row.countryData?.cca3) {
+            return Promise.resolve({
+              data: null,
+              error: "Codigo ISO3 no disponible"
+            });
+          }
+
+          return safeLoad(() => getWorldBankPopulation(row.countryData.cca3));
+        })
+      );
+      worldBankRows = worldBankResults.map((result, index) => {
+        const local = countrySummaries[index];
+        const countryInfo = countryCards[index]?.countryData;
+        collectError(errors, "World Bank", result, countryInfo?.name || titleCase(local.country));
+        return {
+          country: local.country,
+          localPopulation: local.un_2025_population,
+          countryInfo,
+          worldBank: result.data,
+          error: result.error
+        };
+      });
+
+      const [tourismResult, earthquakeResult, fifaResult, esportsResult] = await Promise.all([
+        safeLoad(getSosTouristArrivals),
+        safeLoad(getSosEarthquakes),
+        safeLoad(getSosFifaSquadValues),
+        safeLoad(getSosEsportsEarnings)
+      ]);
+
+      collectError(errors, "SOS2526-25 turistas", tourismResult);
+      collectError(errors, "SOS2526-19 terremotos", earthquakeResult);
+      collectError(errors, "SOS2526-26 FIFA", fifaResult);
+      collectError(errors, "SOS2526-30 eSports", esportsResult);
+
+      touristCountries = topCountries(tourismResult.data, "totalArrivals");
+      earthquakeCountries = topCountries(earthquakeResult.data, "maxSeverity");
+      fifaCountries = topCountries(fifaResult.data, "latestTotalMarketValue");
+      esportsCountries = topCountries(esportsResult.data, "topCountryEarnings");
+
+      integrationErrors = errors;
+
       loading = false;
       await tick();
       await loadHighcharts();
-      renderChart();
-      renderSosChart();
+      renderIntegrationCharts();
     } catch (e) {
       error = e.message || "No se pudieron cargar las integraciones.";
       loading = false;
     }
   }
 
-  // Al abrir la pantalla, cargamos las integraciones.
   onMount(loadIntegrations);
 
-  // Al salir, destruimos la grafica para no dejar memoria ocupada.
   onDestroy(() => {
-    chart?.destroy();
-    sosChart?.destroy();
+    destroyIntegrationCharts();
   });
 </script>
 
@@ -395,7 +1035,7 @@
     <div>
       <p class="eyebrow">LCC citys-stats</p>
       <h1>Integraciones externas</h1>
-      <p class="subtitle">Datos agregados por pais y conectados con APIs externas y de otros grupos SOS.</p>
+      <p class="subtitle">Datos de ciudades cruzados con APIs REST JSON mediante endpoints propios de Express.</p>
     </div>
 
     <div class="toolbar" aria-label="Opciones de integracion">
@@ -411,11 +1051,12 @@
     </div>
   </header>
 
-  <section class="source-grid" aria-label="APIs externas usadas">
-    {#each apiLinks as api}
-      <a class="source-card" href={api.url} target="_blank" rel="noreferrer">
-        <span>{api.label}</span>
-        <strong>{api.name}</strong>
+  <section class="source-grid" aria-label="APIs usadas">
+    {#each sourceCards as source}
+      <a class="source-card" href={source.url} target="_blank" rel="noreferrer">
+        <span>{source.detail}</span>
+        <strong>{source.name}</strong>
+        <small>{source.proxy}</small>
       </a>
     {/each}
   </section>
@@ -424,149 +1065,194 @@
     <p class="state" role="status">Cargando integraciones...</p>
   {:else if error}
     <div class="message error" role="alert">{error}</div>
-  {:else if items.length === 0}
+  {:else if countrySummaries.length === 0}
     <div class="message">No hay registros locales de citys-stats para integrar.</div>
   {:else}
-    {#if summary?.studentApis?.length}
-      <section class="student-api-grid" aria-label="Resumen de APIs SOS de otros grupos">
-        {#each summary.studentApis as api}
-          <article class="student-api-card" class:error-card={api.error}>
-            <span>API SOS de otro grupo</span>
-            <strong>{api.source}</strong>
-            {#if api.error}
-              <p>{api.error}</p>
-            {:else}
-              <p>{formatter.format(api.count)} registros recibidos por proxy propio.</p>
-              {#if api.countries?.length}
-                <ul class="student-api-list" aria-label={`Top paises de ${api.source}`}>
-                  {#each api.countries as country}
-                    <li>
-                      <span>{titleCase(country.country)}</span>
-                      <strong>{api.metricLabel}: {studentMetricValue(country.metric)}</strong>
-                      <small>{country.detail}</small>
-                    </li>
-                  {/each}
-                </ul>
-              {/if}
-            {/if}
-          </article>
-        {/each}
+    {#if restoredInitialData}
+      <div class="message success" role="status">
+        Se han cargado los datos iniciales de citys-stats para poder mostrar las integraciones.
+      </div>
+    {/if}
+
+    {#if integrationErrors.length}
+      <section class="message warning" aria-label="Avisos de integracion">
+        <h2>Avisos de carga</h2>
+        <ul>
+          {#each integrationErrors as item}
+            <li>
+              <strong>{item.label}</strong>
+              {#if item.context} ({item.context}){/if}: {item.message}
+            </li>
+          {/each}
+        </ul>
       </section>
     {/if}
 
-    <section class="chart-panel" aria-labelledby="integration-chart-title">
-      <h2 id="integration-chart-title">Vista comparada</h2>
-      <div class="chart-frame" bind:this={chartContainer}></div>
+    <section class="panel" aria-labelledby="open-meteo-title">
+      <div class="section-heading">
+        <span>Integracion 1</span>
+        <h2 id="open-meteo-title">Open-Meteo: geocoding de la ciudad principal</h2>
+      </div>
+      <div class="chart-frame" bind:this={geocodingChartContainer}></div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Ciudad</th>
+              <th>Pais local</th>
+              <th>Coordenadas</th>
+              <th>Zona horaria</th>
+              <th>Altitud</th>
+              <th>Poblacion citys-stats</th>
+              <th>Poblacion Open-Meteo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each geocodingRows as row}
+              <tr class:error-row={row.error}>
+                <td>{titleCase(row.topCity)}</td>
+                <td>{titleCase(row.country)}</td>
+                <td>
+                  {#if row.geocoding}
+                    {displayDecimal(row.geocoding.latitude)}, {displayDecimal(row.geocoding.longitude)}
+                  {:else}
+                    Sin dato
+                  {/if}
+                </td>
+                <td>{row.geocoding?.timezone ?? "Sin dato"}</td>
+                <td>{displayNumber(row.geocoding?.elevation, "Sin dato")}</td>
+                <td>{displayNumber(row.topCityPopulation ?? row.un_2025_population, "Sin dato")}</td>
+                <td>{displayNumber(row.geocoding?.population, "Sin dato")}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     </section>
 
-    <section class="chart-panel" aria-labelledby="sos-chart-title">
-      <h2 id="sos-chart-title">APIs SOS externas</h2>
-      <div class="chart-frame" bind:this={sosChartContainer}></div>
+    <section class="panel" aria-labelledby="rest-countries-title">
+      <div class="section-heading">
+        <span>Integracion 2</span>
+        <h2 id="rest-countries-title">REST Countries: ficha nacional</h2>
+      </div>
+      <div class="chart-frame" bind:this={countryChartContainer}></div>
+      <div class="country-card-grid">
+        {#each countryCards as row}
+          <article class="country-card" class:error-card={row.error}>
+            <div class="country-card-header">
+              <div>
+                <p>{titleCase(row.country)}</p>
+                <h3>{row.countryData?.name ?? "Sin dato"}</h3>
+              </div>
+              {#if row.countryData?.flagPng}
+                <img src={row.countryData.flagPng} alt={`Bandera de ${row.countryData.name}`} />
+              {/if}
+            </div>
+            <dl>
+              <div>
+                <dt>Capital</dt>
+                <dd>{row.countryData?.capital ?? "Sin dato"}</dd>
+              </div>
+              <div>
+                <dt>Region</dt>
+                <dd>{row.countryData?.region ?? "Sin dato"}</dd>
+              </div>
+              <div>
+                <dt>Poblacion pais</dt>
+                <dd>{displayCompact(row.countryData?.population)}</dd>
+              </div>
+              <div>
+                <dt>Area</dt>
+                <dd>{displayCompact(row.countryData?.area)} km2</dd>
+              </div>
+            </dl>
+          </article>
+        {/each}
+      </div>
     </section>
 
-    <section class="city-grid" aria-label="Detalle de integraciones por ciudad">
-      {#each items as item}
-        <article class="city-card">
-          <div class="city-heading">
-            <div>
-              <p>{titleCase(item.country)}</p>
-              <h2>{titleCase(item.country)}</h2>
-              <p>{item.cityCount} ciudades · principal: {titleCase(item.topCity)}</p>
-            </div>
-            {#if item.countryInfo?.flagPng}
-              <img src={item.countryInfo.flagPng} alt={`Bandera de ${item.countryInfo.name}`} />
-            {/if}
-          </div>
+    <section class="panel" aria-labelledby="world-bank-title">
+      <div class="section-heading">
+        <span>Integracion 3</span>
+        <h2 id="world-bank-title">World Bank: indicador de poblacion</h2>
+      </div>
+      <div class="chart-frame" bind:this={worldBankChartContainer}></div>
+    </section>
 
-          <dl>
-            <div>
-              <dt>citys-stats pais</dt>
-              <dd>{formatter.format(localPopulation(item))}</dd>
+    <section class="split-grid" aria-label="Integraciones SOS">
+      <article class="panel" aria-labelledby="tourism-title">
+        <div class="section-heading">
+          <span>Integracion 4</span>
+          <h2 id="tourism-title">SOS2526-25: llegadas turisticas</h2>
+        </div>
+        <div class="chart-frame" bind:this={tourismChartContainer}></div>
+        <div class="summary-list">
+          {#each touristCountries as country, index}
+            <div class="summary-row">
+              <span class="rank">{index + 1}</span>
+              <div>
+                <strong>{titleCase(country.country)}</strong>
+                <small>{country.records} registros, ultimo {country.latestYear ?? "N/D"}</small>
+              </div>
+              <b>{displayCompact(country.totalArrivals)}</b>
             </div>
-            <div>
-              <dt>Open-Meteo ciudad principal</dt>
-              <dd>
-                {#if item.geocoding}
-                  {item.geocoding.latitude?.toFixed(2)}, {item.geocoding.longitude?.toFixed(2)}
-                {:else}
-                  Sin dato
-                {/if}
-              </dd>
-            </div>
-            <div>
-              <dt>REST Countries</dt>
-              <dd>
-                {#if item.countryInfo}
-                  {item.countryInfo.region} · {compactFormatter.format(item.countryInfo.population)}
-                {:else}
-                  Sin dato
-                {/if}
-              </dd>
-            </div>
-            <div>
-              <dt>World Bank</dt>
-              <dd>
-                {#if item.worldBankPopulation}
-                  {compactFormatter.format(item.worldBankPopulation.value)} ({item.worldBankPopulation.date})
-                {:else}
-                  Sin dato
-                {/if}
-              </dd>
-            </div>
-            <div>
-              <dt>SOS25 turistas</dt>
-              <dd>
-                {#if item.touristArrivals}
-                  {compactFormatter.format(item.touristArrivals.totalArrivals)}
-                  ({item.touristArrivals.records} reg., ult. {item.touristArrivals.latestYear})
-                {:else}
-                  Sin dato
-                {/if}
-              </dd>
-            </div>
-            <div>
-              <dt>SOS19 terremotos</dt>
-              <dd>
-                {#if item.earthquakeStats}
-                  {item.earthquakeStats.records} eventos · M{item.earthquakeStats.maxSeverity}
-                {:else}
-                  Sin dato
-                {/if}
-              </dd>
-            </div>
-            <div>
-              <dt>SOS26 valor FIFA</dt>
-              <dd>
-                {#if item.fifaSquadValue}
-                  {compactFormatter.format(item.fifaSquadValue.latestTotalMarketValue)}
-                  ({item.fifaSquadValue.latestYear})
-                {:else}
-                  Sin dato
-                {/if}
-              </dd>
-            </div>
-            <div>
-              <dt>SOS30 premios eSports</dt>
-              <dd>
-                {#if item.esportsEarnings}
-                  {compactFormatter.format(item.esportsEarnings.topCountryEarnings)}
-                  ({item.esportsEarnings.topGameName ?? item.esportsEarnings.latestGameName})
-                {:else}
-                  Sin dato
-                {/if}
-              </dd>
-            </div>
-          </dl>
+          {/each}
+        </div>
+      </article>
 
-          {#if item.integrationErrors.length > 0}
-            <ul class="warning-list" aria-label="Avisos de integracion">
-              {#each item.integrationErrors as integrationError}
-                <li>{integrationError.source}: {integrationError.error}</li>
-              {/each}
-            </ul>
-          {/if}
-        </article>
-      {/each}
+      <article class="panel" aria-labelledby="earthquakes-title">
+        <div class="section-heading">
+          <span>Integracion 5</span>
+          <h2 id="earthquakes-title">SOS2526-19: severidad de terremotos</h2>
+        </div>
+        <div class="chart-frame" bind:this={earthquakeChartContainer}></div>
+        <div class="summary-list">
+          {#each earthquakeCountries as country, index}
+            <div class="summary-row">
+              <span class="rank danger">{index + 1}</span>
+              <div>
+                <strong>{titleCase(country.country)}</strong>
+                <small>{country.records} eventos, ultima fecha {country.latestDate ?? "N/D"}</small>
+              </div>
+              <b>{displayDecimal(country.maxSeverity)}</b>
+            </div>
+          {/each}
+        </div>
+      </article>
+
+      <article class="panel" aria-labelledby="fifa-title">
+        <div class="section-heading">
+          <span>Integracion 6</span>
+          <h2 id="fifa-title">SOS2526-26: valor de plantillas FIFA</h2>
+        </div>
+        <div class="chart-frame" bind:this={fifaChartContainer}></div>
+        <div class="kpi-grid">
+          {#each fifaCountries as country}
+            <div class="kpi-card">
+              <span>{titleCase(country.country)}</span>
+              <strong>{displayCompact(country.latestTotalMarketValue)}</strong>
+              <small>{country.latestYear ?? "N/D"} - {country.latestSquadSize ?? "N/D"} jugadores</small>
+            </div>
+          {/each}
+        </div>
+      </article>
+
+      <article class="panel" aria-labelledby="esports-title">
+        <div class="section-heading">
+          <span>Integracion 7</span>
+          <h2 id="esports-title">SOS2526-30: premios eSports</h2>
+        </div>
+        <div class="chart-frame" bind:this={esportsChartContainer}></div>
+        <div class="prize-board">
+          {#each esportsCountries as country}
+            <article>
+              <span>{titleCase(country.country)}</span>
+              <strong>{displayCompact(country.topCountryEarnings)}</strong>
+              <small>{country.topGameName ?? country.latestGameName ?? "Juego sin dato"}</small>
+            </article>
+          {/each}
+        </div>
+      </article>
     </section>
   {/if}
 </main>
@@ -580,9 +1266,9 @@
   }
 
   .integrations-page {
-    max-width: 1220px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 28px 16px 48px;
+    padding: 28px 16px 54px;
     text-align: left;
   }
 
@@ -597,14 +1283,17 @@
   .eyebrow,
   h1,
   h2,
+  h3,
   p {
     margin: 0;
   }
 
-  .eyebrow {
+  .eyebrow,
+  .section-heading span {
     color: #0f766e;
     font-size: 0.82rem;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
@@ -620,10 +1309,15 @@
     font-size: 1.16rem;
   }
 
+  h3 {
+    color: #0f172a;
+    font-size: 1.05rem;
+  }
+
   .subtitle {
     margin-top: 10px;
     color: #526174;
-    max-width: 720px;
+    max-width: 760px;
   }
 
   .toolbar {
@@ -664,17 +1358,19 @@
     cursor: pointer;
   }
 
+  button:hover {
+    background: #0b5f59;
+  }
+
   .source-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 12px;
     margin-bottom: 16px;
   }
 
   .source-card,
-  .student-api-card,
-  .chart-panel,
-  .city-card,
+  .panel,
   .message,
   .state {
     border: 1px solid #d9e0ea;
@@ -685,118 +1381,96 @@
 
   .source-card {
     display: grid;
-    gap: 4px;
+    gap: 5px;
+    min-width: 0;
     padding: 14px;
     color: inherit;
     text-decoration: none;
   }
 
   .source-card span,
+  .source-card small,
   dt,
-  .city-heading p {
+  small,
+  .country-card p {
     color: #64748b;
-    font-size: 0.86rem;
+    font-size: 0.84rem;
   }
 
   .source-card strong {
     color: #0f172a;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
   }
 
-  .student-api-grid {
+  .source-card small {
+    overflow-wrap: anywhere;
+  }
+
+  .panel {
+    padding: 20px;
+    margin-top: 16px;
+  }
+
+  .section-heading {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 4px;
     margin-bottom: 16px;
   }
 
-  .student-api-card {
-    padding: 14px;
+  .table-wrapper {
+    overflow-x: auto;
   }
 
-  .student-api-card span {
-    color: #64748b;
+  table {
+    width: 100%;
+    min-width: 790px;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+  }
+
+  th {
+    color: #475569;
     font-size: 0.82rem;
-    font-weight: 700;
     text-transform: uppercase;
   }
 
-  .student-api-card strong {
-    display: block;
-    margin-top: 4px;
-    color: #0f172a;
+  td {
+    color: #111827;
   }
 
-  .student-api-card p {
-    margin-top: 8px;
-    color: #475569;
+  .error-row td {
+    color: #991b1b;
   }
 
-  .student-api-list {
+  .country-card-grid {
     display: grid;
-    gap: 8px;
-    margin: 12px 0 0;
-    padding: 0;
-    list-style: none;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
   }
 
-  .student-api-list li {
-    display: grid;
-    gap: 2px;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 8px;
+  .country-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    background: #fbfdff;
   }
 
-  .student-api-list span,
-  .student-api-list small {
-    color: #64748b;
-  }
-
-  .student-api-list strong {
-    margin-top: 0;
-  }
-
-  .error-card {
-    border-color: #fecaca;
-    background: #fef2f2;
-  }
-
-  .chart-panel {
-    padding: 20px;
-  }
-
-  .chart-panel + .chart-panel {
-    margin-top: 16px;
-  }
-
-  .chart-panel h2 {
-    margin-bottom: 14px;
-  }
-
-  .chart-frame {
-    min-height: 430px;
-  }
-
-  .city-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    margin-top: 16px;
-  }
-
-  .city-card {
-    padding: 16px;
-  }
-
-  .city-heading {
+  .country-card-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 16px;
+    min-height: 48px;
+    margin-bottom: 12px;
   }
 
-  .city-heading img {
+  .country-card img {
     width: 46px;
     height: 32px;
     object-fit: cover;
@@ -806,22 +1480,121 @@
 
   dl {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 10px;
     margin: 0;
   }
 
   dd {
-    margin: 3px 0 0;
+    margin: 2px 0 0;
     color: #0f172a;
-    font-weight: 700;
+    font-weight: 800;
   }
 
-  .warning-list {
-    margin: 14px 0 0;
-    padding-left: 18px;
-    color: #9a3412;
-    font-size: 0.9rem;
+  .chart-frame {
+    min-height: 380px;
+    margin-bottom: 16px;
+  }
+
+  .split-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .split-grid .panel {
+    margin-top: 0;
+  }
+
+  .summary-list,
+  .kpi-grid,
+  .prize-board {
+    display: grid;
+    gap: 12px;
+  }
+
+  .summary-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fafc;
+  }
+
+  .rank {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-weight: 800;
+  }
+
+  .rank.danger {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .summary-row div {
+    min-width: 0;
+  }
+
+  .summary-row small,
+  .kpi-card small,
+  .prize-board small {
+    display: block;
+    margin-top: 2px;
+  }
+
+  .summary-row b {
+    color: white;
+    border-radius: 999px;
+    background: #0f766e;
+    padding: 5px 9px;
+    font-weight: 900;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpi-card {
+    display: grid;
+    gap: 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fafc;
+  }
+
+  .kpi-card span,
+  .prize-board span {
+    color: #334155;
+    font-weight: 800;
+  }
+
+  .kpi-card strong,
+  .prize-board strong {
+    color: #0f172a;
+  }
+
+  .prize-board {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .prize-board article {
+    display: grid;
+    align-content: end;
+    min-height: 122px;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    padding: 12px;
+    background: #eff6ff;
   }
 
   .message,
@@ -829,24 +1602,47 @@
     padding: 16px;
   }
 
-  .error {
+  .message h2 {
+    margin-bottom: 10px;
+  }
+
+  .message ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .warning {
+    border-color: #fed7aa;
+    background: #fff7ed;
+    color: #7c2d12;
+  }
+
+  .success {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+  }
+
+  .error,
+  .error-card {
     border-color: #fecaca;
     background: #fef2f2;
     color: #991b1b;
   }
 
-  @media (max-width: 820px) {
+  @media (max-width: 960px) {
+    .country-card-grid,
+    .split-grid,
+    .kpi-grid,
+    .prize-board {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 760px) {
     .page-header {
       align-items: stretch;
       flex-direction: column;
-    }
-
-    .toolbar,
-    .source-grid,
-    .student-api-grid,
-    .city-grid,
-    dl {
-      grid-template-columns: 1fr;
     }
 
     .toolbar {
@@ -860,7 +1656,16 @@
     }
 
     .chart-frame {
-      min-height: 360px;
+      min-height: 330px;
+    }
+
+    .summary-row {
+      grid-template-columns: 30px minmax(0, 1fr);
+    }
+
+    .summary-row b {
+      grid-column: 2;
+      width: fit-content;
     }
   }
 </style>
