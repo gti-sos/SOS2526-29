@@ -270,4 +270,33 @@ module.exports = function registerNaturalDisastersV2(app, db) {
     app.post(`${BASE_API_URL}/:country/:year`, (request, response) => response.sendStatus(405));
     // No se permite PUT sobre toda la coleccion.
     app.put(BASE_API_URL, (request, response) => response.sendStatus(405));
+
+
+    // ====================================================================
+    // 🚀 PROXY PARA LA INTEGRACIÓN 4 (API EXTERNA)
+    // ====================================================================
+    app.get(`/api/v2/proxy-integracion-4`, async (request, response) => {
+        try {
+            // 1. Pon aquí la URL de la API de la Integración 4
+            const urlExterna = "LA_URL_DE_LA_NUEVA_API_AQUI"; 
+            
+            // 2. Tu backend hace la petición
+            const peticion = await fetch(urlExterna);
+            
+            if (!peticion.ok) {
+                return response.status(peticion.status).json({ error: "Fallo en la API externa" });
+            }
+
+            // 3. Convertimos los datos a JSON
+            const datosExternos = await peticion.json();
+
+            // 4. Se los mandamos a tu frontend de Svelte
+            return response.json(datosExternos);
+
+        } catch (error) {
+            console.error("Error en el proxy de la integración 4:", error);
+            return response.status(500).json({ error: "Fallo interno en el servidor proxy" });
+        }
+    });
+
 };
