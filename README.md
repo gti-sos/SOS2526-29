@@ -2,6 +2,15 @@
 
 Aplicacion web de la asignatura SOS2526 para analizar datos de desastres naturales, estadisticas de ciudades y datos relacionados con vino. El backend esta hecho con Node.js, Express y NeDB. El frontend esta hecho con Svelte y se sirve desde la carpeta `public` cuando se despliega en Render.
 
+## Documentacion unica
+
+Toda la documentacion tecnica, guia de instalacion, guia de ejecucion, explicacion de funciones, manual de modificaciones y defensa del proyecto esta centralizada en:
+
+- [docs/DEFENSA_COMPLETA.md](docs/DEFENSA_COMPLETA.md)
+- [docs/DEFENSA_COMPLETA.pdf](docs/DEFENSA_COMPLETA.pdf) como copia para lectura e impresion en PDF
+
+Los archivos antiguos de defensa dentro de `docs/` se eliminan como fuentes independientes para que toda la informacion activa quede en esos dos documentos.
+
 ## Equipo
 
 - Rufino Moreno Pacheco: https://github.com/rufmorpac
@@ -70,9 +79,7 @@ La vista `https://sos2526-29.onrender.com/integrations/citys-stats` integra por 
 | SOS2526-26 `fifa-squad-value-per-years` | Alumno SOS | `/api/v1/citys-stats/integrations/sos-fifa-squad-values` |
 | SOS2526-30 `esportsearnings-stats` | Alumno SOS | `/api/v1/citys-stats/integrations/sos-esports-earnings` |
 
-Guia principal de defensa LCC: [docs/D03_DEFENSA_LCC.md](docs/D03_DEFENSA_LCC.md).
-
-Guia de teoria y estilo para defensa: [docs/TEORIA_Y_ESTILO_DEFENSA.md](docs/TEORIA_Y_ESTILO_DEFENSA.md).
+Guia unica de defensa, teoria, funciones y modificaciones: [docs/DEFENSA_COMPLETA.md](docs/DEFENSA_COMPLETA.md).
 
 ## Ejecutar en local
 
@@ -113,4 +120,4 @@ En PowerShell se recomienda usar `npm.cmd` para evitar el bloqueo habitual de `n
 - Integracion LCC por proxy propio: preparada mediante endpoints bajo `/api/v1/citys-stats/integrations`.
 - Analytics grupal: preparado en `/analytics` con un unico widget Highcharts no lineal.
 - Integraciones grupales: preparadas en `/integrations`, con la parte LCC enlazada.
-- Pendiente fuera de esta parte: videos personales, informes Toggl en `efforts/MMMMM`, PR formal asociada a issue done y milestone/release D03, y partes individuales de otros miembros si no estan terminadas.
+- Comprobaciones externas: videos personales, informes Toggl/efforts y PR/milestone/release solo si la entrega los exige. No se consideran funcionalidades pendientes del codigo.
