@@ -24,6 +24,11 @@
     let cargando5 = true;
     let errorMensaje5 = "";
 
+    // Variables Integración 6 (NASA - Directa)
+    let cargando6 = true;
+    let errorMensaje6 = "";
+    let miGraficaRadarNasa;
+
     // URLs de las APIs
     const MI_API = "/api/v2/natural-disasters";
     const API_COMPANERO_1 = "https://sos2526-19-integracion.onrender.com/api/v1/workers-productivity";
@@ -312,7 +317,7 @@
     
 
     // --- INTEGRACIÓN 3: API Externa de Terremotos vs Mis Muertes (DIRECTA) ---
-    async function cargarIntegracionExterna() {
+    async function cargarIntegracion3() {
         try {
             // 1. Llamamos a TU backend local y DIRECTAMENTE a la web de terremotos
             const urlUSGS = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=1950-01-01&endtime=2024-12-31&minmagnitude=6.5";
@@ -372,13 +377,13 @@
                 barrasTerremotos.push(dato.terremotos);
             }
 
-            // 5. Dibujamos la gráfica mixta (Chart.js)
+            // 5. Dibujamos la gráfica (Chart.js)
             setTimeout(() => {
                 const ctx = document.getElementById('grafica-externa-1').getContext('2d');
                 if (window.miGraficaExterna) window.miGraficaExterna.destroy();
 
                 window.miGraficaExterna = new Chart(ctx, {
-                    type: 'line', 
+                    type: 'bar', 
                     data: {
                         labels: etiquetasAnos,
                         datasets: [
@@ -392,7 +397,7 @@
                                 borderWidth: 1
                             },
                             {
-                                type: 'line', 
+                                type: 'bar', 
                                 label: 'Muertes Totales',
                                 data: lineaMuertes,
                                 yAxisID: 'yDerecha',
@@ -488,13 +493,13 @@
                         }, 
                         {
                             name: 'Anomalía Temp (ºC)',
-                            type: 'line', // Línea
+                            type: 'area', // Línea
                             data: lineaTemperatura
                         }
                     ],
                     chart: {
                         height: 400,
-                        type: 'line',
+                        type: 'area',
                         toolbar: { show: true } // Botones para descargar la gráfica
                     },
                     stroke: {
@@ -641,16 +646,156 @@
         }
     }
 
+    // --- INTEGRACIÓN 6: NASA EONET (DIRECTA SIN PROXY - CHART.JS RADAR) ---
+    async function cargarIntegracion6() {
+        try {
+            // API oficial de la NASA: Eventos naturales abiertos/activos a día de hoy
+            const urlNasa = "https://eonet.gsfc.nasa.gov/api/v3/events?status=open";
+
+            const [resMia, resNasa] = await Promise.all([
+                fetch(MI_API), 
+                fetch(urlNasa) 
+            ]);
+
+            if (!resMia.ok) throw new Error("Error cargando tus datos locales");
+            if (!resNasa.ok) throw new Error("Error conectando con la NASA");
+
+            const misDatos = await resMia.json();
+            const datosNasa = await resNasa.json(); 
+
+            // 1. Agrupamos tus Muertes Históricas por país
+            let misMuertesPorPais = {};
+            for (let miDato of misDatos) {
+                let pais = miDato.country.toLowerCase();
+                misMuertesPorPais[pais] = (misMuertesPorPais[pais] || 0) + (parseFloat(miDato.death_count) || 0);
+            }
+
+            // 2. Buscamos eventos de la NASA que ocurran en tus países
+            let eventosNasaPorPais = {};
+            // Inicializamos todos a 0
+            for (let pais in misMuertesPorPais) {
+                eventosNasaPorPais[pais] = 0;
+            }
+
+            // Repasamos los eventos de los satélites
+            for (let evento of datosNasa.events) {
+                let tituloEvento = evento.title.toLowerCase();
+                
+                // Si el título del evento contiene el nombre del país, sumamos 1 alerta
+                for (let pais in misMuertesPorPais) {
+                    if (tituloEvento.includes(pais)) {
+                        eventosNasaPorPais[pais]++;
+                    }
+                }
+            }
+
+            // 3. NORMALIZACIÓN (El truco del 100%)
+            // Buscamos el valor máximo de muertes y de eventos para hacer la escala
+            let maxMuertes = Math.max(...Object.values(misMuertesPorPais));
+            let maxNasa = Math.max(...Object.values(eventosNasaPorPais));
+            
+            // Evitamos dividir por cero si la NASA hoy no tiene nada
+            if (maxNasa === 0) maxNasa = 1; 
+
+            let etiquetasPaises = [];
+            let radarMuertes = [];
+            let radarNasa = [];
+
+            for (let pais in misMuertesPorPais) {
+                const paisBonito = pais.charAt(0).toUpperCase() + pais.slice(1);
+                etiquetasPaises.push(paisBonito);
+                
+                // Convertimos el dato puro en un porcentaje del 0 al 100
+                let indiceMuertes = (misMuertesPorPais[pais] / maxMuertes) * 100;
+                let indiceNasa = (eventosNasaPorPais[pais] / maxNasa) * 100;
+
+                radarMuertes.push(indiceMuertes.toFixed(1));
+                radarNasa.push(indiceNasa.toFixed(1));
+            }
+
+            // 4. Dibujamos la gráfica de RADAR
+            const intentarDibujarRadar = () => {
+                if (!window.Chart) {
+                    setTimeout(intentarDibujarRadar, 100);
+                    return;
+                }
+
+                const ctx = document.getElementById('grafica-nasa-6').getContext('2d');
+                if (window.miGraficaRadarNasa) window.miGraficaRadarNasa.destroy();
+
+                window.miGraficaRadarNasa = new Chart(ctx, {
+                    type: 'radar', 
+                    data: {
+                        labels: etiquetasPaises,
+                        datasets: [
+                            {
+                                label: 'Índice de Peligro Histórico (Mis Datos)',
+                                data: radarMuertes,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'Índice de Alerta NASA (Hoy)',
+                                data: radarNasa,
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            r: {
+                                angleLines: { display: true },
+                                suggestedMin: 0,
+                                suggestedMax: 100,
+                                ticks: {
+                                    stepSize: 20,
+                                    callback: function(value) { return value + '%' } // Le pone el símbolo de porcentaje
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.raw + ' pts';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                cargando6 = false;
+            };
+
+            intentarDibujarRadar();
+
+        } catch (error) {
+            errorMensaje6 = error.message;
+            cargando6 = false;
+        }
+    }
+
 
     // Al montar la página, ejecutamos TODAS simultáneamente
     onMount(() => {
         cargarIntegracion1();
         cargarIntegracion2();
-        cargarIntegracionExterna();
+        cargarIntegracion3();
         cargarIntegracion4();
         cargarIntegracion5();
+        cargarIntegracion6();
     });
 </script>
+
+
+<!-- LISTA DE LIBRERIAS UTILIZADAS EN LAS INTEGRACIONES -->
 
 <svelte:head>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -726,6 +871,19 @@
         {#if cargando5 && !errorMensaje5} <p>⏳ Carga de Datos Pandémicos...</p> {/if}
         
         <div id="grafica-directa-5" style="width: 100%; height: 450px;"></div>
+    </section>
+
+    <!-- BLOQUE DE LA INTEGRACIÓN 6 (Radar Directo NASA EONET) -->
+    <section class="card integration-card">
+        <h2>6. Alerta Global: NASA EONET (Radar Directo)</h2>
+        <p>Comparativa del "Índice de Peligro Histórico" (Mis datos) vs "Índice de Alerta Actual" (Eventos severos activos hoy según los satélites de la NASA).</p>
+        
+        {#if errorMensaje6} <p class="error">❌ {errorMensaje6}</p> {/if}
+        {#if cargando6 && !errorMensaje6} <p>⏳ Conectando con los satélites de la NASA...</p> {/if}
+        
+        <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
+            <canvas id="grafica-nasa-6"></canvas>
+        </div>
     </section>
 
 </div>
