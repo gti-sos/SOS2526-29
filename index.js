@@ -19,6 +19,28 @@ app.use(cors());
 // Indicamos a Express que lea cuerpos JSON en peticiones POST y PUT.
 app.use(express.json());
 
+// =============================================================================
+// FLUJO GENERAL DE EJECUCION
+// =============================================================================
+// 1. Node ejecuta este archivo de arriba abajo una sola vez al arrancar.
+// 2. Se crea la app de Express y se activan middlewares generales:
+//    CORS y lectura de JSON.
+// 3. Se abren las bases NeDB. autoload carga cada fichero .db.
+// 4. Se importan los modulos de API y se ejecutan pasando app y su db.
+//    Cada modulo registra sus rutas; no responde peticiones todavia.
+// 5. Se registran proxies async para APIs externas:
+//    - /api/proxy/drought-stats:
+//      fetch externo -> json -> si viene vacio, fetch loadInitialData
+//      -> repetir fetch externo -> response.
+//    - /api/proxy/age-specific-fertility-rates:
+//      fetch externo -> json -> si viene vacio, fetch loadInitialData
+//      -> repetir fetch externo -> response.
+//    - /api/proxy/exportations-stats:
+//      copiar query recibida -> fetch externo -> json -> response.
+// 6. Se sirve el frontend compilado desde /public.
+// 7. app.listen deja el servidor escuchando. A partir de ahi, Express ejecuta
+//    solo el handler que coincida con el metodo y la URL de cada peticion.
+
 
 // =============================================================================
 // 1. CONFIGURACION DE BASES DE DATOS
@@ -63,34 +85,60 @@ wineStatsApiV1(app, wineStatsDb);
 // =============================================================================
 // 3. PROXIES PARA APIS EXTERNAS (evita CORS desde el frontend)
 // =============================================================================
+//CORS es una protección del navegador que puede bloquear llamadas directas del frontend 
+// a APIs externas, por eso usamos un proxy en el backend que pide los datos por nosotros
+//y se los devuelve al frontend, evitando asi la proteccion de CORS.
 
+
+//OJO ESTO ES DE RUFINO, REALEMNTE NO VA AQUI PERO EL LO HA PUESTO AQUI POR LA CARA
+
+
+
+// -----------------------------------------------------------------------------
+// Proxy para la API externa de drought-stats
+// -----------------------------------------------------------------------------
 app.get("/api/proxy/drought-stats", async (req, res) => {
   try {
+    // URL base de la API externa que se quiere consultar
     const baseUrl = "https://sos2526-19-integracion.onrender.com/api/v1/drought-stats";
 
+    // Se hace una petición GET a la API externa
     let response = await fetch(baseUrl);
+
+    // Si la respuesta no es correcta, se lanza un error
     if (!response.ok) {
       throw new Error(`Error API externa: ${response.status}`);
     }
 
+    // Se convierte la respuesta a JSON
     let data = await response.json();
 
+    // Si la API devuelve un array vacío, se intenta cargar datos iniciales
     if (Array.isArray(data) && data.length === 0) {
+      // Se llama al endpoint loadInitialData de la API externa
       const loadResponse = await fetch(`${baseUrl}/loadInitialData`);
+
+      // Si la carga inicial falla, se lanza un error
       if (!loadResponse.ok) {
         throw new Error(`Error loadInitialData: ${loadResponse.status}`);
       }
 
+      // Después de cargar los datos iniciales, se vuelve a consultar la API
       response = await fetch(baseUrl);
+
+      // Se comprueba otra vez que la respuesta sea correcta
       if (!response.ok) {
         throw new Error(`Error API externa tras loadInitialData: ${response.status}`);
       }
 
+      // Se actualiza data con los datos ya cargados
       data = await response.json();
     }
 
+    // Si todo ha ido bien, se devuelve la información al frontend
     res.status(200).json(data);
   } catch (err) {
+    // Si ocurre cualquier error, se responde con error 500
     res.status(500).json({ error: "No se pudo conectar con la API externa." });
   }
 });

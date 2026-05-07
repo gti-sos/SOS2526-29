@@ -15,6 +15,28 @@
   // Pantalla de integraciones: cruza citys-stats con APIs externas y pinta
   // un widget distinto por fuente de datos.
 
+  // FLUJO ASINCRONO DE ESTA PANTALLA
+  // 1. Al abrir /integrations/citys-stats, Svelte registra onMount(loadIntegrations).
+  // 2. loadIntegrations limpia estado y destruye graficas anteriores.
+  // 3. Primero carga datos locales agregados:
+  //    getCountrySummaries(selectedLimit).
+  //    Si vienen vacios, llama a loadInitialCitysStats y repite getCountrySummaries.
+  // 4. Con esos paises locales lanza llamadas externas por bloques:
+  //    - Promise.all(getGeocoding por cada pais) usando safeLoad.
+  //    - Promise.all(getCountryInfo por cada pais) usando safeLoad.
+  //    - Promise.all(getWorldBankPopulation por cada codigo ISO3) usando safeLoad.
+  //    - Promise.all de APIs SOS externas:
+  //      turismo + terremotos + FIFA + eSports.
+  // 5. safeLoad convierte cada fallo en { data: null, error }, asi una API externa
+  //    rota no impide pintar el resto de widgets.
+  // 6. Los resultados se normalizan en arrays de pantalla:
+  //    geocodingRows, countryCards, worldBankRows, touristCountries,
+  //    earthquakeCountries, fifaCountries y esportsCountries.
+  // 7. loading=false y await tick espera a que existan los contenedores HTML.
+  // 8. loadHighcharts importa Highcharts y todos los modulos necesarios una vez.
+  // 9. renderIntegrationCharts llama a cada renderXChart y guarda las instancias.
+  // 10. onDestroy limpia todas las graficas al salir.
+
   // Highcharts se importa de forma diferida para no cargarlo en otras paginas.
   let Highcharts;
   // Contenedores HTML de cada widget. Highcharts necesita referencias reales.

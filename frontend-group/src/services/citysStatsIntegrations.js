@@ -4,6 +4,22 @@
  * Este modulo solo lo usa la pagina de integraciones. Apunta a /api/v1/citys-stats
  * porque en esa version estan los endpoints proxy que combinan datos locales con
  * Open-Meteo, REST Countries, World Bank y APIs SOS externas.
+ *
+ * FLUJO ASINCRONO:
+ * 1. La pagina de integraciones llama a una funcion exportada de este servicio.
+ * 2. La funcion construye la URL del endpoint v1 correspondiente.
+ * 3. Se ejecuta fetch contra nuestro backend, no directamente contra APIs externas.
+ * 4. El backend v1 llama a Open-Meteo, REST Countries, World Bank o APIs SOS.
+ * 5. handleResponse lee response.text(), intenta convertirlo a JSON y:
+ *    - devuelve datos si la respuesta es correcta.
+ *    - lanza Error si el backend respondio con error.
+ * 6. La pagina envuelve estas llamadas con safeLoad para que una integracion
+ *    fallida no rompa todos los widgets.
+ *
+ * ORDEN DE USO HABITUAL EN LA PANTALLA:
+ * getCountrySummaries -> getGeocoding/getCountryInfo/getWorldBankPopulation
+ * -> getSosTouristArrivals/getSosEarthquakes/getSosFifaSquadValues/
+ *    getSosEsportsEarnings -> pintar widgets.
  */
 import { apiPath } from "./apiBase.js";
 

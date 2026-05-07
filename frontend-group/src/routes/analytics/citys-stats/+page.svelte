@@ -4,6 +4,15 @@
   // Servicio para pedir citys-stats al backend.
   import { getAllCitysStats } from "@/services/citysStatsApi";
 
+  // FLUJO ASINCRONO DE ESTA PANTALLA
+  // 1. Al abrir /analytics/citys-stats, Svelte registra onMount(loadAnalytics).
+  // 2. loadAnalytics pone loading=true y llama a getAllCitysStats con sort.
+  // 3. Cuando llegan los datos, loading=false y await tick espera a que exista
+  //    el div bind:this={chartContainer}.
+  // 4. loadHighcharts importa Highcharts y accesibilidad solo una vez.
+  // 5. renderChart usa citysStats ya cargado para crear la grafica.
+  // 6. onDestroy destruye chart al salir para evitar graficas duplicadas.
+
   // Libreria Highcharts cargada cuando se necesita.
   let Highcharts;
   // Contenedor HTML de la grafica.

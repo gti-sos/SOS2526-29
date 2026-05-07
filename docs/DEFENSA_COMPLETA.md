@@ -1,4 +1,4 @@
-﻿# Defensa completa SOS2526-29
+# Defensa completa SOS2526-29
 
 Documento canonico del proyecto para la defensa. Es la fuente principal para estudiar, modificar y explicar el proyecto; el `README.md` queda como entrada breve al repositorio.
 
@@ -12,33 +12,33 @@ Fuente actualizada para estudiar y modificar: este Markdown. Si se quiere una co
 
 ## Indice
 
-- [1. Resumen ejecutivo](#1-resumen-ejecutivo)
-- [2. Problema, objetivos y publico](#2-problema-objetivos-y-publico)
-- [3. Equipo y recursos](#3-equipo-y-recursos)
-- [4. Stack tecnologico](#4-stack-tecnologico)
-- [5. Arquitectura general](#5-arquitectura-general)
-- [6. Estructura real de carpetas](#6-estructura-real-de-carpetas)
-- [7. Instalacion, configuracion y ejecucion](#7-instalacion-configuracion-y-ejecucion)
-- [8. Scripts, tests y validaciones](#8-scripts-tests-y-validaciones)
-- [9. Rutas utiles para abrir](#9-rutas-utiles-para-abrir)
-- [10. Modelo de datos](#10-modelo-de-datos)
-- [11. Backend: arranque y responsabilidades](#11-backend-arranque-y-responsabilidades)
-- [12. APIs REST del proyecto](#12-apis-rest-del-proyecto)
-- [13. Frontend: rutas, servicios y pantallas](#13-frontend-rutas-servicios-y-pantallas)
-- [14. Parte LCC: `citys-stats`](#14-parte-lcc-citys-stats)
-- [15. Integraciones LCC](#15-integraciones-lcc)
-- [16. Funciones importantes explicadas](#16-funciones-importantes-explicadas)
-- [17. Flujos de ejecucion](#17-flujos-de-ejecucion)
-- [18. Codigos HTTP y contrato REST](#18-codigos-http-y-contrato-rest)
-- [19. Cambios que pueden pedir en directo](#19-cambios-que-pueden-pedir-en-directo)
-- [20. Errores comunes y soluciones](#20-errores-comunes-y-soluciones)
-- [21. Decisiones tecnicas](#21-decisiones-tecnicas)
-- [22. Limitaciones y mejoras futuras](#22-limitaciones-y-mejoras-futuras)
-- [23. Guion de defensa oral](#23-guion-de-defensa-oral)
-- [24. Preguntas dificiles y respuestas](#24-preguntas-dificiles-y-respuestas)
-- [25. Glosario para personas no tecnicas](#25-glosario-para-personas-no-tecnicas)
-- [26. Checklists finales](#26-checklists-finales)
-- [27. Anexos tecnicos](#27-anexos-tecnicos)
+- [1. Resumen ejecutivo](#1-resumen-ejecutivo) - pag. 2
+- [2. Problema, objetivos y publico](#2-problema-objetivos-y-publico) - pag. 3
+- [3. Equipo y recursos](#3-equipo-y-recursos) - pag. 3
+- [4. Stack tecnologico](#4-stack-tecnologico) - pag. 4
+- [5. Arquitectura general](#5-arquitectura-general) - pag. 5
+- [6. Estructura real de carpetas](#6-estructura-real-de-carpetas) - pag. 6
+- [7. Instalacion, configuracion y ejecucion](#7-instalacion-configuracion-y-ejecucion) - pags. 7-8
+- [8. Scripts, tests y validaciones](#8-scripts-tests-y-validaciones) - pag. 9
+- [9. Rutas utiles para abrir](#9-rutas-utiles-para-abrir) - pag. 10
+- [10. Modelo de datos](#10-modelo-de-datos) - pag. 11
+- [11. Backend: arranque y responsabilidades](#11-backend-arranque-y-responsabilidades) - pags. 11-12
+- [12. APIs REST del proyecto](#12-apis-rest-del-proyecto) - pags. 13-14
+- [13. Frontend: rutas, servicios y pantallas](#13-frontend-rutas-servicios-y-pantallas) - pag. 15
+- [14. Parte LCC: `citys-stats`](#14-parte-lcc-citys-stats) - pags. 16-18
+- [15. Integraciones LCC](#15-integraciones-lcc) - pags. 19-21
+- [16. Funciones importantes explicadas](#16-funciones-importantes-explicadas) - pags. 22-48
+- [17. Flujos de ejecucion](#17-flujos-de-ejecucion) - pags. 49-62
+- [18. Codigos HTTP y contrato REST](#18-codigos-http-y-contrato-rest) - pags. 63-66
+- [19. Cambios que pueden pedir en directo](#19-cambios-que-pueden-pedir-en-directo) - pags. 67-71
+- [20. Errores comunes y soluciones](#20-errores-comunes-y-soluciones) - pags. 72-74
+- [21. Decisiones tecnicas](#21-decisiones-tecnicas) - pag. 75
+- [22. Limitaciones y mejoras futuras](#22-limitaciones-y-mejoras-futuras) - pag. 76
+- [23. Guion de defensa oral](#23-guion-de-defensa-oral) - pags. 77-89
+- [24. Preguntas dificiles y respuestas](#24-preguntas-dificiles-y-respuestas) - pags. 90-91
+- [25. Glosario para personas no tecnicas](#25-glosario-para-personas-no-tecnicas) - pag. 92
+- [26. Checklists finales](#26-checklists-finales) - pag. 93
+- [27. Anexos tecnicos](#27-anexos-tecnicos) - pags. 94-95
 
 Ruta de lectura recomendada para defender LCC `citys-stats`:
 
@@ -286,11 +286,10 @@ Archivos clave:
 | `frontend-group/src/services/citysStatsIntegrations.js` | Fetch integraciones LCC v1 |
 | `frontend-group/vite.config.js` | Build hacia `../public` |
 
-Rutas alias:
+Rutas canonicas LCC:
 
-- Existen carpetas `analytics/city-stats`, `analytics/city-stats/map` e `integrations/city-stats`.
-- Esas rutas importan y reutilizan las pantallas reales de `citys-stats`.
 - La ruta canonica para defensa es `citys-stats`, porque ese es el nombre del recurso publicado.
+- Las rutas antiguas `city-stats` se eliminaron para evitar duplicidad en el frontend.
 
 ## 7. Instalacion, configuracion y ejecucion
 
@@ -2187,73 +2186,11 @@ Respuesta de defensa:
 
 ### 16.8 Flujos completos que conviene memorizar
 
-Crear ciudad:
+La chuleta completa esta en la seccion 17, para evitar duplicar informacion.
 
-```text
-Usuario pulsa Guardar registro
-  -> handleCreate
-     -> validateCityStatForm
-     -> createCityStat
-        -> fetch POST /api/v2/citys-stats
-           -> normalizeCityStat
-           -> db.findOne para duplicado
-           -> db.insert
-           -> removeDatabaseId
-     -> handleResponse
-     -> refreshList
-```
+Idea que hay que memorizar:
 
-Buscar ciudad:
-
-```text
-Usuario pulsa Aplicar busqueda
-  -> handleSearch
-     -> buildSearchQuery
-     -> refreshList
-        -> getAllCitysStats(query)
-           -> buildUrl con query params
-           -> fetch GET /api/v2/citys-stats?...query
-              -> filtros exactos, q, sort, offset, limit
-```
-
-Editar sin cambiar clave:
-
-```text
-Usuario abre /citys-stats/editar/:city/:country
-  -> loadResource
-     -> getOneCityStat
-Usuario guarda
-  -> handleUpdate
-     -> isSameResource devuelve true
-     -> updateCityStat
-        -> PUT /api/v2/citys-stats/:city/:country
-```
-
-Editar cambiando ciudad o pais:
-
-```text
-Usuario guarda con city o country diferente
-  -> handleUpdate
-     -> isSameResource devuelve false
-     -> createCityStat nuevo
-     -> deleteCityStat antiguo
-     -> updateRoute hacia la nueva URL
-```
-
-Integraciones:
-
-```text
-Usuario abre /integrations/citys-stats
-  -> loadIntegrations
-     -> getCountrySummaries
-        -> buildCityCountrySummaries en backend
-     -> getGeocoding, getCountryInfo, getWorldBankPopulation
-     -> getSosTouristArrivals, getSosEarthquakes, getSosFifaSquadValues, getSosEsportsEarnings
-     -> safeLoad guarda errores parciales
-     -> tick espera DOM
-     -> loadHighcharts
-     -> renderIntegrationCharts
-```
+> El orden real depende del contexto: pantalla, boton o endpoint. Las funciones no se ejecutan por estar arriba o abajo en el archivo, sino porque algo las llama.
 
 ### 16.9 Recetas de cambio que mas pueden pedir
 
@@ -2476,89 +2413,852 @@ Regla final:
 
 ## 17. Flujos de ejecucion
 
+Idea clave para defensa:
+
+> El orden real no depende de donde este escrita la funcion, sino de quien la llama: una ruta de Express, un `onMount`, un boton o un service del frontend.
+
+Otra idea importante:
+
+> Cuando pongo "No hay funcion auxiliar", significa que ese paso esta escrito directamente dentro de la ruta o del componente. No te falta memorizar ninguna funcion con nombre.
+
 ### Arranque general
 
 1. El usuario ejecuta `npm start`.
 2. Node ejecuta `index.js`.
 3. Express crea `app`.
-4. Se activa CORS.
-5. Se activa lectura JSON.
-6. Se crean las bases NeDB.
-7. Se registran APIs v1 y v2.
-8. Se sirve `public`.
-9. Se registra fallback para rutas no API.
-10. El servidor escucha en `10000` o `process.env.PORT`.
+4. Se activan CORS y lectura JSON.
+5. Se abren las bases NeDB.
+6. Se importan APIs v1 y v2.
+7. Cada API ejecuta `module.exports(app, db)`.
+8. Cada API crea constantes, declara funciones y registra rutas.
+9. Se sirve `public`.
+10. Se registra el fallback de la SPA.
+11. El servidor queda escuchando.
 
-### Abrir una pantalla
+Importante:
 
-1. El usuario abre `/citys-stats`.
-2. Express no lo trata como API.
-3. Express devuelve `public/index.html`.
-4. Svelte arranca desde `main.js`.
-5. `App.svelte` resuelve `window.location.pathname`.
-6. Se carga `routes/citys-stats/+page.svelte`.
-7. `onMount` llama a `refreshList`.
-8. La pantalla pide datos al backend.
+- En el arranque las funciones auxiliares se declaran, pero no se ejecutan.
+- Las rutas `app.get`, `app.post`, `app.put` y `app.delete` solo se registran.
+- Una ruta se ejecuta solo cuando llega una peticion con su metodo y URL.
 
-### Crear ciudad
+### Regla para cualquier pantalla Svelte
 
-1. El usuario rellena ciudad, pais y poblacion.
-2. Pulsa guardar.
-3. `handleCreate` valida el formulario.
-4. `createCityStat` hace `POST /api/v2/citys-stats`.
-5. Express ejecuta `normalizeCityStat`.
-6. El backend busca duplicados por `city + country`.
-7. NeDB inserta el documento.
-8. La API devuelve `201`.
-9. El service devuelve datos al componente.
-10. `refreshList` recarga la tabla.
+1. El usuario abre una URL, por ejemplo `/citys-stats`.
+2. Express devuelve `public/index.html`.
+3. Arranca Svelte.
+4. `App.svelte` mira `window.location.pathname`.
+5. El router carga el componente de esa ruta.
+6. El `<script>` del componente se ejecuta.
+7. Las funciones se declaran.
+8. `onMount` ejecuta la carga inicial si existe.
+9. Los botones ejecutan sus handlers solo cuando el usuario pulsa.
 
-### Buscar ciudad
+### Si estas en `/citys-stats`
 
-1. El usuario rellena filtros.
-2. `buildSearchQuery` construye query.
-3. `getAllCitysStats(query)` construye URL.
-4. El backend aplica filtros, `q`, `sort`, `offset` y `limit`.
-5. Devuelve una lista.
-6. La pantalla muestra resultados y mensaje.
+Abrir la pantalla:
 
-### Editar ciudad sin cambiar clave
+```text
+onMount
+  -> refreshList({}, "")
+     -> getAllCitysStats({})
+        -> buildUrl("", {})
+        -> fetch GET /api/v2/citys-stats
+           -> backend v2 app.get(BASE_API_URL)
+              -> db.find
+              -> docs.map(removeDatabaseId)
+              -> filtros exactos si vienen
+                 No hay funcion auxiliar: se hace dentro de la ruta.
+              -> busqueda q si viene
+                 No hay funcion auxiliar: se hace dentro de la ruta.
+              -> sort si viene
+                 No hay funcion auxiliar: se hace dentro de la ruta.
+              -> offset/limit si vienen
+                 No hay funcion auxiliar: se hace dentro de la ruta.
+              -> result.slice(offset, offset + limit)
+              -> res.status(200).json(...)
+        -> handleResponse(response)
+           -> response.text()
+           -> JSON.parse si hay cuerpo
+     -> citysStats = datos recibidos
+     -> activeQuery = {}
+     -> loading = false
+```
 
-1. El usuario pulsa editar.
-2. `openEdit` navega a `/citys-stats/editar/:city/:country`.
-3. La pantalla de edicion carga el registro.
-4. El usuario cambia poblacion.
-5. `handleUpdate` detecta que la clave sigue igual.
-6. Llama a `updateCityStat`.
-7. El backend hace `PUT`.
-8. La pantalla muestra exito.
+Buscar:
 
-### Editar ciudad cambiando clave
+```text
+handleSearch
+  -> clearFeedback
+  -> buildSearchQuery
+     -> parseOptionalPositiveInteger para un_2025_population
+     -> parseOptionalNonNegativeInteger para limit
+     -> parseOptionalNonNegativeInteger para offset
+  -> refreshList(query)
+     -> getAllCitysStats(query)
+        -> buildUrl("", query)
+        -> fetch GET /api/v2/citys-stats?...query
+           -> backend v2 app.get(BASE_API_URL)
+              -> db.find
+              -> docs.map(removeDatabaseId)
+              -> filtro city si viene
+                 No hay funcion auxiliar.
+              -> filtro country si viene
+                 No hay funcion auxiliar.
+              -> filtro un_2025_population si viene
+                 No hay funcion auxiliar.
+              -> busqueda q si viene
+                 No hay funcion auxiliar.
+              -> sort si viene
+                 No hay funcion auxiliar.
+              -> offset/limit si vienen
+                 No hay funcion auxiliar.
+              -> result.slice(...)
+              -> res.status(200).json(...)
+        -> handleResponse(response)
+  -> hasQueryValues(query)
+  -> message o error
+```
 
-1. El usuario cambia `city` o `country`.
-2. `handleUpdate` detecta que ya no es el mismo recurso.
-3. Crea el nuevo registro con `POST`.
-4. Borra el antiguo con `DELETE`.
-5. Reemplaza la URL con la nueva clave.
+Limpiar filtros:
 
-### Analytics grupal
+```text
+handleResetSearch
+  -> emptySearchForm
+  -> clearFeedback
+  -> refreshList({})
+     -> getAllCitysStats({})
+        -> buildUrl("", {})
+        -> fetch GET /api/v2/citys-stats
+        -> backend v2 app.get(BASE_API_URL)
+        -> handleResponse(response)
+```
 
-1. El usuario abre `/analytics`.
-2. La pantalla llama en paralelo a:
-   - `getAllCitysStats`
-   - `getDisasters`
-   - `getAllWineStats`
-3. `buildMetrics` calcula registros e indicadores.
-4. `loadHighcharts` carga la libreria.
-5. `renderChart` pinta columnas con dos ejes.
+Crear:
 
-### Integraciones LCC
+```text
+handleCreate
+  -> clearFeedback
+  -> validateCityStatForm
+     -> parsePositiveInteger
+  -> createCityStat
+     -> buildUrl()
+     -> fetch POST /api/v2/citys-stats
+        -> backend v2 app.post(BASE_API_URL)
+           -> normalizeCityStat
+              -> hasExactCityFields
+           -> db.findOne para duplicado
+           -> db.insert
+           -> removeDatabaseId
+           -> res.status(201).json(...)
+     -> handleResponse(response)
+  -> emptyCreateForm
+  -> refreshList(activeQuery)
+     -> getAllCitysStats(activeQuery)
+     -> buildUrl("", activeQuery)
+     -> fetch GET /api/v2/citys-stats
+     -> backend v2 app.get(BASE_API_URL)
+     -> handleResponse(response)
+```
 
-1. El usuario abre `/integrations/citys-stats`.
-2. Se cargan paises locales con `country-summaries`.
-3. Se piden APIs externas mediante endpoints propios.
-4. Se transforman datos a arrays y metricas.
-5. Se pintan siete widgets Highcharts.
+Cargar datos iniciales:
+
+```text
+handleLoadInitialData
+  -> clearFeedback
+  -> loadInitialCitysStats
+     -> buildUrl("/loadInitialData")
+     -> fetch GET /api/v2/citys-stats/loadInitialData
+        -> backend v2 app.get(`${BASE_API_URL}/loadInitialData`)
+           -> db.count
+           -> si count > 0:
+              -> db.find
+              -> docs.map(removeDatabaseId)
+              -> res.status(200).json(...)
+           -> si count === 0:
+              -> db.insert(initialData)
+              -> docs.map(removeDatabaseId)
+              -> res.status(201).json(...)
+     -> handleResponse(response)
+  -> refreshList(activeQuery)
+```
+
+Borrar uno:
+
+```text
+handleDeleteOne
+  -> clearFeedback
+  -> deleteCityStat
+     -> encodePathValue(city)
+     -> encodePathValue(country)
+     -> buildUrl("/:city/:country")
+     -> fetch DELETE /api/v2/citys-stats/:city/:country
+        -> backend v2 app.delete(`${BASE_API_URL}/:city/:country`)
+           -> normaliza req.params.city y req.params.country
+           -> db.remove({ city, country }, {})
+           -> res.sendStatus(204)
+           -> o res.status(404).json(...) si no existia
+     -> handleResponse(response)
+  -> refreshList(activeQuery)
+```
+
+Borrar todos:
+
+```text
+handleDeleteAll
+  -> clearFeedback
+  -> deleteAllCitysStats
+     -> buildUrl()
+     -> fetch DELETE /api/v2/citys-stats
+        -> backend v2 app.delete(BASE_API_URL)
+           -> db.remove({}, { multi: true })
+           -> res.sendStatus(204)
+     -> handleResponse(response)
+  -> refreshList(activeQuery)
+```
+
+Abrir edicion:
+
+```text
+openEdit
+  -> encodeURIComponent(city)
+  -> encodeURIComponent(country)
+  -> navigate("/citys-stats/editar/:city/:country")
+```
+
+### Si estas en `/citys-stats/editar/:city/:country`
+
+Abrir pantalla:
+
+```text
+onMount
+  -> loadResource
+     -> getOneCityStat(params.city, params.country)
+        -> encodePathValue(city)
+        -> encodePathValue(country)
+        -> buildUrl("/:city/:country")
+        -> fetch GET /api/v2/citys-stats/:city/:country
+           -> backend v2 app.get(`${BASE_API_URL}/:city/:country`)
+              -> normaliza req.params.city y req.params.country
+              -> db.findOne({ city, country })
+              -> removeDatabaseId
+              -> res.status(200).json(...)
+              -> o 404 si no existe
+        -> handleResponse(response)
+     -> rellena form
+     -> rellena originalKey
+```
+
+Guardar sin cambiar `city` ni `country`:
+
+```text
+handleUpdate
+  -> clearFeedback
+  -> validateForm
+     -> parsePositiveInteger
+  -> isSameResource true
+  -> updateCityStat
+     -> encodePathValue(originalKey.city)
+     -> encodePathValue(originalKey.country)
+     -> buildUrl("/:city/:country")
+     -> fetch PUT /api/v2/citys-stats/:city/:country
+        -> backend v2 app.put(`${BASE_API_URL}/:city/:country`)
+           -> normalizeCityStat
+              -> hasExactCityFields
+           -> comprueba URL y body
+           -> db.findOne
+           -> db.update
+           -> db.findOne
+           -> removeDatabaseId
+           -> res.status(200).json(...)
+     -> handleResponse(response)
+  -> actualiza form
+  -> message
+```
+
+Guardar cambiando `city` o `country`:
+
+```text
+handleUpdate
+  -> clearFeedback
+  -> validateForm
+     -> parsePositiveInteger
+  -> isSameResource false
+  -> createCityStat(payload)
+     -> buildUrl()
+     -> fetch POST /api/v2/citys-stats
+     -> backend v2 app.post(BASE_API_URL)
+        -> normalizeCityStat
+           -> hasExactCityFields
+        -> db.findOne
+        -> db.insert
+        -> removeDatabaseId
+     -> handleResponse(response)
+  -> deleteCityStat(originalKey.city, originalKey.country)
+     -> encodePathValue
+     -> buildUrl("/:city/:country")
+     -> fetch DELETE /api/v2/citys-stats/:city/:country
+     -> backend v2 app.delete(`${BASE_API_URL}/:city/:country`)
+        -> db.remove
+     -> handleResponse(response)
+  -> updateRoute(created.city, created.country)
+     -> encodeURIComponent
+     -> replace("/citys-stats/editar/:city/:country")
+```
+
+### Si estas en `/analytics/citys-stats`
+
+```text
+onMount
+  -> loadAnalytics
+     -> getAllCitysStats({ sort: "-un_2025_population" })
+        -> buildUrl("", { sort })
+        -> fetch GET /api/v2/citys-stats?sort=-un_2025_population
+           -> backend v2 app.get(BASE_API_URL)
+              -> db.find
+              -> docs.map(removeDatabaseId)
+              -> sort inline dentro de la ruta
+              -> result.slice(...)
+        -> handleResponse(response)
+     -> tick
+     -> loadHighcharts
+        -> import("highcharts")
+        -> import("highcharts/modules/accessibility.js")
+     -> renderChart
+        -> citysStats.slice()
+        -> sort por poblacion
+        -> map(...)
+           -> labelFor(item)
+        -> chart?.destroy()
+        -> Highcharts.chart(...)
+onDestroy
+  -> chart?.destroy()
+```
+
+### Si estas en `/analytics/citys-stats/map`
+
+```text
+onMount
+  -> loadMapData
+     -> getAllCitysStats({ sort: "-un_2025_population" })
+        -> buildUrl("", { sort })
+        -> fetch GET /api/v2/citys-stats?sort=-un_2025_population
+        -> backend v2 app.get(BASE_API_URL)
+        -> handleResponse(response)
+     -> declaraciones reactivas de Svelte:
+        -> geolocated = citysStats.map(...)
+           -> keyFor(item)
+        -> missing = citysStats.filter(...)
+           -> keyFor(item)
+        -> maxPopulation = Math.max(...)
+        -> minPopulation = Math.min(...)
+        -> points = geolocated.map(...)
+           -> colorFor(item.population)
+           -> radiusFor(item.population)
+        -> selectedPoint = points.find(...)
+        -> totalPopulation = geolocated.reduce(...)
+     -> tick
+     -> loadHighchartsMap
+        -> import("highcharts")
+        -> import("highcharts/modules/map.js")
+        -> import("highcharts/modules/accessibility.js")
+     -> renderMap
+        -> points.map(...)
+           -> titleCase(point.city)
+           -> titleCase(point.country)
+        -> Highcharts.mapChart(...)
+        -> evento render
+           -> removeCityMarkerClip(chart)
+        -> eventos click/mouseOver
+           -> selectPoint(point)
+onDestroy
+  -> mapChart?.destroy()
+```
+
+### Si estas en `/integrations/citys-stats`
+
+La pantalla se puede lanzar de tres formas:
+
+```text
+onMount(loadIntegrations)
+select on:change={loadIntegrations}
+button on:click={loadIntegrations}
+```
+
+Carga local inicial:
+
+```text
+loadIntegrations
+  -> destroyIntegrationCharts
+  -> getCountrySummaries(selectedLimit)
+     -> fetch GET /api/v1/citys-stats/country-summaries?limit=N
+        -> backend v1 app.get(`${BASE_API_URL}/country-summaries`)
+           -> parseLimit
+           -> findAllCityStats
+              -> db.find
+              -> docs.map(removeDatabaseId)
+           -> buildCityCountrySummaries
+              -> normalizeCountryKey
+              -> readFiniteNumber
+           -> slice(0, limit)
+           -> res.status(200).json(...)
+     -> handleResponse(response)
+```
+
+Si no hay datos locales:
+
+```text
+if countrySummaries.length === 0
+  -> loadInitialCitysStats
+     -> buildUrl("/loadInitialData")
+     -> fetch GET /api/v2/citys-stats/loadInitialData
+     -> backend v2 app.get(`${BASE_API_URL}/loadInitialData`)
+        -> db.count
+        -> db.find o db.insert(initialData)
+        -> removeDatabaseId
+     -> handleResponse(response)
+  -> getCountrySummaries(selectedLimit) otra vez
+```
+
+Bloque Open-Meteo:
+
+```text
+Promise.all(countrySummaries.map(...))
+  -> safeLoad(() => getGeocoding(item.topCity, item.country))
+     -> getGeocoding del service
+        -> fetch GET /api/v1/citys-stats/integrations/geocoding/:city
+           -> backend v1 app.get(`${BASE_API_URL}/integrations/geocoding/:city`)
+              -> getGeocoding del backend
+                 -> cleanSearchTerm(city)
+                 -> cleanSearchTerm(country)
+                 -> fetchJson(Open-Meteo)
+                    -> fetch
+                    -> response.text()
+                    -> JSON.parse
+           -> res.status(200).json(...)
+        -> handleResponse(response)
+  -> geocodingResults.map(...)
+     -> collectError
+     -> titleCase en el contexto del error
+  -> geocodingRows
+```
+
+Bloque REST Countries:
+
+```text
+Promise.all(countrySummaries.map(...))
+  -> safeLoad(() => getCountryInfo(item.country))
+     -> getCountryInfo del service
+        -> fetch GET /api/v1/citys-stats/integrations/country/:country
+           -> backend v1 app.get(`${BASE_API_URL}/integrations/country/:country`)
+              -> getCountryInfo del backend
+                 -> cleanSearchTerm(country)
+                 -> fetchJson(REST Countries)
+                 -> selecciona pais correcto
+           -> res.status(200).json(...)
+        -> handleResponse(response)
+  -> countryResults.map(...)
+     -> collectError
+     -> titleCase
+  -> countryCards
+```
+
+Bloque World Bank:
+
+```text
+Promise.all(countryCards.map(...))
+  -> si no hay cca3:
+     -> Promise.resolve({ data: null, error: "Codigo ISO3 no disponible" })
+  -> si hay cca3:
+     -> safeLoad(() => getWorldBankPopulation(row.countryData.cca3))
+        -> getWorldBankPopulation del service
+           -> fetch GET /api/v1/citys-stats/integrations/world-bank/:countryCode
+              -> backend v1 app.get(`${BASE_API_URL}/integrations/world-bank/:countryCode`)
+                 -> getWorldBankPopulation del backend
+                    -> mira worldBankPopulationCache
+                    -> fetchJson(World Bank) si no esta en cache
+                    -> normalizeWorldBankRow
+                    -> guarda en cache
+              -> res.status(200).json(...)
+           -> handleResponse(response)
+  -> worldBankResults.map(...)
+     -> collectError
+     -> titleCase
+  -> worldBankRows
+```
+
+Bloque APIs SOS externas:
+
+```text
+Promise.all([
+  safeLoad(getSosTouristArrivals),
+  safeLoad(getSosEarthquakes),
+  safeLoad(getSosFifaSquadValues),
+  safeLoad(getSosEsportsEarnings)
+])
+
+getSosTouristArrivals
+  -> fetch GET /api/v1/citys-stats/integrations/sos-tourist-arrivals
+     -> backend getTouristArrivals
+        -> fetchJson(SOS2526-25)
+        -> asArray
+        -> normalizeTouristArrival
+           -> readFiniteNumber
+        -> filter(Boolean)
+     -> buildTouristArrivalsByCountry
+        -> normalizeCountryKey
+     -> sort por totalArrivals
+  -> handleResponse
+
+getSosEarthquakes
+  -> fetch GET /api/v1/citys-stats/integrations/sos-earthquakes
+     -> backend getEarthquakes
+        -> fetchJson(SOS2526-19)
+        -> asArray
+        -> normalizeEarthquake
+           -> countryFromIso3
+           -> readFiniteNumber
+        -> filter(Boolean)
+     -> buildEarthquakesByCountry
+        -> normalizeCountryKey
+     -> sort por maxSeverity
+  -> handleResponse
+
+getSosFifaSquadValues
+  -> fetch GET /api/v1/citys-stats/integrations/sos-fifa-squad-values
+     -> backend getFifaSquadValues
+        -> fetchJson(SOS2526-26)
+        -> asArray
+        -> normalizeFifaSquadValue
+           -> readFiniteNumber
+        -> filter(Boolean)
+     -> buildFifaSquadValuesByCountry
+        -> normalizeCountryKey
+     -> sort por latestTotalMarketValue
+  -> handleResponse
+
+getSosEsportsEarnings
+  -> fetch GET /api/v1/citys-stats/integrations/sos-esports-earnings
+     -> backend getEsportsEarnings
+        -> fetchJson(SOS2526-30)
+        -> asArray
+        -> normalizeEsportsEarning
+           -> readFiniteNumber
+        -> filter(Boolean)
+     -> buildEsportsEarningsByCountry
+        -> normalizeCountryKey
+     -> sort por topCountryEarnings
+  -> handleResponse
+```
+
+Preparar datos finales de pantalla:
+
+```text
+collectError para turismo, terremotos, FIFA y eSports
+touristCountries = topCountries(tourismResult.data, "totalArrivals")
+  -> numberOrNull
+earthquakeCountries = topCountries(earthquakeResult.data, "maxSeverity")
+  -> numberOrNull
+fifaCountries = topCountries(fifaResult.data, "latestTotalMarketValue")
+  -> numberOrNull
+esportsCountries = topCountries(esportsResult.data, "topCountryEarnings")
+  -> numberOrNull
+integrationErrors = errors
+```
+
+Final de la pantalla:
+
+```text
+loading = false
+tick
+loadHighcharts
+  -> import("highcharts")
+  -> import("highcharts/highcharts-more.js")
+  -> loadPlugin(dumbbell)
+  -> loadPlugin(lollipop)
+  -> loadPlugin(variwide)
+  -> loadPlugin(bullet)
+  -> loadPlugin(sankey)
+  -> loadPlugin(treemap)
+  -> loadPlugin(sunburst)
+  -> loadPlugin(accessibility)
+renderIntegrationCharts
+  -> destroyIntegrationCharts
+  -> renderGeocodingChart
+     -> numberOrNull
+     -> titleCase
+     -> displayNumber/displayDecimal
+     -> createChart
+  -> renderCountryChart
+     -> numberOrNull
+     -> countryName
+     -> displayNumber/displayCompact
+     -> createChart
+  -> renderWorldBankChart
+     -> numberOrNull
+     -> countryName
+     -> displayNumber
+     -> createChart
+  -> renderTourismChart
+     -> combinedCountryRows
+        -> findLocalCountry
+           -> localCountryIndex
+              -> normalizeCountryKey
+        -> localAveragePopulation si no hay match
+     -> localPopulationFor
+     -> titleCase
+     -> createChart
+  -> renderEarthquakeChart
+     -> combinedCountryRows
+     -> localPopulationFor
+     -> normalizedIndex
+        -> numberOrNull
+     -> titleCase
+     -> createChart
+  -> renderFifaChart
+     -> numberOrNull
+     -> normalizedIndex
+     -> titleCase
+     -> createChart
+  -> renderEsportsChart
+     -> combinedCountryRows
+     -> localPopulationFor
+     -> normalizedIndex
+     -> titleCase
+     -> createChart
+onDestroy
+  -> destroyIntegrationCharts
+```
+
+### Si estas en `/analytics`
+
+```text
+onMount
+  -> loadAnalytics
+     -> Promise.all([
+          getAllCitysStats(),
+          getDisasters(),
+          getAllWineStats()
+        ])
+        -> getAllCitysStats
+           -> buildUrl
+           -> fetch GET /api/v2/citys-stats
+           -> backend v2 app.get(BASE_API_URL)
+           -> handleResponse
+        -> getDisasters
+           -> fetch a la API de natural-disasters
+        -> getAllWineStats
+           -> fetch a la API de wine-stats
+     -> buildMetrics(citysStats, disasters, wines)
+        -> sum(citysStats, "un_2025_population")
+        -> sum(disasters, "death_count")
+        -> sum(wines, "unit")
+        -> calcula index normalizado
+     -> tick
+     -> loadHighcharts
+        -> import("highcharts")
+        -> import("highcharts/modules/accessibility.js")
+     -> renderChart
+        -> Highcharts.chart(...)
+onDestroy
+  -> chart?.destroy()
+```
+
+### Si llamas directamente a la API v2
+
+`GET /api/v2/citys-stats`:
+
+```text
+app.get(BASE_API_URL)
+  -> db.find
+  -> docs.map(removeDatabaseId)
+  -> filtro city si viene
+     No hay funcion auxiliar.
+  -> filtro country si viene
+     No hay funcion auxiliar.
+  -> filtro un_2025_population si viene
+     No hay funcion auxiliar.
+  -> busqueda q si viene
+     No hay funcion auxiliar.
+  -> sort si viene
+     No hay funcion auxiliar.
+  -> offset/limit si vienen
+     No hay funcion auxiliar.
+  -> result.slice(offset, offset + limit)
+  -> res.status(200).json(...)
+```
+
+`POST /api/v2/citys-stats`:
+
+```text
+app.post(BASE_API_URL)
+  -> normalizeCityStat
+     -> hasExactCityFields
+  -> db.findOne duplicado
+  -> db.insert
+  -> removeDatabaseId
+  -> res.status(201).json(...)
+```
+
+`PUT /api/v2/citys-stats/:city/:country`:
+
+```text
+app.put(`${BASE_API_URL}/:city/:country`)
+  -> normalizeCityStat
+     -> hasExactCityFields
+  -> comprobar URL/body
+  -> db.findOne
+  -> db.update
+  -> db.findOne
+  -> removeDatabaseId
+  -> res.status(200).json(...)
+```
+
+`DELETE /api/v2/citys-stats`:
+
+```text
+app.delete(BASE_API_URL)
+  -> db.remove({}, { multi: true })
+  -> res.sendStatus(204)
+```
+
+`DELETE /api/v2/citys-stats/:city/:country`:
+
+```text
+app.delete(`${BASE_API_URL}/:city/:country`)
+  -> normaliza req.params.city y req.params.country
+  -> db.remove({ city, country }, {})
+  -> res.sendStatus(204)
+  -> o res.status(404).json(...) si no existia
+```
+
+### Si llamas directamente a integraciones v1
+
+Endpoints individuales:
+
+```text
+GET /api/v1/citys-stats/integrations/geocoding/:city
+  -> getGeocoding
+     -> cleanSearchTerm
+     -> fetchJson Open-Meteo
+        -> fetch
+        -> response.text()
+        -> JSON.parse
+
+GET /api/v1/citys-stats/integrations/country/:country
+  -> getCountryInfo
+     -> cleanSearchTerm
+     -> fetchJson REST Countries
+        -> fetch
+        -> response.text()
+        -> JSON.parse
+
+GET /api/v1/citys-stats/integrations/world-bank/:countryCode
+  -> getWorldBankPopulation
+     -> worldBankPopulationCache.has
+     -> fetchJson World Bank si no esta en cache
+     -> normalizeWorldBankRow
+     -> worldBankPopulationCache.set
+
+GET /api/v1/citys-stats/integrations/sos-tourist-arrivals
+  -> getTouristArrivals
+     -> fetchJson
+     -> asArray
+     -> normalizeTouristArrival
+        -> readFiniteNumber
+  -> buildTouristArrivalsByCountry
+     -> normalizeCountryKey
+  -> sort por totalArrivals
+
+GET /api/v1/citys-stats/integrations/sos-earthquakes
+  -> getEarthquakes
+     -> fetchJson
+     -> asArray
+     -> normalizeEarthquake
+        -> countryFromIso3
+        -> readFiniteNumber
+  -> buildEarthquakesByCountry
+     -> normalizeCountryKey
+  -> sort por maxSeverity
+
+GET /api/v1/citys-stats/integrations/sos-fifa-squad-values
+  -> getFifaSquadValues
+     -> fetchJson
+     -> asArray
+     -> normalizeFifaSquadValue
+        -> readFiniteNumber
+  -> buildFifaSquadValuesByCountry
+     -> normalizeCountryKey
+  -> sort por latestTotalMarketValue
+
+GET /api/v1/citys-stats/integrations/sos-esports-earnings
+  -> getEsportsEarnings
+     -> fetchJson
+     -> asArray
+     -> normalizeEsportsEarning
+        -> readFiniteNumber
+  -> buildEsportsEarningsByCountry
+     -> normalizeCountryKey
+  -> sort por topCountryEarnings
+```
+
+Resumen integrado:
+
+```text
+GET /api/v1/citys-stats/integrations/summary
+  -> parseLimit
+  -> findAllCityStats
+     -> db.find
+     -> docs.map(removeDatabaseId)
+  -> buildCityCountrySummaries
+     -> normalizeCountryKey
+     -> readFiniteNumber
+  -> Promise.all(countrySummaries.map(buildIntegratedCityBase))
+     -> buildIntegratedCityBase
+        -> Promise.all
+           -> safeExternal("Open-Meteo", () => getGeocoding)
+              -> getGeocoding
+                 -> cleanSearchTerm
+                 -> fetchJson
+           -> safeExternal("REST Countries", () => getCountryInfo)
+              -> getCountryInfo
+                 -> cleanSearchTerm
+                 -> fetchJson
+  -> extrae countryCodes
+  -> getWorldBankPopulations
+     -> usa worldBankPopulationCache
+     -> fetchJson si faltan codigos
+     -> normalizeWorldBankRow
+  -> Promise.all APIs SOS
+     -> safeExternal(..., getTouristArrivals)
+        -> fetchJson
+        -> asArray
+        -> normalizeTouristArrival
+     -> safeExternal(..., getEarthquakes)
+        -> fetchJson
+        -> asArray
+        -> normalizeEarthquake
+     -> safeExternal(..., getFifaSquadValues)
+        -> fetchJson
+        -> asArray
+        -> normalizeFifaSquadValue
+     -> safeExternal(..., getEsportsEarnings)
+        -> fetchJson
+        -> asArray
+        -> normalizeEsportsEarning
+  -> buildTouristArrivalsByCountry si hay datos
+  -> buildEarthquakesByCountry si hay datos
+  -> buildFifaSquadValuesByCountry si hay datos
+  -> buildEsportsEarningsByCountry si hay datos
+  -> integrationBases.map(buildIntegratedCity)
+     -> normalizeCountryKey
+     -> busca datos en Maps externos
+     -> crea integrationErrors
+  -> res.status(200).json(...)
+```
+
+### Frase corta para examen
+
+> Si me dan una funcion, primero miro en que pantalla, boton o endpoint se usa. El archivo se carga de arriba abajo, pero la ejecucion real empieza cuando una ruta de Express, un `onMount` de Svelte o un evento de usuario llama a esa funcion. Si un paso dice "No hay funcion auxiliar", es codigo escrito directamente dentro de esa ruta.
 
 ## 18. Codigos HTTP y contrato REST
 

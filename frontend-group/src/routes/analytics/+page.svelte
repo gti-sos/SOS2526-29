@@ -7,6 +7,16 @@
   // Pantalla de analytics global: junta las tres APIs del grupo y muestra
   // un unico widget comparando numero de registros e indicador normalizado.
 
+  // FLUJO ASINCRONO DE ESTA PANTALLA
+  // 1. Al abrir /analytics, Svelte registra onMount(loadAnalytics).
+  // 2. loadAnalytics lanza en paralelo las tres llamadas:
+  //    getAllCitysStats + getDisasters + getAllWineStats.
+  // 3. Promise.all espera a que terminen las tres; si una falla, entra en catch.
+  // 4. buildMetrics convierte datos crudos en metricas comparables.
+  // 5. await tick espera a que exista bind:this={chartContainer}.
+  // 6. loadHighcharts importa Highcharts y accesibilidad solo una vez.
+  // 7. renderChart pinta el widget y onDestroy lo limpia al salir.
+
   // Libreria Highcharts cargada solo cuando hace falta pintar el grafico.
   let Highcharts;
   // Nodo HTML donde Highcharts montara la grafica.

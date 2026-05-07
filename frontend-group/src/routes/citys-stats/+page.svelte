@@ -11,6 +11,27 @@
   } from "@/services/citysStatsApi";
   import { navigate } from "@/lib/navigation.js";
 
+  // FLUJO ASINCRONO DE ESTA PANTALLA
+  // 1. Al abrir /citys-stats, Svelte ejecuta el <script> y registra onMount.
+  //    Las funciones se declaran, pero no se ejecutan todavia.
+  // 2. onMount llama a refreshList({}, "").
+  //    refreshList -> getAllCitysStats -> fetch GET /api/v2/citys-stats
+  //    -> actualiza citysStats, activeQuery, loading y mensajes.
+  // 3. Buscar:
+  //    handleSearch -> buildSearchQuery -> refreshList(query) -> mensaje final.
+  // 4. Limpiar filtros:
+  //    handleResetSearch -> emptySearchForm -> refreshList({}).
+  // 5. Crear:
+  //    handleCreate -> validateCityStatForm -> createCityStat
+  //    -> refreshList(activeQuery) para repintar la tabla.
+  // 6. Cargar datos iniciales:
+  //    handleLoadInitialData -> loadInitialCitysStats
+  //    -> refreshList(activeQuery).
+  // 7. Borrar:
+  //    handleDeleteAll/deleteCityStat -> refreshList(activeQuery).
+  // 8. Editar no hace fetch aqui:
+  //    openEdit solo navega a /citys-stats/editar/:city/:country.
+
   // Opciones del desplegable de ordenacion.
   const sortOptions = [
     { value: "", label: "Sin orden especial" },

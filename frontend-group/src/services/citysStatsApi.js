@@ -4,6 +4,24 @@
  * Este modulo lo usan las pantallas de listado, edicion y analytics. Apunta a
  * /api/v2/citys-stats porque ahi estan las operaciones CRUD de la entrega:
  * listar, filtrar, crear, editar, borrar y cargar datos iniciales.
+ *
+ * FLUJO ASINCRONO:
+ * 1. Una pagina Svelte llama a una funcion exportada de este servicio.
+ * 2. La funcion prepara URL y metodo HTTP:
+ *    buildUrl para coleccion/filtros, encodePathValue para city/country.
+ * 3. Se ejecuta fetch contra /api/v2/citys-stats.
+ * 4. handleResponse lee response.text(), intenta JSON.parse y decide:
+ *    - si response.ok es true, devuelve los datos a la pagina.
+ *    - si response.ok es false, lanza Error con friendlyApiMessage.
+ * 5. La pagina que llamo al servicio hace await y pinta exito o error.
+ *
+ * ORDEN DE USO HABITUAL:
+ * - Listado/analytics: getAllCitysStats -> fetch GET -> handleResponse.
+ * - Crear: createCityStat -> fetch POST -> handleResponse.
+ * - Cargar iniciales: loadInitialCitysStats -> fetch GET /loadInitialData.
+ * - Borrar todos: deleteAllCitysStats -> fetch DELETE -> handleResponse.
+ * - Editar/borrar uno:
+ *   encodePathValue(city/country) -> fetch GET/PUT/DELETE del recurso concreto.
  */
 import { apiPath } from "./apiBase.js";
 

@@ -13,6 +13,20 @@
   // params contiene city y country tomados de la URL.
   export let params = {};
 
+  // FLUJO ASINCRONO DE ESTA PANTALLA
+  // 1. Al abrir /citys-stats/editar/:city/:country, Svelte recibe params.
+  // 2. onMount ejecuta loadResource.
+  //    loadResource -> getOneCityStat(params.city, params.country)
+  //    -> rellena form y originalKey.
+  // 3. Al pulsar guardar, handleUpdate valida el formulario.
+  // 4. Si city/country no cambian:
+  //    updateCityStat(originalKey, payload) -> rellena form con respuesta.
+  // 5. Si city/country cambian:
+  //    createCityStat(payload) -> deleteCityStat(originalKey)
+  //    -> updateRoute(new city/country).
+  //    Se hace asi porque la clave del recurso es city + country.
+  // 6. Cualquier Error del servicio se captura y se pinta en error.
+
   // Devuelve el formulario vacio.
   const emptyForm = () => ({
     city: "",

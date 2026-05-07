@@ -6,6 +6,16 @@
   // Servicio para pedir registros de citys-stats.
   import { getAllCitysStats } from "@/services/citysStatsApi";
 
+  // FLUJO ASINCRONO DE ESTA PANTALLA
+  // 1. Al abrir /analytics/citys-stats/map, Svelte registra onMount(loadMapData).
+  // 2. loadMapData -> getAllCitysStats({ sort: "-un_2025_population" }).
+  // 3. Las declaraciones reactivas $: calculan geolocated, missing,
+  //    minPopulation, maxPopulation, points y selectedPoint a partir de citysStats.
+  // 4. await tick espera a que exista bind:this={mapContainer}.
+  // 5. loadHighchartsMap importa Highcharts, map.js y accesibilidad solo una vez.
+  // 6. renderMap usa points + worldMap para crear el mapa.
+  // 7. onDestroy destruye mapChart al salir.
+
   // Coordenadas locales para colocar cada ciudad en el mapa.
   const coordinates = {
     "jakarta|indonesia": { lat: -6.2088, lon: 106.8456 },

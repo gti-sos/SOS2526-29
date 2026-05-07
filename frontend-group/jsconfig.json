@@ -24,10 +24,10 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
     /**
-     * Typecheck JS in `.svelte` and `.js` files by default.
-     * Disable this if you'd like to use dynamic types.
+     * Keep IntelliSense and path aliases active, but avoid noisy type errors in
+     * plain JavaScript inside `.svelte` files.
      */
-    "checkJs": true
+    "checkJs": false
   },
   /**
    * Use global.d.ts instead of compilerOptions.types
