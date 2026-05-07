@@ -12,7 +12,12 @@
   } from "@/services/citysStatsIntegrations";
   import { loadInitialCitysStats } from "@/services/citysStatsApi";
 
+  // Pantalla de integraciones: cruza citys-stats con APIs externas y pinta
+  // un widget distinto por fuente de datos.
+
+  // Highcharts se importa de forma diferida para no cargarlo en otras paginas.
   let Highcharts;
+  // Contenedores HTML de cada widget. Highcharts necesita referencias reales.
   let geocodingChartContainer;
   let countryChartContainer;
   let worldBankChartContainer;
@@ -20,12 +25,16 @@
   let earthquakeChartContainer;
   let fifaChartContainer;
   let esportsChartContainer;
+  // Instancias activas para poder destruirlas antes de repintar.
   let integrationCharts = [];
 
+  // Estado general de la pantalla.
   let loading = true;
   let error = "";
   let selectedLimit = 8;
+  // Datos locales agregados por pais.
   let countrySummaries = [];
+  // Filas ya combinadas para cada integracion.
   let geocodingRows = [];
   let countryCards = [];
   let worldBankRows = [];
@@ -34,6 +43,7 @@
   let fifaCountries = [];
   let esportsCountries = [];
   let integrationErrors = [];
+  // Indica si hubo que cargar datos iniciales porque la API local estaba vacia.
   let restoredInitialData = false;
 
   const formatter = new Intl.NumberFormat("es-ES", {
@@ -94,6 +104,7 @@
     }
   ];
 
+  // Convierte textos de API a una forma legible para titulos y etiquetas.
   function titleCase(value) {
     return String(value ?? "")
       .split(/[-\s]+/)
@@ -102,30 +113,36 @@
       .join(" ");
   }
 
+  // Convierte cualquier valor a numero finito o null si no sirve.
   function numberOrNull(value) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : null;
   }
 
+  // Decide que nombre de pais mostrar segun venga de REST Countries o de citys-stats.
   function countryName(row) {
     return row.countryInfo?.name || row.countryData?.name || titleCase(row.country);
   }
 
+  // Muestra numeros grandes con separadores o un texto fallback si faltan.
   function displayNumber(value, fallback = "Sin dato") {
     const parsed = numberOrNull(value);
     return parsed === null ? fallback : formatter.format(parsed);
   }
 
+  // Muestra numeros grandes abreviados, util en tooltips de poblacion o dinero.
   function displayCompact(value, fallback = "Sin dato") {
     const parsed = numberOrNull(value);
     return parsed === null ? fallback : compactFormatter.format(parsed);
   }
 
+  // Muestra decimales con dos cifras maximas.
   function displayDecimal(value, fallback = "Sin dato") {
     const parsed = numberOrNull(value);
     return parsed === null ? fallback : decimalFormatter.format(parsed);
   }
 
+  // Ordena y limita paises externos por una metrica concreta.
   function topCountries(data, metric, limit = 6) {
     return (Array.isArray(data?.countries) ? data.countries : [])
       .filter((item) => numberOrNull(item?.[metric]) !== null)
@@ -133,6 +150,7 @@
       .slice(0, limit);
   }
 
+  // Normaliza nombres de pais para poder cruzar fuentes con guiones, tildes o mayusculas.
   function normalizeCountryKey(value) {
     return String(value ?? "")
       .normalize("NFD")
@@ -142,6 +160,7 @@
       .toLowerCase();
   }
 
+  // Crea un indice rapido pais -> resumen local de citys-stats.
   function localCountryIndex() {
     const index = new Map();
 
@@ -152,10 +171,13 @@
     return index;
   }
 
+  // Busca un pais externo dentro de los paises disponibles en citys-stats.
   function findLocalCountry(country) {
     return localCountryIndex().get(normalizeCountryKey(country));
   }
 
+  // Calcula una poblacion media local para usarla cuando una API externa no
+  // tiene coincidencia exacta con nuestros paises.
   function localAveragePopulation() {
     const values = countrySummaries
       .map((country) => numberOrNull(country.un_2025_population))
@@ -165,12 +187,15 @@
     return values.reduce((total, value) => total + value, 0) / values.length;
   }
 
+  // Escoge la poblacion local que acompana a una fila externa.
   function localPopulationFor(match) {
     return numberOrNull(match?.local?.un_2025_population) ??
       numberOrNull(match?.localPopulation) ??
       localAveragePopulation();
   }
 
+  // Empareja filas externas con paises locales; si no hay matches usa una
+  // referencia media para que el widget siga siendo comparable.
   function combinedCountryRows(rows, metric, limit = 6) {
     const sortedRows = (Array.isArray(rows) ? rows : [])
       .filter((row) => numberOrNull(row?.[metric]) !== null)
@@ -196,6 +221,7 @@
     }));
   }
 
+  // Convierte un valor a una escala visual, evitando ceros que desaparezcan.
   function normalizedIndex(value, max, scale = 100) {
     const parsed = numberOrNull(value);
     const parsedMax = numberOrNull(max);
@@ -204,6 +230,7 @@
     return Math.max(1, Math.min(scale, (parsed / parsedMax) * scale));
   }
 
+  // Acumula errores de integracion para mostrarlos sin romper toda la pantalla.
   function collectError(list, label, result, context = "") {
     if (result.error) {
       list.push({
@@ -214,6 +241,7 @@
     }
   }
 
+  // Ejecuta una llamada y devuelve siempre un objeto controlado de exito/error.
   async function safeLoad(task) {
     try {
       return { data: await task(), error: "" };
@@ -222,6 +250,7 @@
     }
   }
 
+  // Carga Highcharts y todos los modulos usados por los widgets.
   async function loadHighcharts() {
     if (Highcharts) return Highcharts;
 
@@ -233,6 +262,7 @@
     const morePlugin = moreModule.default ?? moreModule;
     if (typeof morePlugin === "function") morePlugin(Highcharts);
 
+    // Algunos modulos exportan una funcion plugin; este helper la aplica si existe.
     async function loadPlugin(pluginLoader) {
       const pluginModule = await pluginLoader();
       const plugin = pluginModule.default ?? pluginModule;
@@ -251,11 +281,13 @@
     return Highcharts;
   }
 
+  // Destruye todos los widgets antes de repintar o salir de la pantalla.
   function destroyIntegrationCharts() {
     integrationCharts.forEach((chart) => chart?.destroy());
     integrationCharts = [];
   }
 
+  // Crea una grafica con opciones comunes para todos los widgets.
   function createChart(container, config) {
     if (!Highcharts || !container) return;
 
@@ -272,6 +304,7 @@
     }));
   }
 
+  // Widget 1: treemap de ciudades con coordenadas de Open-Meteo.
   function renderGeocodingChart() {
     const chartRows = geocodingRows
       .filter((row) =>
@@ -354,6 +387,7 @@
     });
   }
 
+  // Widget 2: Sankey entre poblacion local y datos oficiales de REST Countries.
   function renderCountryChart() {
     const chartRows = countryCards
       .filter((row) => numberOrNull(row.countryData?.population) !== null)
@@ -451,6 +485,7 @@
     });
   }
 
+  // Widget 3: lollipop comparando citys-stats con poblacion de World Bank.
   function renderWorldBankChart() {
     const chartRows = worldBankRows
       .filter((row) => numberOrNull(row.worldBank?.value) !== null)
@@ -544,6 +579,7 @@
     });
   }
 
+  // Widget 4: variwide de turismo externo frente a poblacion local.
   function renderTourismChart() {
     const chartRows = combinedCountryRows(touristCountries, "totalArrivals");
 
@@ -613,6 +649,7 @@
     });
   }
 
+  // Widget 5: bullet chart de severidad de terremotos frente a indice local.
   function renderEarthquakeChart() {
     const chartRows = combinedCountryRows(earthquakeCountries, "maxSeverity");
     const localMax = Math.max(...chartRows.map((match) => localPopulationFor(match)), 1);
@@ -685,6 +722,7 @@
     });
   }
 
+  // Widget 6: dumbbell que compara ranking local con ranking de valor FIFA.
   function renderFifaChart() {
     const chartRows = fifaCountries
       .filter((country) => numberOrNull(country.latestTotalMarketValue) !== null)
@@ -776,6 +814,7 @@
     });
   }
 
+  // Widget 7: sunburst que reparte paises locales y premios de eSports.
   function renderEsportsChart() {
     const chartRows = combinedCountryRows(esportsCountries, "topCountryEarnings");
     const maxEarnings = Math.max(
@@ -908,6 +947,7 @@
     });
   }
 
+  // Repinta todos los widgets despues de cargar o actualizar datos.
   function renderIntegrationCharts() {
     destroyIntegrationCharts();
     renderGeocodingChart();
@@ -919,6 +959,7 @@
     renderEsportsChart();
   }
 
+  // Orquesta toda la pantalla: datos locales, APIs externas, errores y charts.
   async function loadIntegrations() {
     loading = true;
     error = "";
@@ -1019,8 +1060,10 @@
     }
   }
 
+  // Al abrir la pantalla se cargan las integraciones.
   onMount(loadIntegrations);
 
+  // Al salir se limpian las graficas creadas por Highcharts.
   onDestroy(() => {
     destroyIntegrationCharts();
   });

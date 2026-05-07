@@ -111,16 +111,19 @@ module.exports = (app, db) => {
             .toLowerCase();
     }
 
+    // Convierte codigos ISO3 de APIs externas a nombre de pais si lo conocemos.
     function countryFromIso3(value, fallback) {
         const code = String(value ?? "").trim().toUpperCase();
         return ISO3_COUNTRY_NAMES[code] || fallback;
     }
 
+    // Lee numeros de APIs externas sin romper si vienen vacios o como texto invalido.
     function readFiniteNumber(value, fallback = null) {
         const parsed = Number(value);
         return Number.isFinite(parsed) ? parsed : fallback;
     }
 
+    // Acepta respuestas externas con varias formas habituales y devuelve siempre array.
     function asArray(data) {
         if (Array.isArray(data)) return data;
         if (Array.isArray(data?.data)) return data.data;
@@ -156,6 +159,7 @@ module.exports = (app, db) => {
         });
     }
 
+    // Agrupa las ciudades locales por pais y calcula poblacion total y ciudad principal.
     function buildCityCountrySummaries(items) {
         const byCountry = new Map();
 
@@ -513,6 +517,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Normaliza una fila de SOS2526-25 a un formato comun por pais y anio.
     function normalizeTouristArrival(row) {
         const country = String(row?.country ?? "").trim();
         const year = readFiniteNumber(row?.year);
@@ -533,6 +538,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Descarga llegadas turisticas y descarta filas que no se puedan normalizar.
     async function getTouristArrivals() {
         const data = await fetchJson(
             TOURIST_ARRIVALS_API_URL,
@@ -543,6 +549,7 @@ module.exports = (app, db) => {
         return asArray(data).map(normalizeTouristArrival).filter(Boolean);
     }
 
+    // Agrega llegadas turisticas por pais para comparar con citys-stats.
     function buildTouristArrivalsByCountry(rows) {
         const byCountry = new Map();
 
@@ -573,6 +580,7 @@ module.exports = (app, db) => {
         return byCountry;
     }
 
+    // Normaliza una fila de terremotos externos y resuelve pais desde ISO3 si hace falta.
     function normalizeEarthquake(row) {
         const country = String(countryFromIso3(row?.iso3, row?.country) ?? "").trim();
         const severity = readFiniteNumber(row?.severity);
@@ -591,6 +599,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Descarga terremotos externos y descarta filas incompletas.
     async function getEarthquakes() {
         const data = await fetchJson(
             EARTHQUAKES_API_URL,
@@ -601,6 +610,7 @@ module.exports = (app, db) => {
         return asArray(data).map(normalizeEarthquake).filter(Boolean);
     }
 
+    // Agrega terremotos por pais: severidad maxima, registros y poblacion expuesta.
     function buildEarthquakesByCountry(rows) {
         const byCountry = new Map();
 
@@ -631,6 +641,7 @@ module.exports = (app, db) => {
         return byCountry;
     }
 
+    // Normaliza una fila de valor de plantillas FIFA.
     function normalizeFifaSquadValue(row) {
         const country = String(row?.country ?? "").trim();
         const year = readFiniteNumber(row?.year);
@@ -650,6 +661,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Descarga valores de plantillas FIFA y descarta filas incompletas.
     async function getFifaSquadValues() {
         const data = await fetchJson(
             FIFA_SQUAD_VALUES_API_URL,
@@ -660,6 +672,7 @@ module.exports = (app, db) => {
         return asArray(data).map(normalizeFifaSquadValue).filter(Boolean);
     }
 
+    // Agrega valores FIFA por pais y conserva el dato mas reciente.
     function buildFifaSquadValuesByCountry(rows) {
         const byCountry = new Map();
 
@@ -694,6 +707,7 @@ module.exports = (app, db) => {
         return byCountry;
     }
 
+    // Normaliza una fila de ganancias de eSports por pais, juego y anio.
     function normalizeEsportsEarning(row) {
         const country = String(row?.country ?? "").trim();
         const gameName = String(row?.game_name ?? "").trim();
@@ -715,6 +729,7 @@ module.exports = (app, db) => {
         };
     }
 
+    // Descarga ganancias de eSports y descarta filas incompletas.
     async function getEsportsEarnings() {
         const data = await fetchJson(
             ESPORTS_EARNINGS_API_URL,
@@ -725,6 +740,7 @@ module.exports = (app, db) => {
         return asArray(data).map(normalizeEsportsEarning).filter(Boolean);
     }
 
+    // Agrega eSports por pais: totales, ultimo juego y juego con mas ganancias.
     function buildEsportsEarningsByCountry(rows) {
         const byCountry = new Map();
 

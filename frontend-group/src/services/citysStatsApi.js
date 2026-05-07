@@ -1,9 +1,21 @@
-// Elegimos la URL de la API segun estemos en desarrollo local o desplegados.
+/**
+ * Cliente de frontend para la API REST principal de citys-stats.
+ *
+ * Este modulo lo usan las pantallas de listado, edicion y analytics. Apunta a
+ * /api/v2/citys-stats porque ahi estan las operaciones CRUD de la entrega:
+ * listar, filtrar, crear, editar, borrar y cargar datos iniciales.
+ */
 import { apiPath } from "./apiBase.js";
 
 const CITYS_STATS_API_BASE = apiPath("/api/v2/citys-stats");
 
-// Construye una URL completa de la API y anade parametros de busqueda si existen.
+/**
+ * Construye una URL completa de la API y anade parametros de busqueda si existen.
+ *
+ * @param {string} path Subruta dentro de /api/v2/citys-stats.
+ * @param {Object} query Parametros de busqueda opcionales.
+ * @returns {string} URL absoluta lista para fetch.
+ */
 function buildUrl(path = "", query = {}) {
     // URL permite manejar rutas y parametros sin concatenar texto a mano.
     const url = new URL(`${CITYS_STATS_API_BASE}${path}`, window.location.origin);
@@ -23,13 +35,24 @@ function buildUrl(path = "", query = {}) {
     return url.toString();
 }
 
-// Prepara valores que van dentro de la ruta, como ciudad o pais.
+/**
+ * Prepara valores que van dentro de la ruta, como ciudad o pais.
+ *
+ * @param {string|number} value Valor que se va a insertar en la URL.
+ * @returns {string} Valor normalizado y codificado.
+ */
 function encodePathValue(value) {
     // encodeURIComponent evita problemas con espacios, tildes u otros caracteres.
     return encodeURIComponent(String(value).trim().toLowerCase());
 }
 
-// Traduce mensajes tecnicos del backend a textos faciles para el usuario.
+/**
+ * Traduce mensajes tecnicos del backend a textos faciles para el usuario.
+ *
+ * @param {number} status Codigo HTTP recibido.
+ * @param {string} rawMessage Mensaje original del backend.
+ * @returns {string} Mensaje listo para mostrar en la interfaz.
+ */
 function friendlyApiMessage(status, rawMessage) {
     // Usamos switch para tratar cada error conocido.
     switch (rawMessage) {
@@ -60,7 +83,12 @@ function friendlyApiMessage(status, rawMessage) {
     }
 }
 
-// Procesa una respuesta de fetch y lanza Error si algo fue mal.
+/**
+ * Procesa una respuesta de fetch y lanza Error si algo fue mal.
+ *
+ * @param {Response} response Respuesta devuelta por fetch.
+ * @returns {Promise<Object|Array|string|null>} Cuerpo parseado o null en respuestas vacias.
+ */
 async function handleResponse(response) {
     // 204 significa exito sin contenido.
     if (response.status === 204) {
@@ -89,7 +117,12 @@ async function handleResponse(response) {
     return data;
 }
 
-// Pide todos los registros de ciudades, opcionalmente con filtros.
+/**
+ * Pide todos los registros de ciudades, opcionalmente con filtros.
+ *
+ * @param {Object} query Filtros, paginacion u ordenacion admitidos por la API.
+ * @returns {Promise<Array|Object>} Registros devueltos por el backend.
+ */
 export async function getAllCitysStats(query = {}) {
     // Llamamos a la API con la URL construida.
     const response = await fetch(buildUrl("", query));
@@ -97,7 +130,12 @@ export async function getAllCitysStats(query = {}) {
     return handleResponse(response);
 }
 
-// Crea un nuevo registro de ciudad.
+/**
+ * Crea un nuevo registro de ciudad.
+ *
+ * @param {Object} cityStat Registro con city, country y un_2025_population.
+ * @returns {Promise<Object|null>} Registro creado o respuesta del backend.
+ */
 export async function createCityStat(cityStat) {
     // Enviamos una peticion POST con JSON en el body.
     const response = await fetch(buildUrl(), {
@@ -109,7 +147,11 @@ export async function createCityStat(cityStat) {
     return handleResponse(response);
 }
 
-// Borra todos los registros de ciudades.
+/**
+ * Borra todos los registros de ciudades.
+ *
+ * @returns {Promise<Object|null>} Respuesta del backend o null si no hay cuerpo.
+ */
 export async function deleteAllCitysStats() {
     // DELETE sobre la coleccion completa borra todos los datos.
     const response = await fetch(buildUrl(), {
@@ -119,7 +161,11 @@ export async function deleteAllCitysStats() {
     return handleResponse(response);
 }
 
-// Carga los datos iniciales de ejemplo.
+/**
+ * Carga los datos iniciales de ejemplo cuando la coleccion esta vacia.
+ *
+ * @returns {Promise<Array|Object|null>} Datos insertados o respuesta informativa.
+ */
 export async function loadInitialCitysStats() {
     // Esta ruta solo inserta datos si la base esta vacia.
     const response = await fetch(buildUrl("/loadInitialData"));
@@ -127,7 +173,13 @@ export async function loadInitialCitysStats() {
     return handleResponse(response);
 }
 
-// Borra un registro concreto por ciudad y pais.
+/**
+ * Borra un registro concreto por ciudad y pais.
+ *
+ * @param {string} city Ciudad del registro.
+ * @param {string} country Pais del registro.
+ * @returns {Promise<Object|null>} Respuesta del backend o null si no hay cuerpo.
+ */
 export async function deleteCityStat(city, country) {
     // Codificamos ciudad y pais para usarlos dentro de la URL.
     const response = await fetch(
@@ -140,7 +192,13 @@ export async function deleteCityStat(city, country) {
     return handleResponse(response);
 }
 
-// Obtiene un registro concreto por ciudad y pais.
+/**
+ * Obtiene un registro concreto por ciudad y pais.
+ *
+ * @param {string} city Ciudad del registro.
+ * @param {string} country Pais del registro.
+ * @returns {Promise<Object>} Registro encontrado.
+ */
 export async function getOneCityStat(city, country) {
     // La API identifica cada ciudad con city + country.
     const response = await fetch(
@@ -150,7 +208,14 @@ export async function getOneCityStat(city, country) {
     return handleResponse(response);
 }
 
-// Actualiza un registro concreto por ciudad y pais.
+/**
+ * Actualiza un registro concreto por ciudad y pais.
+ *
+ * @param {string} city Ciudad original del registro.
+ * @param {string} country Pais original del registro.
+ * @param {Object} cityStat Nuevos datos del registro.
+ * @returns {Promise<Object|null>} Registro actualizado o respuesta del backend.
+ */
 export async function updateCityStat(city, country, cityStat) {
     // Enviamos los nuevos datos con PUT.
     const response = await fetch(

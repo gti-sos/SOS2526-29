@@ -4,23 +4,36 @@
   import { getDisasters } from "@/services/natural-disasters.js";
   import { getAllWineStats } from "@/services/wine-stats.js";
 
+  // Pantalla de analytics global: junta las tres APIs del grupo y muestra
+  // un unico widget comparando numero de registros e indicador normalizado.
+
+  // Libreria Highcharts cargada solo cuando hace falta pintar el grafico.
   let Highcharts;
+  // Nodo HTML donde Highcharts montara la grafica.
   let chartContainer;
+  // Instancia actual del grafico para poder destruirla antes de repintar.
   let chart;
+  // Estado visual de carga.
   let loading = true;
+  // Mensaje de error visible si falla alguna API.
   let error = "";
+  // Datos ya normalizados que alimentan el grafico y las tarjetas.
   let metrics = [];
 
+  // Formateador compartido para mostrar numeros en formato espanol.
   const formatter = new Intl.NumberFormat("es-ES", {
     maximumFractionDigits: 0
   });
 
+  // Paleta fija para identificar cada recurso del grupo.
   const colors = ["#0f766e", "#dc2626", "#7c3aed"];
 
+  // Suma un campo numerico de una coleccion, tratando valores vacios como 0.
   function sum(items, field) {
     return items.reduce((total, item) => total + Number(item[field] || 0), 0);
   }
 
+  // Importa Highcharts y el modulo de accesibilidad bajo demanda.
   async function loadHighcharts() {
     if (Highcharts) return Highcharts;
 
@@ -32,6 +45,8 @@
     return Highcharts;
   }
 
+  // Convierte los datos crudos de cada API en metricas comparables.
+  // El indice normalizado permite comparar magnitudes muy distintas en 0-100.
   function buildMetrics(citysStats, disasters, wines) {
     const raw = [
       {
@@ -62,6 +77,7 @@
     }));
   }
 
+  // Pinta o repinta el grafico de columnas con los datos de metrics.
   function renderChart() {
     if (!chartContainer || !Highcharts) return;
 
@@ -141,6 +157,7 @@
     });
   }
 
+  // Carga las tres APIs en paralelo, prepara las metricas y pinta el widget.
   async function loadAnalytics() {
     loading = true;
     error = "";
@@ -163,8 +180,10 @@
     }
   }
 
+  // Al abrir la pantalla se cargan los datos.
   onMount(loadAnalytics);
 
+  // Al salir se destruye Highcharts para evitar fugas y graficas duplicadas.
   onDestroy(() => {
     chart?.destroy();
   });

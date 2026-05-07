@@ -92,12 +92,17 @@ app.get("/about", (request, response) => {
     response.sendFile(frontendIndexPath);
 });
 
+// Proxy puntual para que el frontend pueda consultar la API externa de exportations
+// desde nuestro mismo backend y evitar problemas de CORS en navegador.
 app.get("/api/proxy/exportations-stats", async (req, res) => {
     try {
+        // Fetch nativo de Node: pedimos los datos originales al grupo SOS2526-13.
         const response = await fetch("https://sos2526-13.onrender.com/api/v2/exportations-stats");
+        // Convertimos la respuesta a JSON y la reenviamos tal cual al frontend.
         const data = await response.json();
         res.status(200).json(data);
     } catch (err) {
+        // Si la API externa falla, respondemos error controlado en vez de colgar la peticion.
         res.status(500).json({ error: "No se pudo conectar con la API externa." });
     }
 });

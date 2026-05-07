@@ -1,3 +1,6 @@
+// Configuracion del frontend Svelte. Vite compila esta carpeta y deja el
+// resultado en ../public para que el backend Express pueda servirlo.
+
 // Importamos defineConfig para escribir la configuracion de Vite con ayuda del editor.
 import { defineConfig } from "vite";
 // Importamos el plugin que permite compilar componentes Svelte.
