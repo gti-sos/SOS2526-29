@@ -4,6 +4,8 @@
       id: "exportations-stats",
       title: "Exportations Stats",
       description: "Análisis de estadísticas de exportaciones mundiales cruzadas con datos de producción vinícola.",
+      tipo: "INTEGRACION",
+      proxy:true,
       icon: "📦",
       color: "#01696f",
       url: "/integrations/rmp/exportations-stats"
@@ -12,6 +14,8 @@
       id: "drought-stats",
       title: "Drought Stats",
       description: "Correlación entre sequías por región y el impacto en la producción y calidad del vino.",
+      tipo: "USO",
+      proxy:true,
       icon: "🌵",
       color: "#964219",
       url: "/integrations/rmp/drought-stats"
@@ -20,6 +24,8 @@
       id: "national-team-rankings",
       title: "National Team Rankings",
       description: "Relación entre el ranking de selecciones nacionales de fútbol y el consumo de vino por país.",
+      tipo: "USO",
+      proxy:false,
       icon: "⚽",
       color: "#437a22",
       url: "/integrations/rmp/national-team-rankings-per-years"
@@ -28,6 +34,8 @@
       id: "age-specific-fertility",
       title: "Age-Specific Fertility Rates",
       description: "Estudio demográfico entre tasas de fertilidad por edad y tradición vitivinícola por país.",
+      tipo: "USO",
+      proxy:true,
       icon: "👶",
       color: "#7a39bb",
       url: "/integrations/rmp/age-specific-fertility-rates"
@@ -36,6 +44,8 @@
       id: "hydroelectric-plant",
       title: "World Hydroelectric Plant",
       description: "Análisis del impacto de las plantas hidroeléctricas en la disponibilidad hídrica para la viticultura.",
+      tipo: "USO",
+      proxy:false,
       icon: "💧",
       color: "#006494",
       url: "/integrations/rmp/world-hydroelectric-plant"
@@ -79,8 +89,10 @@
         <div class="card-header">
           <span class="card-icon">{item.icon}</span>
           <span class="card-num">0{i + 1}</span>
+          <span class="card-proxy">{item.proxy ? 'Proxy' : 'Sin proxy'}</span>
         </div>
         <h2 class="card-title">{item.title}</h2>
+        <span  class="card-type" class:uso={item.tipo === "USO"} class:integracion={item.tipo === "INTEGRACION"}>{item.tipo}</span>
         <p class="card-desc">{item.description}</p>
         <div class="card-footer">
           <span class="card-link">
@@ -234,6 +246,14 @@
     color: var(--color-text-faint, #bbb);
     font-variant-numeric: tabular-nums;
   }
+  .card-proxy {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #340000;
+    font-variant-numeric: tabular-nums;
+    margin-left: 0.5rem;
+  }
 
   .card-title {
     font-size: 1rem;
@@ -242,6 +262,39 @@
     color: var(--color-text, #1a1a1a);
     margin-bottom: 0.5rem;
   }
+  .card-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.3rem 0.7rem;
+  min-height: 1.8rem;
+
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  white-space: nowrap;
+
+  border-radius: 9999px;
+  color: var(--badge-text, #01696f);
+  background: var(--badge-bg, #d9ecec);
+  border: 1px solid var(--badge-border, #b9d7d8);
+}
+  .card-type.uso {
+  --badge-text: #132d01;
+  --badge-bg: #d4dfcc;
+  --badge-border: #b8c9ad;
+  }
+
+  .card-type.integracion {
+    --badge-text: #0b5177;
+    --badge-bg: #c6d8e4;
+    --badge-border: #a9c2d4;
+  }
+
 
   .card-desc {
     font-size: 0.875rem;

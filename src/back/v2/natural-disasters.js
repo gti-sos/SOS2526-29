@@ -270,4 +270,43 @@ module.exports = function registerNaturalDisastersV2(app, db) {
     app.post(`${BASE_API_URL}/:country/:year`, (request, response) => response.sendStatus(405));
     // No se permite PUT sobre toda la coleccion.
     app.put(BASE_API_URL, (request, response) => response.sendStatus(405));
+
+
+    // ====================================================================
+    // 🚀 PROXY PARA LA INTEGRACIÓN 4 (Cambio Climático - Temperatura Global)
+    // ====================================================================
+    app.get(`/api/v2/proxy-integracion-4`, async (request, response) => {
+        try {
+            // API pública de temperatura global. ¡Rápida y súper estable!
+            const urlExterna = "https://global-warming.org/api/temperature-api"; 
+            
+            const peticion = await fetch(urlExterna);
+            
+            if (!peticion.ok) {
+                return response.status(peticion.status).json({ error: "Fallo al conectar con la API del Clima" });
+            }
+
+            const datosBrutos = await peticion.json();
+            let temperaturaPorAno = {};
+
+            // La API devuelve datos como: { time: "1950.04", station: "-0.12" }
+            // Vamos a extraer solo el año y guardar la temperatura de ese año
+            if (datosBrutos.result) {
+                datosBrutos.result.forEach(item => {
+                    // Cortamos "1950.04" por el punto y nos quedamos con "1950" (número entero)
+                    let ano = parseInt(item.time.split('.')[0]);
+                    
+                    // Guardamos la temperatura de la estación global
+                    temperaturaPorAno[ano] = parseFloat(item.station);
+                });
+            }
+
+            // El backend devuelve esto al frontend: {"1950": -0.12, "1951": -0.07, ...}
+            return response.json(temperaturaPorAno);
+
+        } catch (error) {
+            console.error("Error en el proxy de la integración 4:", error);
+            return response.status(500).json({ error: "Fallo interno en el servidor proxy" });
+        }
+    });
 };
