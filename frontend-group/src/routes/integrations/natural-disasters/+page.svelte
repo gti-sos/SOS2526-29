@@ -35,53 +35,13 @@
     const API_COMPANERO_2 = "https://sos2526-26.onrender.com/api/v2/countries-idh-per-years";
 
 
-    // -- TRADUCCION DE NOMBRES DE PAISES (para comparar "España" / "espana" / inglés) ---
-
-    function sinDiacriticos(str) {
-        return String(str || "")
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-    }
-
-    const VARIANTE_A_PAIS_CANONICO = (() => {
-        const map = {};
-        const add = (canon, lista) => {
-            for (const v of lista) {
-                const k = sinDiacriticos(String(v).trim()).toLowerCase();
-                if (k) map[k] = canon;
-            }
-        };
-        add("spain", ["spain", "españa", "espana"]);
-        add("france", ["france", "francia"]);
-        add("brazil", ["brazil", "brasil"]);
-        add("cambodia", ["cambodia", "camboya"]);
-        add("norway", ["norway", "noruega"]);
-        add("afghanistan", ["afghanistan", "afganistan", "afganistán"]);
-        add("australia", ["australia"]);
-        add("africa", ["africa", "áfrica"]);
-        return map;
-    })();
-
-    function clavePaisCanonica(nombre) {
-        const slug = sinDiacriticos(String(nombre || "").trim()).toLowerCase();
-        if (!slug) return "";
-        return VARIANTE_A_PAIS_CANONICO[slug] || slug;
-    }
-
-    function leerNombrePaisEnFila(row) {
-        if (!row || typeof row !== "object") return "";
-        for (const [key, val] of Object.entries(row)) {
-            const k = String(key).toLowerCase();
-            if ((k.includes("country") || k.includes("pais") || k.includes("país") || k === "nation" || k === "name") && val != null && String(val).trim() !== "") {
-                return String(val);
-            }
-        }
-        return "";
-    }
+    
 
 
+    // ====================================================================
     // --- INTEGRACION 1: CHART.JS (Productividad G19 vs Muertes acumuladas) ---
-     
+    // ====================================================================
+    
     function leerMetricaProductividad(row) {
         if (!row || typeof row !== "object") return NaN;
         const excluir = new Set(["id", "year", "country", "pais", "país"]);
@@ -103,20 +63,22 @@
         return NaN;
     }
 
+    function leerNombrePaisEnFila(row) {
+        if (!row || typeof row !== "object") return null;
+        return row.country || row.pais || row.país || row.Country || row.Pais || null;
+    }
+
     async function cargarIntegracion1() {
         try {
             const [resMia, resComp1] = await Promise.all([fetch(MI_API), fetch(API_COMPANERO_1)]);
-            if (!resMia.ok || !resComp1.ok) throw new Error("Error de conexión");
+            if (!resMia.ok || !resComp1.ok) throw new Error("Error de conexión con las APIs");
 
             const misDatos = await resMia.json();
             let datosComp1 = await resComp1.json();
 
+            // Evitamos problemas si el compañero devuelve la info como texto
             if (typeof datosComp1 === "string") {
-                try {
-                    datosComp1 = JSON.parse(datosComp1);
-                } catch {
-                    /* vacío */
-                }
+                try { datosComp1 = JSON.parse(datosComp1); } catch { /* vacío */ }
             }
 
             const listaCompanero = Array.isArray(datosComp1)
@@ -127,39 +89,42 @@
                 throw new Error("Datos vacíos. Revisa las APIs.");
             }
 
+            // 1. Agrupamos tus datos convirtiendo el país a minúsculas directamente
             const misDatosAgrupados = {};
             for (const miDato of misDatos) {
-                const canon = clavePaisCanonica(miDato.country);
-                if (!canon) continue;
+                if (!miDato.country) continue;
+                const canon = String(miDato.country).toLowerCase().trim();
+                
                 if (!misDatosAgrupados[canon]) {
                     misDatosAgrupados[canon] = { nombreVisual: miDato.country, totalMuertes: 0 };
                 }
                 misDatosAgrupados[canon].totalMuertes += parseFloat(miDato.death_count) || 0;
             }
 
+            // 2. Agrupamos los del compañero convirtiendo a minúsculas directamente
             const compDatosAgrupados = {};
             for (let item of listaCompanero) {
                 if (typeof item === "string") {
-                    try {
-                        item = JSON.parse(item);
-                    } catch {
-                        continue;
-                    }
+                    try { item = JSON.parse(item); } catch { continue; }
                 }
                 const nombrePais = leerNombrePaisEnFila(item);
-                const canon = clavePaisCanonica(nombrePais);
                 const metric = leerMetricaProductividad(item);
-                if (!canon || Number.isNaN(metric)) continue;
+                
+                if (!nombrePais || Number.isNaN(metric)) continue;
+
+                const canon = String(nombrePais).toLowerCase().trim();
 
                 if (!compDatosAgrupados[canon]) compDatosAgrupados[canon] = { sumaValor: 0, cuenta: 0 };
                 compDatosAgrupados[canon].sumaValor += metric;
                 compDatosAgrupados[canon].cuenta += 1;
             }
 
+            // 3. Cruzamos los datos
             const datosCombinados = [];
             for (const canon of Object.keys(misDatosAgrupados)) {
                 const bloqueComp = compDatosAgrupados[canon];
                 if (!bloqueComp || bloqueComp.cuenta === 0) continue;
+                
                 const mediaValor = bloqueComp.sumaValor / bloqueComp.cuenta;
                 datosCombinados.push({
                     pais: misDatosAgrupados[canon].nombreVisual,
@@ -169,36 +134,39 @@
             }
 
             if (datosCombinados.length === 0) {
-                const misClaves = Object.keys(misDatosAgrupados).join(", ") || "Ninguno";
-                const susClaves = Object.keys(compDatosAgrupados).join(", ") || "Ninguno";
-                throw new Error(
-                    `No hay países en común tras normalizar nombres. Mis claves: [${misClaves}]. Compañero: [${susClaves}].`
-                );
+                throw new Error("No hay países en común entre tu API y la del compañero.");
             }
 
             datosCombinados.sort((a, b) => a.pais.localeCompare(b.pais));
 
             const etiquetasPaises = [];
-            const lineaValor = [];
-            const lineaMuertes = [];
+            const barrasValor = [];
+            const barrasMuertes = [];
+            
             for (const dato of datosCombinados) {
                 etiquetasPaises.push(dato.pais);
-                lineaValor.push(dato.valorCompanero);
-                lineaMuertes.push(dato.muertes);
+                barrasValor.push(dato.valorCompanero);
+                barrasMuertes.push(dato.muertes);
             }
 
-            setTimeout(() => {
+            // 4. Dibujamos la gráfica garantizando que Chart.js esté listo
+            const intentarDibujarChart = () => {
+                if (!window.Chart) {
+                    setTimeout(intentarDibujarChart, 100);
+                    return;
+                }
+
                 const ctx = document.getElementById("grafica-companero-1").getContext("2d");
                 if (window.miGrafica1ChartJS) window.miGrafica1ChartJS.destroy();
 
                 window.miGrafica1ChartJS = new Chart(ctx, {
-                    type: "bar",
+                    type: "bar", // Obligatorio para la rúbrica (No line)
                     data: {
                         labels: etiquetasPaises,
                         datasets: [
                             {
                                 label: "Productividad / hora (G19, media)",
-                                data: lineaValor,
+                                data: barrasValor,
                                 yAxisID: "yIzquierda",
                                 backgroundColor: "rgba(153, 102, 255, 0.7)", 
                                 borderColor: "rgba(153, 102, 255, 1)",
@@ -206,7 +174,7 @@
                             },
                             {
                                 label: "Total muertes (histórico)",
-                                data: lineaMuertes,
+                                data: barrasMuertes,
                                 yAxisID: "yDerecha",
                                 backgroundColor: "rgba(255, 159, 64, 0.7)", 
                                 borderColor: "rgba(255, 159, 64, 1)",
@@ -234,13 +202,17 @@
                     }
                 });
                 cargando1 = false;
-            }, 500);
+            };
+
+            intentarDibujarChart();
+
         } catch (error) {
             errorMensaje1 = error.message;
             cargando1 = false;
         }
     }
 
+    
     // --- INTEGRACIÓN 2: CHART.JS (Burbujas: IDH vs Muertes) ---
     async function cargarIntegracion2() {
         try {
@@ -311,12 +283,9 @@
         }
     }
 
+
     // --- INTEGRACIÓN 3: API Externa de Terremotos vs Mis Muertes ---
     
-    // Variables de estado (asegúrate de tenerlas arriba con las demás)
-    
-
-    // --- INTEGRACIÓN 3: API Externa de Terremotos vs Mis Muertes (DIRECTA) ---
     async function cargarIntegracion3() {
         try {
             // 1. Llamamos a TU backend local y DIRECTAMENTE a la web de terremotos
