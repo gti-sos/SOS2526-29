@@ -257,54 +257,6 @@ section { margin-bottom: 3rem; }
   font-size: 0.8375rem;
 }
 
-.code-badge {
-  display: inline-block;
-  font-family: monospace;
-  font-size: 0.78rem;
-  background: #f3f0ec;
-  padding: 2px 7px;
-  border-radius: 6px;
-  color: #555;
-}
-
-.table-wrap {
-  overflow-x: auto;
-  border: 1px solid #e8e6e2;
-  border-radius: 10px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8375rem;
-}
-thead tr { background: #f3f0ec; }
-th {
-  text-align: left;
-  padding: 0.65rem 1rem;
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #777;
-  white-space: nowrap;
-  border-bottom: 1px solid #e8e6e2;
-}
-td {
-  padding: 0.6rem 1rem;
-  border-bottom: 1px solid #ebebeb;
-  color: #1a1a1a;
-  vertical-align: middle;
-}
-tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover { background: #f9f8f5; }
-
-.td-num {
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  white-space: nowrap;
-}
-.td-country { font-weight: 500; white-space: nowrap; }
-
 @media (max-width: 480px) {
   .page { padding: 1.5rem 1rem 3rem; }
   .summary-row { flex-direction: column; }

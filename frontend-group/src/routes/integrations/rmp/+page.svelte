@@ -44,12 +44,43 @@
       id: "hydroelectric-plant",
       title: "World Hydroelectric Plant",
       description: "Análisis del impacto de las plantas hidroeléctricas en la disponibilidad hídrica para la viticultura.",
-      tipo: "USO",
+      tipo: "INTEGRACION",
       proxy:false,
       icon: "💧",
       color: "#006494",
       url: "/integrations/rmp/world-hydroelectric-plant"
+    },
+     {
+      id: "cocktails",
+      title: "Cocktails",
+      description: "Relacion entre cocktails y el tipo de vino que usan.",
+      tipo: "INTEGRACION",
+      proxy:false,
+      icon: "🍸",
+      color: "#bb76a9",
+      url: "/integrations/rmp/cocktails"
+    },
+    {
+      id: "comidas",
+      title: "Comidas",
+      description: "Relacion entre el porcentaje de alcohol en los vinos y el tipo de vino.",
+      tipo: "INTEGRACION",
+      proxy:true,
+      icon: "🍷",
+      color: "#5e2129",
+      url: "/integrations/rmp/food"
+    },
+     {
+      id: "conversion",
+      title: "Conversion",
+      description: "Relacion entre la puntuacion y el precio en varias divisas.",
+      tipo: "INTEGRACION",
+      proxy:false,
+      icon: "💵",
+      color: "#437a22",
+      url: "/integrations/rmp/conversion"
     }
+
   ];
 </script>
 

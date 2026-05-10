@@ -60,74 +60,10 @@ const wineStatsApiV1 = require("./src/back/v1/wine-stats");
 wineStatsApiV1(app, wineStatsDb);
 
 
-// =============================================================================
-// 3. PROXIES PARA APIS EXTERNAS (evita CORS desde el frontend)
-// =============================================================================
 
-app.get("/api/proxy/drought-stats", async (req, res) => {
-  try {
-    const baseUrl = "https://sos2526-19-integracion.onrender.com/api/v1/drought-stats";
-
-    let response = await fetch(baseUrl);
-    if (!response.ok) {
-      throw new Error(`Error API externa: ${response.status}`);
-    }
-
-    let data = await response.json();
-
-    if (Array.isArray(data) && data.length === 0) {
-      const loadResponse = await fetch(`${baseUrl}/loadInitialData`);
-      if (!loadResponse.ok) {
-        throw new Error(`Error loadInitialData: ${loadResponse.status}`);
-      }
-
-      response = await fetch(baseUrl);
-      if (!response.ok) {
-        throw new Error(`Error API externa tras loadInitialData: ${response.status}`);
-      }
-
-      data = await response.json();
-    }
-
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ error: "No se pudo conectar con la API externa." });
-  }
-});
-
-app.get("/api/proxy/age-specific-fertility-rates", async (req, res) => {
-  try {
-    const baseUrl = "https://sos2526-12.onrender.com/api/v2/age-specific-fertility-rates";
-
-    let response = await fetch(baseUrl);
-    if (!response.ok) {
-      throw new Error(`Error API externa: ${response.status}`);
-    }
-
-    let data = await response.json();
-
-    if (Array.isArray(data) && data.length === 0) {
-      const loadResponse = await fetch(`${baseUrl}/loadInitialData`);
-      if (!loadResponse.ok) {
-        throw new Error(`Error loadInitialData: ${loadResponse.status}`);
-      }
-
-      response = await fetch(baseUrl);
-      if (!response.ok) {
-        throw new Error(`Error API externa tras loadInitialData: ${response.status}`);
-      }
-
-      data = await response.json();
-    }
-
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ error: "No se pudo conectar con la API externa." });
-  }
-}); 
 
 // =============================================================================
-// 4. FRONTEND ESTATICO Y RUTAS DE NAVEGACION
+// 3. FRONTEND ESTATICO Y RUTAS DE NAVEGACION
 // =============================================================================
 
 app.use("/", express.static(path.join(__dirname, "public")));
@@ -158,6 +94,4 @@ app.listen(port, () => {
     console.log(`>>> API RMP: http://localhost:${port}/api/v1/wine-stats`);
     console.log(`>>> API LCC v2: http://localhost:${port}/api/v2/citys-stats`);
     console.log(`>>> API ALG v2: http://localhost:${port}/api/v2/natural-disasters`);
-    console.log(`>>> PROXY drought-stats: http://localhost:${port}/api/proxy/drought-stats`);
-    console.log(`>>> PROXY age-specific-fertility-rates: http://localhost:${port}/api/proxy/age-specific-fertility-rates`);
-});
+   });

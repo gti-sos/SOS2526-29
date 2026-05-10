@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
 
   const WINE_STATS_URL = "/api/v1/wine-stats?limit=200";
-    const RANKINGS_URL = "https://sos2526-26.onrender.com/api/v2/national-team-rankings-per-years";
+  const RANKINGS_URL = "https://sos2526-26.onrender.com/api/v2/national-team-rankings-per-years";
 
   let loading = true;
   let error = "";
@@ -18,12 +18,33 @@
   const fmtDec = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 });
   const fmtInt = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
 
+  // Normalización básica de texto (acentos, mayúsculas)
   function norm(str) {
     return String(str ?? "")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
       .trim();
+  }
+
+  // Normalización de país: convierte español → inglés para cruzar datasets
+  function normCountry(str) {
+    const cleaned = String(str ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[.,]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const aliases = {
+      spain:    "spain",
+      espana:   "spain",
+      germany:  "germany",
+      alemania: "germany"
+    };
+
+    return aliases[cleaned] || cleaned;
   }
 
   function titleCase(str) {
@@ -85,9 +106,10 @@
       totalWines = winesArr.length;
       totalRankings = rankingsArr.length;
 
+      // ---- Agrupar vinos por país (clave normalizada con traducción) ----
       const wineByCountry = {};
       for (const w of winesArr) {
-        const key = norm(w.country);
+        const key = normCountry(w.country);  // <-- CAMBIADO
         if (!key) continue;
 
         if (!wineByCountry[key]) {
@@ -114,10 +136,11 @@
         wineByCountry[key].types[t] = (wineByCountry[key].types[t] || 0) + 1;
       }
 
+      // ---- Agrupar rankings por país (clave normalizada con traducción) ----
       const rankingByCountry = {};
       for (const r of rankingsArr) {
         const country = readCountry(r);
-        const key = norm(country);
+        const key = normCountry(country);  // <-- CAMBIADO
         if (!key) continue;
 
         const year = readYear(r);
@@ -153,6 +176,7 @@
         }
       }
 
+      // ---- Cruzar ambos datasets ----
       mergedRows = Object.entries(wineByCountry)
         .map(([key, w]) => {
           const r = rankingByCountry[key] ?? null;
@@ -188,6 +212,7 @@
       matchedCountries = mergedRows.filter(
         (row) => row.latestRank !== null || row.bestRank !== null
       ).length;
+
     } catch (e) {
       error = e.message || "No se pudo cargar la integración.";
     } finally {
@@ -197,7 +222,6 @@
 
   onMount(load);
 </script>
-
 <svelte:head>
   <title>National Team Rankings – RMP</title>
 </svelte:head>
