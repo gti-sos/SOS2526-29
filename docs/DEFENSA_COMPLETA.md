@@ -943,9 +943,9 @@ Frase de defensa:
 | Open-Meteo Geocoding | No SOS | `https://geocoding-api.open-meteo.com/v1/search` | `/api/v1/citys-stats/integrations/geocoding/:city` | `treemap` |
 | REST Countries | No SOS | `https://restcountries.com/v3.1/name/:country` | `/api/v1/citys-stats/integrations/country/:country` | `sankey` |
 | World Bank Indicators | No SOS | `https://api.worldbank.org/v2/country/:code/indicator/SP.POP.TOTL` | `/api/v1/citys-stats/integrations/world-bank/:countryCode` | `lollipop` |
-| SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals` | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` | `variwide` |
+| SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals` | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` | `packedbubble` |
 | SOS2526-19 `earthquakes` | Alumno SOS | `https://sos2526-19.onrender.com/api/v1/earthquakes` | `/api/v1/citys-stats/integrations/sos-earthquakes` | `bullet` |
-| SOS2526-26 `fifa-squad-value-per-years` | Alumno SOS | `https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years` | `/api/v1/citys-stats/integrations/sos-fifa-squad-values` | `dumbbell` |
+| SOS2526-26 `fifa-squad-value-per-years` | Alumno SOS | `https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years` | `/api/v1/citys-stats/integrations/sos-fifa-squad-values` | `columnpyramid` |
 | SOS2526-30 `esportsearnings-stats` | Alumno SOS | `https://sos2526-30.onrender.com/api/v1/esportsearnings-stats` | `/api/v1/citys-stats/integrations/sos-esports-earnings` | `sunburst` |
 
 ### Cumplimiento D03
@@ -2973,9 +2973,8 @@ tick
 loadHighcharts
   -> import("highcharts")
   -> import("highcharts/highcharts-more.js")
-  -> loadPlugin(dumbbell)
+  -> highcharts-more registra packedbubble y columnpyramid
   -> loadPlugin(lollipop)
-  -> loadPlugin(variwide)
   -> loadPlugin(bullet)
   -> loadPlugin(sankey)
   -> loadPlugin(treemap)
@@ -3948,21 +3947,29 @@ Estos puntos no se pueden confirmar mirando solo el repositorio local, asi que n
 
 ## 23. Guion de defensa oral
 
-Esta seccion esta pensada para estudiar y tambien para usarla como guion real el dia de la defensa. La idea no es leer palabra por palabra como si fuera un texto memorizado, sino entender el orden, repetir las frases clave y saber que pantalla o archivo abrir en cada momento.
+Esta seccion esta reescrita para la defensa real: no es un discurso de 10 minutos. Es un guion de actuacion para cuando el profesor te pida tareas concretas delante del sistema, Chrome DevTools, Postman y el codigo.
 
 Regla de oro:
 
 ```text
-problema -> arquitectura -> API -> frontend -> funciones -> integraciones -> pruebas -> cierre
+pantalla correcta -> accion real -> Network/Postman -> codigo -> prediccion exacta -> diagrama por capas
 ```
 
-Si te pierdes durante la defensa, vuelve a esta frase:
+Frase base si te bloqueas:
 
-> Mi proyecto no es solo una tabla. Es una cadena completa: el usuario actua en Svelte, el frontend llama con `fetch`, Express valida la peticion, NeDB guarda o consulta datos, y la respuesta se transforma en CRUD, graficas, mapa e integraciones.
+> Voy a seguir el flujo real: el usuario actua en el HTML, Svelte ejecuta una funcion, el service hace `fetch`, Express recibe la peticion, valida los datos, consulta o modifica NeDB, y devuelve JSON para que el frontend actualice tabla, grafica o mapa.
+
+No hagas esto:
+
+- No expliques el proyecto en abstracto si te han pedido una tarea concreta.
+- No cambies codigo si te han pedido usar la interfaz.
+- No edites la base de datos manualmente.
+- No pulses `Send` en Postman si te dicen que solo predigas.
+- No digas "dara error"; di codigo HTTP y respuesta exacta.
 
 ### Preparacion antes de entrar
 
-Tener abiertas estas pestanas en el navegador:
+Tener abiertas estas pestanas:
 
 1. `https://sos2526-29.onrender.com/`
 2. `https://sos2526-29.onrender.com/citys-stats`
@@ -3971,262 +3978,159 @@ Tener abiertas estas pestanas en el navegador:
 5. `https://sos2526-29.onrender.com/integrations/citys-stats`
 6. `https://sos2526-29.onrender.com/analytics`
 
-Tener abiertos estos archivos en el editor:
+Tener abiertos estos archivos:
 
 1. `index.js`
 2. `src/back/v2/citys-stats.js`
 3. `src/back/v1/citys-stats.js`
-4. `frontend-group/src/services/citysStatsApi.js`
-5. `frontend-group/src/routes/citys-stats/+page.svelte`
-6. `frontend-group/src/routes/analytics/citys-stats/+page.svelte`
-7. `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte`
-8. `frontend-group/src/routes/integrations/citys-stats/+page.svelte`
-9. `frontend-group/src/routes/analytics/+page.svelte`
+4. `frontend-group/src/services/apiBase.js`
+5. `frontend-group/src/services/citysStatsApi.js`
+6. `frontend-group/src/routes/citys-stats/+page.svelte`
+7. `frontend-group/src/routes/citys-stats/editar/[city]/[country]/+page.svelte`
+8. `frontend-group/src/routes/analytics/citys-stats/+page.svelte`
+9. `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte`
+10. `frontend-group/src/routes/integrations/citys-stats/+page.svelte`
 
-Comandos preparados por si piden ejecutar en local:
-
-```powershell
-npm.cmd install
-npm.cmd --prefix frontend-group install
-npm.cmd run build
-npm.cmd start
-```
-
-Pruebas preparadas por si piden validar:
-
-```powershell
-npm.cmd run test-LCC-v2
-npm.cmd run test-LCC-e2e
-```
-
-### Guion de 30 segundos
-
-Usalo si el profesor pide una explicacion muy breve.
-
-> Nuestro proyecto es una aplicacion web con backend Express, base de datos NeDB y frontend Svelte. El grupo trabaja con tres recursos: vinos, desastres naturales y estadisticas de ciudades. Mi parte es `citys-stats`, una API REST para gestionar ciudades, paises y poblacion estimada en 2025. He implementado CRUD, validacion estricta, busqueda, filtros, ordenacion, paginacion, analytics, mapa e integraciones externas. La defensa importante es que el dato recorre todo el sistema: se crea o consulta en la interfaz, pasa por un service con `fetch`, llega a Express, se valida, se guarda o lee en NeDB y vuelve al frontend convertido en tabla, grafico, mapa o widget.
-
-### Guion de 90 segundos
-
-Usalo cuando haya poco tiempo, pero quieras cubrir todo lo importante.
-
-1. Abrir `index.js`.
-2. Decir:
-
-> Aqui arranca el servidor. Se crea la aplicacion Express, se activan middlewares como `cors` y `express.json`, se inicializan las bases NeDB de cada recurso, se registran las APIs y se sirve el frontend compilado desde `public`.
-
-3. Abrir `src/back/v2/citys-stats.js`.
-4. Decir:
-
-> Este es el contrato REST principal de mi recurso. Aqui estan `GET`, `POST`, `PUT` y `DELETE`. Tambien estan la busqueda libre con `q`, los filtros exactos, la ordenacion, la paginacion y la validacion estricta para que no entren campos incorrectos.
-
-5. Abrir `frontend-group/src/services/citysStatsApi.js`.
-6. Decir:
-
-> Este service separa la interfaz de la API. Las pantallas no construyen todas las peticiones a mano, sino que llaman a funciones como `getAllCitysStats`, `createCityStat`, `updateCityStat` o `deleteCityStat`.
-
-7. Abrir `frontend-group/src/routes/citys-stats/+page.svelte`.
-8. Decir:
-
-> Esta es la pantalla CRUD. Aqui se cargan datos, se busca, se crea, se edita y se borra. Los eventos del usuario acaban llamando al service y despues se refresca la lista.
-
-9. Abrir `src/back/v1/citys-stats.js`.
-10. Decir:
-
-> Aqui estan las integraciones externas. He decidido hacerlas desde el backend para no depender directamente del navegador, controlar errores y normalizar respuestas distintas.
-
-11. Abrir `frontend-group/src/routes/integrations/citys-stats/+page.svelte`.
-12. Decir:
-
-> Esta vista consume los endpoints proxy y transforma los datos externos en widgets y graficas. Si una API externa falla, la pantalla puede seguir mostrando el resto.
-
-13. Abrir `frontend-group/src/routes/analytics/+page.svelte`.
-14. Decir:
-
-> Aqui esta el trabajo grupal: un widget comun que combina los tres recursos sin mezclar unidades directamente, usando metricas normalizadas.
-
-### Guion principal de 8 a 10 minutos
-
-Este es el guion recomendado si la defensa permite explicar con calma.
-
-### Minuto 0: apertura
-
-Pantalla:
+Base URL para Postman:
 
 ```text
-/
+https://sos2526-29.onrender.com
 ```
 
-Frase:
-
-> Buenos dias. Somos el grupo SOS2526-29. La aplicacion permite consultar y visualizar datos de tres recursos: `wine-stats`, `natural-disasters` y `citys-stats`. Mi parte es `citys-stats`, que trabaja con ciudades, paises y poblacion estimada para 2025. Voy a explicar mi recurso de punta a punta: API, base de datos, frontend, graficas, mapa, integraciones y pruebas.
-
-Idea que debe quedar clara:
-
-> No presento solo una pagina visual. Presento una aplicacion completa con backend, persistencia, contrato REST y frontend conectado.
-
-### Minuto 1: arquitectura general
-
-Archivo:
-
-```text
-index.js
-```
-
-Frase:
-
-> El servidor se centraliza en `index.js`. Aqui Express recibe peticiones HTTP, interpreta JSON con `express.json`, permite llamadas desde el frontend con CORS, inicializa las bases NeDB y registra las rutas de cada recurso. Despues, para produccion, sirve el frontend compilado desde `public`.
-
-Explicacion sencilla:
-
-> Express es la entrada del backend. NeDB guarda los datos. Svelte es la parte que ve el usuario. El navegador no toca la base de datos directamente; siempre pasa por la API.
-
-Si preguntan por el flujo:
-
-```text
-Usuario -> Svelte -> service fetch -> Express -> NeDB -> Express -> service -> Svelte
-```
-
-Frase para defender:
-
-> Esta separacion es importante porque cada capa tiene una responsabilidad concreta. La pantalla no valida como servidor, el servidor no dibuja graficas y la base de datos no sabe nada de botones.
-
-### Minuto 2: API REST principal
-
-Archivo:
-
-```text
-src/back/v2/citys-stats.js
-```
-
-Pantalla o URL:
+Endpoint principal LCC:
 
 ```text
 /api/v2/citys-stats
 ```
 
-Frase:
+### Tarea 1: abrir el sistema desplegado
 
-> La API principal de mi recurso esta en `/api/v2/citys-stats`. Uso REST porque el recurso es `citys-stats` y las operaciones se expresan con metodos HTTP: `GET` para leer, `POST` para crear, `PUT` para actualizar y `DELETE` para borrar.
-
-Explicacion para alguien sin base:
-
-> Una API REST es como un mostrador ordenado. La URL dice sobre que datos hablamos y el metodo dice que queremos hacer con esos datos.
-
-Ejemplos que se pueden decir:
+Si dicen:
 
 ```text
-GET /api/v2/citys-stats
-POST /api/v2/citys-stats
-PUT /api/v2/citys-stats/madrid/spain
-DELETE /api/v2/citys-stats/madrid/spain
+Abre tu sistema desplegado en la nube.
+Abre tu aplicacion desplegada en Render.
+Ensename tu sistema funcionando en produccion.
 ```
 
-Frase clave:
-
-> En mi caso la clave del recurso no es un `id`, sino la combinacion `city + country`, porque una ciudad siempre se entiende dentro de un pais y ese par identifica el registro.
-
-### Minuto 3: validacion y reglas de datos
-
-Archivo:
+Abres:
 
 ```text
+https://sos2526-29.onrender.com/
+```
+
+Frase:
+
+> Este es el sistema completo desplegado en Render. Express sirve el frontend compilado desde `public` y tambien expone las rutas `/api`.
+
+Si Render tarda:
+
+> Render puede dormir la aplicacion si lleva tiempo sin uso. Mientras arranca puedo ensenar el codigo y despues volver a la pestana.
+
+### Tarea 2: abrir la interfaz de gestion de datos
+
+Si dicen:
+
+```text
+Entra en la interfaz de gestion de tus datos.
+Abre la parte donde se muestran los datos.
+Ensename la pantalla donde puedes gestionar tus datos.
+```
+
+Abres:
+
+```text
+/citys-stats
+```
+
+Frase:
+
+> Esta es la interfaz de gestion de mi recurso `citys-stats`. Desde aqui puedo cargar datos iniciales, buscar, crear, editar y borrar registros usando la UI que llama a mi API REST.
+
+Senala:
+
+- Boton `Cargar datos de ejemplo`.
+- Formulario de busqueda.
+- Formulario de creacion.
+- Tabla.
+- Botones `Editar` y `Eliminar`.
+
+Archivos relacionados:
+
+```text
+frontend-group/src/routes/citys-stats/+page.svelte
+frontend-group/src/services/citysStatsApi.js
 src/back/v2/citys-stats.js
 ```
 
-Funciones que conviene senalar:
+### Tarea 3: modificar un dato desde la interfaz
+
+Si dicen:
 
 ```text
-hasExactCityFields
-normalizeCityStat
+Cambia este valor usando tu interfaz.
+Modifica este dato desde tu aplicacion.
+Haz que en la grafica aparezca este nuevo valor.
+```
+
+Haces:
+
+1. Ir a `/citys-stats`.
+2. Si no hay datos, pulsar `Cargar datos de ejemplo`.
+3. Buscar el registro.
+4. Pulsar `Editar`.
+5. Cambiar `Poblacion estimada en 2025`.
+6. Pulsar `Guardar cambios`.
+7. Volver a `/citys-stats` si hace falta.
+8. Abrir `/analytics/citys-stats` para comprobar la grafica.
+
+Frase mientras lo haces:
+
+> Lo cambio desde la interfaz, no desde el codigo ni desde la base de datos. La pantalla de edicion llama al service y el service hace una peticion `PUT` al backend.
+
+Flujo si solo cambia la poblacion:
+
+```text
+HTML submit
+-> handleUpdate()
+-> updateCityStat()
+-> PUT /api/v2/citys-stats/:city/:country con JSON
+-> normalizeCityStat()
+-> db.findOne()
+-> db.update()
+-> db.findOne()
+-> 200 con JSON actualizado
+```
+
+Si cambia `city` o `country`:
+
+```text
+createCityStat(nuevo)
+-> POST /api/v2/citys-stats
+-> deleteCityStat(antiguo)
+-> DELETE /api/v2/citys-stats/:city/:country
 ```
 
 Frase:
 
-> Antes de guardar datos, la API comprueba que el objeto tenga exactamente los campos esperados y que los valores sean coherentes. Esto evita que entren registros con campos de mas, campos ausentes o tipos incorrectos.
+> Como la clave es `city + country`, si cambia la clave no es un `PUT` normal sobre el mismo recurso: se crea el nuevo y se borra el anterior.
 
-Explicacion sencilla:
+### Tarea 4: comprobar el cambio en la grafica
 
-> La validacion es como una puerta de entrada. Si el dato no tiene la forma correcta, no pasa a la base de datos.
-
-Ejemplo de defensa:
-
-> Si envio un campo extra, la API responde `400`. Si intento crear una ciudad que ya existe para el mismo pais, responde `409`. Si intento actualizar una ciudad inexistente, responde `404`.
-
-Frase para funciones:
-
-> `hasExactCityFields` comprueba la estructura. `normalizeCityStat` limpia y transforma datos para que la base guarde una version uniforme.
-
-### Minuto 4: CRUD en frontend
-
-Pantalla:
-
-```text
-/citys-stats
-```
-
-Archivos:
-
-```text
-frontend-group/src/services/citysStatsApi.js
-frontend-group/src/routes/citys-stats/+page.svelte
-```
-
-Frase:
-
-> La pantalla CRUD no llama directamente a rutas escritas por todas partes. Para eso existe el service `citysStatsApi.js`, que agrupa las llamadas `fetch`. La pantalla Svelte se centra en estado, formularios, eventos y renderizado.
-
-Demo recomendada:
-
-1. Pulsar cargar datos iniciales si la base esta vacia.
-2. Mostrar la tabla.
-3. Buscar un pais o ciudad.
-4. Ordenar por poblacion descendente.
-5. Crear un registro sencillo.
-6. Editarlo.
-7. Borrarlo.
-
-Frase durante la demo:
-
-> Al crear, editar o borrar no modifico la tabla a mano como si fuera una maqueta. Llamo a la API real y despues refresco la lista con los datos que devuelve el backend.
-
-Si preguntan por funciones:
-
-> `refreshList` obtiene los datos actuales; `buildSearchQuery` prepara los parametros de busqueda; `validateCityStatForm` evita enviar formularios claramente incorrectos; `handleCreate` envia el `POST`; `openEdit` carga un registro en el formulario de edicion; `handleUpdate` envia el `PUT`.
-
-### Minuto 5: busqueda, filtros, ordenacion y paginacion
-
-Pantalla:
-
-```text
-/citys-stats
-```
-
-URLs de ejemplo:
-
-```text
-/api/v2/citys-stats?q=india
-/api/v2/citys-stats?country=china
-/api/v2/citys-stats?sort=-un_2025_population&limit=5
-```
-
-Frase:
-
-> La v2 no se queda en listar todo. Permite consultar mejor: busqueda libre con `q`, filtros exactos por campo, ordenacion con `sort` y paginacion con `limit` y `offset`.
-
-Explicacion sencilla:
-
-> Esto es lo que convierte una API basica en una API util. Si los datos crecen, no quieres traer todo siempre; quieres filtrar, ordenar y pedir solo una parte.
-
-Frase de defensa:
-
-> La busqueda y los filtros se expresan como query params porque no cambian el recurso, solo cambian la vista de los datos que estoy pidiendo.
-
-### Minuto 6: analytics individual
-
-Pantalla:
+Abres:
 
 ```text
 /analytics/citys-stats
+```
+
+Frase:
+
+> Esta grafica no tiene datos escritos a mano. Al abrirse ejecuta `loadAnalytics`, llama a `getAllCitysStats({ sort: "-un_2025_population" })` y pinta Highcharts con lo que devuelve la API.
+
+Peticion esperada en Network:
+
+```text
+GET /api/v2/citys-stats?sort=-un_2025_population
 ```
 
 Archivo:
@@ -4235,255 +4139,372 @@ Archivo:
 frontend-group/src/routes/analytics/citys-stats/+page.svelte
 ```
 
-Frase:
+### Tarea 5: abrir DevTools y localizar la peticion
 
-> Esta pantalla cumple la visualizacion individual del recurso. Toma los datos reales de `citys-stats`, los ordena por poblacion y los representa con Highcharts en un grafico circular.
-
-Explicacion sencilla:
-
-> La grafica no inventa datos. Solo cambia la forma de mirarlos. La fuente sigue siendo la API.
-
-Funciones importantes:
+Abrir DevTools:
 
 ```text
-loadAnalytics
-loadHighcharts
-renderChart
+F12
+Ctrl + Shift + I
 ```
 
-Frase para funciones:
+Pasos:
 
-> `loadAnalytics` carga los datos desde la API; `loadHighcharts` importa la libreria cuando hace falta; `renderChart` prepara la serie, destruye la grafica anterior y crea la nueva.
+1. Ir a `Network`.
+2. Filtrar por `Fetch/XHR`.
+3. Recargar la pagina.
+4. Elegir la peticion que empieza por `/api`.
 
-### Minuto 7: mapa
+Peticiones que debes reconocer:
 
-Pantalla:
-
-```text
-/analytics/citys-stats/map
-```
-
-Archivo:
-
-```text
-frontend-group/src/routes/analytics/citys-stats/map/+page.svelte
-```
+| Accion | Peticion |
+| --- | --- |
+| Listado | `GET /api/v2/citys-stats` |
+| Busqueda | `GET /api/v2/citys-stats?q=...&sort=...` |
+| Crear | `POST /api/v2/citys-stats` |
+| Abrir edicion | `GET /api/v2/citys-stats/:city/:country` |
+| Guardar edicion | `PUT /api/v2/citys-stats/:city/:country` |
+| Borrar | `DELETE /api/v2/citys-stats/:city/:country` |
+| Grafica | `GET /api/v2/citys-stats?sort=-un_2025_population` |
+| Mapa | `GET /api/v2/citys-stats?sort=-un_2025_population` |
+| Integraciones | `GET /api/v1/citys-stats/integrations/...` |
 
 Frase:
 
-> El mapa anade una lectura geografica. Cada ciudad se coloca con coordenadas y se representa con una burbuja cuyo tamano o color depende de la poblacion.
+> En `Headers` se ve el metodo, la URL y el status. En `Payload` se ve el JSON enviado en `POST` o `PUT`. En `Response` o `Preview` se ve el JSON que devuelve la API.
 
-Explicacion sencilla:
+### Tarea 6: explicar si usas proxy
 
-> Una tabla te dice los numeros, pero un mapa te ayuda a entender distribucion y concentracion geografica.
+Respuesta correcta, separando casos:
 
-Funciones importantes:
-
-```text
-keyFor
-colorFor
-radiusFor
-renderMap
-```
-
-Frase para funciones:
-
-> `keyFor` identifica cada ciudad, `colorFor` decide el color, `radiusFor` calcula el tamano y `renderMap` pinta o actualiza el mapa.
-
-### Minuto 8: integraciones externas
-
-Pantalla:
-
-```text
-/integrations/citys-stats
-```
+| Caso | Que decir |
+| --- | --- |
+| CRUD en Render | No pasa por proxy de Vite; frontend y backend comparten dominio. |
+| CRUD en desarrollo | `apiBase.js` usa `http://localhost:10000` en modo dev. |
+| Proxy de Vite | Existe en `vite.config.js` para llamadas relativas `/api`. |
+| Integraciones | Si hay proxy propio: el navegador llama a Express y Express llama a APIs externas. |
 
 Archivos:
 
 ```text
+frontend-group/src/services/apiBase.js
+frontend-group/vite.config.js
 src/back/v1/citys-stats.js
-frontend-group/src/routes/integrations/citys-stats/+page.svelte
 ```
 
-Frase:
+Frase para demostrarlo:
 
-> Las integraciones externas estan pensadas como proxy propio. El frontend no llama directamente a todas las APIs externas. Llama a mi backend y mi backend consulta, normaliza y devuelve una respuesta controlada.
+> En Network, para CRUD veo llamadas a `/api/v2/citys-stats` en el mismo origen de Render. Para integraciones veo llamadas a `/api/v1/citys-stats/integrations/...`; despues, en el backend, Express hace el `fetch` a APIs externas.
 
-Explicacion sencilla:
+### Tarea 7: Postman
 
-> Cada API externa responde de una forma distinta. El proxy sirve para traducir todas esas respuestas a una forma mas comoda para mi frontend.
-
-Funciones backend importantes:
+Base URL:
 
 ```text
-fetchJson
-safeExternal
-buildIntegratedCityBase
-buildIntegratedCity
-buildCityCountrySummaries
+https://sos2526-29.onrender.com
 ```
 
-Funciones frontend importantes:
+Header para `POST` y `PUT`:
 
 ```text
-safeLoad
-loadIntegrations
-renderIntegrationCharts
-destroyIntegrationCharts
+Content-Type: application/json
 ```
 
-Frase de defensa:
+Body valido:
 
-> La decision de integrar por pais y no por ciudad se debe a que muchas APIs externas trabajan mejor con codigos de pais, ISO3 o nombres de pais. Por eso primero agrego mis ciudades por pais y despues cruzo con fuentes externas.
+```json
+{
+  "city": "defensa-demo",
+  "country": "spain",
+  "un_2025_population": 123456
+}
+```
 
-### Minuto 9: analytics grupal
+Peticiones:
 
-Pantalla:
+| Accion | Metodo y endpoint | Respuesta esperada |
+| --- | --- | --- |
+| Listar | `GET /api/v2/citys-stats` | `200` y array JSON |
+| Cargar iniciales | `GET /api/v2/citys-stats/loadInitialData` | `201` si estaba vacia, `200` si ya habia datos |
+| Crear | `POST /api/v2/citys-stats` | `201` y objeto creado |
+| Leer uno | `GET /api/v2/citys-stats/defensa-demo/spain` | `200` u `404` |
+| Actualizar | `PUT /api/v2/citys-stats/defensa-demo/spain` | `200` y objeto actualizado |
+| Borrar uno | `DELETE /api/v2/citys-stats/defensa-demo/spain` | `204` u `404` |
+| Borrar todo | `DELETE /api/v2/citys-stats` | `204` |
+
+Si piden `PATCH`:
+
+> Mi CRUD no implementa `PATCH`. Implementa `GET`, `POST`, `PUT` y `DELETE`.
+
+### Tarea 8: predecir respuesta sin pulsar Send
+
+Tabla que debes memorizar:
+
+| Peticion | Condicion | Codigo | Respuesta |
+| --- | --- | --- | --- |
+| `GET /api/v2/citys-stats` | DB accesible | `200` | Array JSON sin `_id` |
+| `GET /api/v2/citys-stats?un_2025_population=abc` | Valor no numerico | `400` | `{ "error": "Invalid query" }` |
+| `GET /api/v2/citys-stats?sort=bad` | Campo no permitido | `400` | `{ "error": "Invalid sort field" }` |
+| `GET /api/v2/citys-stats?offset=-1` | Offset invalido | `400` | `{ "error": "Invalid offset" }` |
+| `GET /api/v2/citys-stats?limit=-1` | Limit invalido | `400` | `{ "error": "Invalid limit" }` |
+| `GET /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
+| `POST /api/v2/citys-stats` | Body valido y no duplicado | `201` | Objeto creado |
+| `POST /api/v2/citys-stats` | Duplicado | `409` | `{ "error": "Resource already exists" }` |
+| `POST /api/v2/citys-stats` | Body mal estructurado | `400` | `{ "error": "JSON body does not match expected structure" }` |
+| `POST /api/v2/citys-stats/:city/:country` | POST sobre recurso concreto | `405` | Sin JSON propio |
+| `PUT /api/v2/citys-stats` | PUT sobre coleccion | `405` | Sin JSON propio |
+| `PUT /api/v2/citys-stats/tokyo/japan` | Body no coincide con URL | `400` | `{ "error": "URL and body do not match" }` |
+| `PUT /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
+| `DELETE /api/v2/citys-stats/tokyo/japan` | Existe | `204` | Sin cuerpo |
+| `DELETE /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
+
+Campos exactos validos:
 
 ```text
-/analytics
+city
+country
+un_2025_population
 ```
 
-Archivo:
+La poblacion debe ser entero mayor que cero.
 
-```text
-frontend-group/src/routes/analytics/+page.svelte
-```
+Frase para escribir:
 
-Frase:
+> Codigo de estado: `400`. Respuesta: `{ "error": "JSON body does not match expected structure" }`, porque el body no tiene exactamente `city`, `country` y `un_2025_population` con poblacion entera mayor que cero.
 
-> La vista grupal combina los tres recursos en un unico widget. Como cada recurso mide cosas distintas, no mezclamos unidades directamente; usamos una comparacion normalizada para que la grafica sea defendible.
+### Tarea 9: explicar frontend
 
-Explicacion sencilla:
+Si dicen "abre el frontend", abre segun la pregunta:
 
-> No tiene sentido sumar poblacion, numero de desastres y datos de vino como si fueran la misma unidad. Por eso se normaliza y se muestra una comparacion relativa.
+| Pregunta | Archivo |
+| --- | --- |
+| Donde se decide el backend | `frontend-group/src/services/apiBase.js` |
+| Donde estan los fetch CRUD | `frontend-group/src/services/citysStatsApi.js` |
+| Donde esta el listado | `frontend-group/src/routes/citys-stats/+page.svelte` |
+| Donde esta editar | `frontend-group/src/routes/citys-stats/editar/[city]/[country]/+page.svelte` |
+| Donde esta la grafica | `frontend-group/src/routes/analytics/citys-stats/+page.svelte` |
+| Donde esta el mapa | `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte` |
+| Donde estan integraciones | `frontend-group/src/services/citysStatsIntegrations.js` |
 
-Frase de defensa:
+Respuestas cortas:
 
-> Aqui se ve el trabajo de grupo: tres APIs independientes conectadas en una visualizacion comun.
-
-### Minuto 10: pruebas, calidad y cierre
-
-Archivos o comandos:
-
-```text
-tests/LCC/pruebas-lcc-v2.json
-tests/LCC/playwright.config.js
-npm.cmd run test-LCC-v2
-npm.cmd run test-LCC-e2e
-```
-
-Frase:
-
-> Para validar que no es solo visual, hay pruebas de API con Newman/Postman y pruebas e2e con Playwright. Las primeras verifican endpoints, codigos HTTP y respuestas. Las segundas simulan acciones reales en navegador.
-
-Cierre:
-
-> En resumen, mi parte cubre el ciclo completo: modelo de datos, API REST versionada, validacion, persistencia, CRUD, busqueda, filtros, ordenacion, paginacion, analytics, mapa, integraciones externas, proxy propio y pruebas. Lo importante es que cada pantalla se puede explicar desde el codigo y cada funcion tiene una responsabilidad concreta.
-
-### Demo exacta recomendada
-
-Orden ideal para ensenar en directo:
-
-1. Abrir `/`.
-2. Entrar en `/citys-stats`.
-3. Pulsar `Load initial data` si hace falta.
-4. Buscar `india` o `china`.
-5. Ordenar por poblacion descendente.
-6. Crear una ciudad de prueba.
-7. Editar la ciudad creada.
-8. Borrar la ciudad creada.
-9. Abrir `/api/v2/citys-stats?sort=-un_2025_population&limit=5`.
-10. Abrir `/analytics/citys-stats`.
-11. Abrir `/analytics/citys-stats/map`.
-12. Abrir `/integrations/citys-stats`.
-13. Abrir `/analytics`.
-14. Volver al codigo y explicar una funcion concreta si lo piden.
-
-Frase para acompanar la demo:
-
-> Voy a hacer una operacion real. Si creo un registro, pasa por el formulario, el service, la API, la validacion y la base de datos. Despues la tabla se refresca pidiendo de nuevo al backend.
-
-### Guion para explicar una funcion cualquiera
-
-Cuando el profesor senale una funcion, usa siempre este orden:
-
-1. Decir en que archivo esta.
-2. Decir quien la llama.
-3. Decir que recibe.
-4. Decir que comprueba.
-5. Decir que transforma.
-6. Decir que devuelve.
-7. Decir que error evita.
+| Pregunta | Respuesta |
+| --- | --- |
+| Que es `item`, `d` o `row` | Un elemento del array que se esta recorriendo o transformando. |
+| Por que `map` | Transforma cada registro en otro formato. |
+| Por que `filter` | Deja solo los elementos que cumplen una condicion. |
+| Por que `find` | Busca un elemento concreto. |
+| Por que `await` | Espera una promesa antes de usar el resultado. |
+| Que hace `tick()` | Espera a que Svelte haya pintado el contenedor HTML antes de crear Highcharts. |
 
 Plantilla:
 
-> Esta funcion esta en `[archivo]`. La llama `[otra funcion o pantalla]` cuando `[situacion]`. Recibe `[parametros]`. Primero valida o prepara `[dato]`, despues transforma `[dato]` y finalmente devuelve `[resultado]`. Es importante porque evita `[error]` y mantiene separada la responsabilidad de `[capa]`.
+> Esta linea pertenece al frontend. No toca NeDB directamente. Prepara datos, llama a un service, espera una promesa o actualiza variables que Svelte usa para repintar la vista.
 
-Ejemplo con `normalizeCityStat`:
+### Tarea 10: explicar backend y validaciones
 
-> `normalizeCityStat` esta en el backend de `citys-stats`. Se usa antes de guardar o devolver datos. Recibe un objeto de ciudad, limpia campos de texto y convierte la poblacion a numero. Es importante porque evita guardar datos con formatos inconsistentes.
+Archivo principal:
 
-Ejemplo con `refreshList`:
+```text
+src/back/v2/citys-stats.js
+```
 
-> `refreshList` esta en la pantalla CRUD. La llama la pantalla al cargar, buscar, crear, editar o borrar. Prepara la consulta, llama al service y actualiza el estado visible. Es importante porque centraliza la recarga de datos y evita repetir la misma llamada en muchos sitios.
+Integraciones:
 
-Ejemplo con `safeExternal`:
+```text
+src/back/v1/citys-stats.js
+```
 
-> `safeExternal` esta en el backend de integraciones. Envuelve llamadas a APIs externas para que un fallo externo no rompa toda la respuesta. Es importante porque en integraciones reales no controlamos la disponibilidad de terceros.
+Funciones clave:
 
-### Frases perfectas para momentos dificiles
+| Funcion | Explicacion |
+| --- | --- |
+| `removeDatabaseId` | Quita `_id` de NeDB antes de responder. |
+| `hasExactCityFields` | Comprueba que el body tenga exactamente los campos esperados. |
+| `normalizeCityStat` | Limpia `city` y `country`, convierte poblacion a numero y valida. |
+| `db.find` | Lista registros. |
+| `db.findOne` | Busca uno o comprueba duplicados. |
+| `db.insert` | Crea. |
+| `db.update` | Actualiza. |
+| `db.remove` | Borra. |
 
-Si preguntan "por que v1 y v2":
+Explicar `POST`:
 
-> Porque versionar permite evolucionar la API sin romper clientes anteriores. En mi caso, v2 concentra el CRUD mejorado y v1 mantiene endpoints anteriores e integraciones.
+```text
+1. Entra en app.post(BASE_API_URL).
+2. Ejecuta normalizeCityStat(req.body).
+3. Si falla, responde 400.
+4. Busca duplicado con db.findOne.
+5. Si existe, responde 409.
+6. Si no existe, inserta con db.insert.
+7. Quita _id y responde 201.
+```
 
-Si preguntan "por que el frontend llama a v1 en integraciones":
+Explicar `PUT`:
 
-> Porque esas rutas concretas de integracion estan implementadas bajo `/api/v1/citys-stats/integrations`. La v2 se usa como contrato CRUD principal.
+```text
+1. Lee city y country de req.params.
+2. Valida el body.
+3. Comprueba que URL y body coinciden.
+4. Busca si el recurso existe.
+5. Si no existe, responde 404.
+6. Actualiza con db.update.
+7. Vuelve a buscar y responde 200.
+```
 
-Si preguntan "por que `citys` y no `cities`":
+### Tarea 11: orden de ejecucion y asincronia
 
-> Porque `citys-stats` ya es el contrato publico del proyecto. Aunque linguisticamente `cities` seria mejor, cambiar la ruta ahora romperia tests, enlaces y documentacion.
+Arranque del servidor:
 
-Si preguntan "por que NeDB":
+```text
+1. Node lee index.js de arriba abajo.
+2. Importa Express, path, NeDB y cors.
+3. Crea app y puerto.
+4. Registra cors y express.json.
+5. Crea las bases NeDB.
+6. Importa los modulos de API.
+7. Cada modulo registra rutas.
+8. Registra proxies y frontend estatico.
+9. Ejecuta app.listen.
+10. Las rutas solo se ejecutan cuando llega una peticion.
+```
 
-> Porque encaja con una practica academica: persistencia local, documentos JSON, instalacion sencilla y sin depender de un servidor de base de datos externo.
+Frase:
 
-Si preguntan "por que no se llama directamente a APIs externas desde Svelte":
+> Declarar funciones y registrar rutas no ejecuta la logica de una peticion. El handler se ejecuta cuando llega un metodo y una URL que coinciden.
 
-> Porque el backend puede controlar errores, evitar problemas de CORS, ocultar detalles de integracion y normalizar respuestas antes de que lleguen al frontend.
+Orden de un `POST`:
 
-Si preguntan "que pasa si algo falla":
+```text
+handler POST
+-> normalizeCityStat
+-> si falla, 400
+-> db.findOne
+-> si existe, 409
+-> db.insert
+-> removeDatabaseId
+-> 201 con JSON
+```
 
-> El proyecto intenta fallar de forma controlada. En API se devuelven codigos HTTP coherentes. En integraciones se capturan fallos externos. En frontend se muestran mensajes y se evita que toda la pantalla quede rota.
+Si hay `await`:
 
-### Plan B si falla algo en directo
+> La funcion se pausa hasta que se resuelve la promesa. Node no se queda bloqueado para siempre; cuando llega el resultado continua justo despues del `await` o entra en `catch` si falla.
 
-Si Render tarda en despertar:
+### Tarea 12: marcar lineas sin cambiar numeros
 
-> Render puede dormir la aplicacion cuando lleva tiempo sin uso. Mientras arranca, puedo explicar el codigo y despues volver a la pestana.
+Si te dicen "marca esta linea con A sin cambiar la numeracion", no anadas una linea encima.
 
-Si falla una API externa:
+Correcto:
 
-> Esta es precisamente una razon para usar proxy y gestion de errores. Las integraciones dependen de servicios externos; el proyecto captura el fallo y puede seguir mostrando el resto.
+```js
+const item = normalizeCityStat(req.body); // A
+```
 
-Si la base ya tiene datos y `loadInitialData` no carga:
+Incorrecto:
 
-> El endpoint evita duplicar datos iniciales. Si la base no esta vacia, responde indicando que ya hay datos.
+```js
+// A
+const item = normalizeCityStat(req.body);
+```
 
-Si una demo de crear ciudad da conflicto:
+### Tarea 13: GitHub, local y Render sincronizados
 
-> Eso significa que ya existe el par `city + country`. La API devuelve `409`, que es el codigo correcto para conflicto de recurso.
+Antes de defender:
 
-Si preguntan algo que no recuerdas:
+```powershell
+git status --short
+```
 
-> Lo miraria desde el flujo. Primero localizo la pantalla, despues el service que llama al backend y por ultimo el endpoint de Express que resuelve la peticion.
+Frase:
 
-### Cierre recomendable
+> GitHub es la referencia entregada. Local debe coincidir para que los numeros de linea sean iguales, y Render debe estar desplegado desde esa version.
 
-> La idea importante es que no hay una pantalla aislada: hay una cadena completa. Svelte recoge una accion, el service hace `fetch`, Express valida, NeDB guarda o consulta, y el frontend transforma la respuesta en tabla, formulario, grafica, mapa o integracion. Por eso el proyecto se puede defender desde usuario, desde API y desde codigo.
+### Tarea 14: diagrama de secuencia
 
+Capas correctas para LCC:
+
+```text
+html -> Svelte script -> express -> NeDB
+```
+
+No decir MongoDB: este proyecto usa NeDB.
+
+Crear dato:
+
+```text
+html -> Svelte script:
+  submit del formulario
+
+Svelte script -> express:
+  POST /api/v2/citys-stats con JSON
+
+express -> NeDB:
+  db.findOne para comprobar duplicado
+
+NeDB -> express:
+  doc o null
+
+express -> NeDB:
+  db.insert si no existe
+
+NeDB -> express:
+  newDoc con _id interno
+
+express -> Svelte script:
+  201 con JSON creado sin _id
+
+Svelte script -> express:
+  GET /api/v2/citys-stats para refrescar
+
+express -> Svelte script:
+  200 con array JSON
+
+Svelte script -> html:
+  tabla actualizada
+```
+
+Donde viaja JSON:
+
+- En el `POST` viaja JSON hacia Express.
+- En la respuesta `201` vuelve JSON creado.
+- En el `GET` de refresco no hay body, pero la respuesta trae array JSON.
+- Entre Express y NeDB no hay HTTP; es llamada interna.
+
+### Respuestas relampago
+
+| Orden o pregunta | Respuesta |
+| --- | --- |
+| Abre el sistema desplegado | `https://sos2526-29.onrender.com/` |
+| Abre gestion de datos | `/citys-stats` |
+| Abre la grafica | `/analytics/citys-stats` |
+| Que peticion carga datos | `GET /api/v2/citys-stats` |
+| Que metodo crea | `POST` |
+| Que metodo edita | `PUT` |
+| Que metodo borra | `DELETE` |
+| Que pasa si falta un campo | `400` con `JSON body does not match expected structure` |
+| Que pasa si ya existe | `409` con `Resource already exists` |
+| Que pasa si no existe | `404` con `Resource not found` |
+| Que base usas | NeDB |
+| Donde se valida | `normalizeCityStat` y `hasExactCityFields` |
+| Donde se ve el JSON | Network: `Payload`, `Response`, `Preview` |
+
+### Simulacro de 10 minutos
+
+1. Abrir Render.
+2. Abrir `/citys-stats`.
+3. Cargar datos iniciales si hace falta.
+4. Crear `defensa-demo`, `spain`, `123456`.
+5. Abrir DevTools y localizar el `POST`.
+6. Explicar metodo, URL, payload, status y respuesta.
+7. Editar poblacion a `654321`.
+8. Localizar el `PUT`.
+9. Abrir `/analytics/citys-stats`.
+10. Localizar el `GET` de la grafica.
+11. Abrir Postman.
+12. Hacer `GET`, `POST`, `PUT`, `DELETE`.
+13. Preparar una peticion mala sin pulsar `Send`.
+14. Predecir codigo y JSON.
+15. Dibujar `html -> Svelte script -> express -> NeDB`.
 ## 24. Preguntas dificiles y respuestas
 
 ### Por que REST y no rutas tipo `/crearCiudad`
@@ -4719,4 +4740,3 @@ docs/DEFENSA_COMPLETA.md
 ```
 
 El PDF antiguo puede usarse solo como copia derivada si se regenera desde este Markdown.
-
