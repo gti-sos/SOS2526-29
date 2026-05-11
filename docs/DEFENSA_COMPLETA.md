@@ -2977,6 +2977,7 @@ loadHighcharts
   -> loadPlugin(lollipop)
   -> loadPlugin(bullet)
   -> loadPlugin(sankey)
+  -> loadPlugin(treemap) como dependencia interna de sunburst
   -> loadPlugin(sunburst)
   -> loadPlugin(accessibility)
 renderIntegrationCharts

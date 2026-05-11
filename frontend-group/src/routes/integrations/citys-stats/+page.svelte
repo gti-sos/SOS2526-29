@@ -294,6 +294,7 @@
     await loadPlugin(() => import("highcharts/modules/lollipop.js"));
     await loadPlugin(() => import("highcharts/modules/bullet.js"));
     await loadPlugin(() => import("highcharts/modules/sankey.js"));
+    await loadPlugin(() => import("highcharts/modules/treemap.js"));
     await loadPlugin(() => import("highcharts/modules/sunburst.js"));
     await loadPlugin(() => import("highcharts/modules/accessibility.js"));
 
