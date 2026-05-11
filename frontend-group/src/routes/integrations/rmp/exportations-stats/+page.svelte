@@ -1,30 +1,28 @@
 <script>
   import { onDestroy, onMount, tick } from "svelte";
 
-  // URLs de las dos APIs.
   const WINE_STATS_URL = "/api/v1/wine-stats?limit=200";
   const EXPORTATIONS_URL = "/api/proxy/exportations-stats?limit=200";
 
-  // Highcharts dinámico.
   let Highcharts;
-  let pieContainer;
-  let pieChart;
+  let vennContainer;
+  let vennChart;
 
-  // Estado.
   let loading = true;
   let error = "";
 
-  // Datos procesados.
   let crossRows = [];
-  let topSuppliers = [];
   let totalWines = 0;
   let totalExportations = 0;
 
-  // Formateadores.
+  // Conjuntos para el Venn
+  let onlyWine = 0;
+  let onlyArms = 0;
+  let both = 0;
+
   const fmtDec = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 });
   const fmtInt = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
 
-  // "spain" → "Spain".
   function titleCase(str) {
     return String(str ?? "")
       .split(/[-\s]+/)
@@ -33,13 +31,23 @@
       .join(" ");
   }
 
-  // Normaliza nombre de país para comparar (quita tildes, lowercase).
-  function norm(str) {
-    return String(str ?? "")
+  function normCountry(str) {
+    const cleaned = String(str ?? "")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
+      .replace(/[.,]/g, "")
+      .replace(/\s+/g, " ")
       .trim();
+
+    const aliases = {
+      spain: "spain",
+      espana: "spain",
+      germany: "germany",
+      alemania: "germany"
+    };
+
+    return aliases[cleaned] || cleaned;
   }
 
   async function loadHighcharts() {
@@ -47,46 +55,94 @@
     const mod = await import("highcharts");
     Highcharts = mod.default;
     window._Highcharts = Highcharts;
-    await import("highcharts/modules/accessibility.js");
+
+    // Módulo Venn (necesario)
+    const vennMod = await import("highcharts/modules/venn.js");
+    const vennFn = vennMod.default ?? vennMod;
+    if (typeof vennFn === "function") vennFn(Highcharts);
+
+    // Accesibilidad
+    const accMod = await import("highcharts/modules/accessibility.js");
+    const accFn = accMod.default ?? accMod;
+    if (typeof accFn === "function") accFn(Highcharts);
   }
 
-  function renderPie() {
-    if (!pieContainer || !Highcharts || !topSuppliers.length) return;
-    pieChart?.destroy();
-    pieChart = Highcharts.chart(pieContainer, {
-      chart: { type: "pie", backgroundColor: "transparent" },
-      title: { text: "Top proveedores de armamento por TIV total" },
-      subtitle: { text: "Fuente: SOS2526-13 exportations-stats" },
-      accessibility: {
-        enabled: true,
-        description: "Gráfico de tarta con los países que más armamento exportan según TIV total.",
-      },
-      tooltip: {
-        pointFormatter() {
-          return `<b>${this.name}</b><br/>TIV: ${fmtDec.format(this.y)}<br/>${this.percentage?.toFixed(1)} %`;
-        },
-      },
-      plotOptions: {
-        pie: {
-          allowPointSelect: true,
-          cursor: "pointer",
-          dataLabels: {
-            enabled: true,
-            format: "<b>{point.name}</b>: {point.percentage:.1f}%",
-            style: { fontSize: "11px" },
+ function renderVenn() {
+  if (!vennContainer || !Highcharts) return;
+  vennChart?.destroy();
+
+  // Valores fijos para que los dos círculos tengan el mismo tamaño visual.
+  // Solo la intersección es proporcional a `both`.
+  const BASE = 10;
+  const intersectionValue = both > 0 ? Math.max(1, Math.round((both / Math.max(onlyWine + both, onlyArms + both)) * BASE * 2)) : 1;
+
+  vennChart = Highcharts.chart(vennContainer, {
+    chart: {
+      backgroundColor: "transparent",
+      height: 400
+    },
+
+    title: {
+      text: "Países productores de vino vs. países en exportaciones de armamento",
+      align: "left",
+      style: { fontSize: "14px", color: "#1a1a1a" }
+    },
+
+    subtitle: {
+      text: "Intersección entre wine-stats (SOS2526-29) y exportations-stats (SOS2526-13)",
+      align: "left",
+      style: { fontSize: "12px", color: "#888" }
+    },
+
+    accessibility: {
+      enabled: true,
+      point: { valueDescriptionFormat: "{point.name}: {point.longDescription}." },
+      description: "Diagrama de Venn que muestra la intersección entre países productores de vino y países presentes en exportaciones de armamento."
+    },
+
+    tooltip: {
+      headerFormat:
+        '<span style="color:{point.color}">●</span> ' +
+        '<span style="font-size:14px"> {point.point.name}</span><br/>',
+      pointFormat: "{point.longDescription}"
+    },
+
+    series: [
+      {
+        type: "venn",
+        name: "Países",
+        data: [
+          {
+            sets: ["Wine Stats"],
+            value: BASE,                      // <-- fijo
+            name: `Wine Stats (${onlyWine + both})`,
+            color: "#01696f",
+            longDescription: `${onlyWine + both} países tienen vinos en wine-stats. De ellos, ${both} también aparecen en exportaciones de armamento.`
           },
-        },
-      },
-      series: [
-        {
-          name: "TIV total",
-          colorByPoint: true,
-          data: topSuppliers.map((s) => ({ name: titleCase(s.name), y: s.tiv })),
-        },
-      ],
-      credits: { enabled: false },
-    });
-  }
+          {
+            sets: ["Exportaciones"],
+            value: BASE,                      // <-- fijo, mismo tamaño
+            name: `Armamento (${onlyArms + both})`,
+            color: "#437a22",
+            longDescription: `${onlyArms + both} países aparecen en exportations-stats. De ellos, ${both} también producen vinos en nuestro catálogo.`
+          },
+          {
+            sets: ["Wine Stats", "Exportaciones"],
+            value: intersectionValue,         // <-- proporcional a `both`
+            name: `En ambos (${both})`,
+            color: "#d19900",
+            longDescription: `${both} países aparecen en ambos datasets: ${crossRows
+              .filter((r) => r.receivedTiv !== null || r.exportedTiv !== null)
+              .map((r) => titleCase(r.country))
+              .join(", ")}.`
+          }
+        ]
+      }
+    ],
+
+    credits: { enabled: false }
+  });
+}
 
   async function load() {
     loading = true;
@@ -94,7 +150,7 @@
     try {
       const [wRes, eRes] = await Promise.all([
         fetch(WINE_STATS_URL),
-        fetch(EXPORTATIONS_URL),
+        fetch(EXPORTATIONS_URL)
       ]);
       if (!wRes.ok) throw new Error(`wine-stats: ${wRes.status}`);
       if (!eRes.ok) throw new Error(`exportations-stats: ${eRes.status}`);
@@ -108,17 +164,17 @@
       totalWines = winesArr.length;
       totalExportations = expArr.length;
 
-      // Agrupar vinos por país.
+      // Agrupar vinos por país
       const wineByCountry = {};
       for (const w of winesArr) {
-        const key = norm(w.country);
+        const key = normCountry(w.country);
         if (!wineByCountry[key]) {
           wineByCountry[key] = {
             rawName: w.country,
             count: 0,
             priceSum: 0,
             abvSum: 0,
-            types: {},
+            types: {}
           };
         }
         const entry = wineByCountry[key];
@@ -128,28 +184,40 @@
         entry.types[w.type] = (entry.types[w.type] || 0) + 1;
       }
 
-      // Agrupar exportaciones por receptor y por proveedor.
+      // Agrupar exportaciones por receptor y proveedor
       const byRecipient = {};
       const bySupplier = {};
+      const armsCountries = new Set();
+
       for (const e of expArr) {
-        const rec = norm(e.recipient);
-        const sup = norm(e.supplier);
+        const rec = normCountry(e.recipient);
+        const sup = normCountry(e.supplier);
         const tiv = Number(e.tiv_total_order) || 0;
 
         if (rec) {
+          armsCountries.add(rec);
           if (!byRecipient[rec]) byRecipient[rec] = { tiv: 0, count: 0, topSup: {} };
           byRecipient[rec].tiv += tiv;
           byRecipient[rec].count++;
           byRecipient[rec].topSup[sup] = (byRecipient[rec].topSup[sup] || 0) + tiv;
         }
         if (sup) {
+          armsCountries.add(sup);
           if (!bySupplier[sup]) bySupplier[sup] = { tiv: 0, count: 0, rawName: e.supplier };
           bySupplier[sup].tiv += tiv;
           bySupplier[sup].count++;
         }
       }
 
-      // Filas cruzadas: un país por fila, datos de ambas APIs.
+      // Calcular conjuntos para el Venn
+      const wineCountries = new Set(Object.keys(wineByCountry));
+      const intersection = [...wineCountries].filter((k) => armsCountries.has(k));
+
+      both     = intersection.length;
+      onlyWine = wineCountries.size - both;
+      onlyArms = armsCountries.size - both;
+
+      // Filas cruzadas para la tabla
       crossRows = Object.entries(wineByCountry)
         .map(([key, w]) => {
           const rec = byRecipient[key] ?? null;
@@ -157,8 +225,8 @@
           const topSup = rec
             ? Object.entries(rec.topSup).sort((a, b) => b[1] - a[1])[0]?.[0]
             : null;
-          const dominantType = Object.entries(w.types)
-            .sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
+          const dominantType =
+            Object.entries(w.types).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
           return {
             country: w.rawName,
             wineCount: w.count,
@@ -169,21 +237,15 @@
             receivedCount: rec?.count ?? 0,
             topSupplier: topSup,
             exportedTiv: sup?.tiv ?? null,
-            exportedCount: sup?.count ?? 0,
+            exportedCount: sup?.count ?? 0
           };
         })
         .sort((a, b) => b.wineCount - a.wineCount);
 
-      // Top 8 proveedores para la tarta.
-      topSuppliers = Object.values(bySupplier)
-        .sort((a, b) => b.tiv - a.tiv)
-        .slice(0, 8)
-        .map((s) => ({ name: s.rawName, tiv: Math.round(s.tiv * 100) / 100 }));
-
       loading = false;
       await tick();
       await loadHighcharts();
-      renderPie();
+      renderVenn();
     } catch (e) {
       error = e.message || "No se pudo cargar la integración.";
       loading = false;
@@ -191,7 +253,7 @@
   }
 
   onMount(load);
-  onDestroy(() => pieChart?.destroy());
+  onDestroy(() => vennChart?.destroy());
 </script>
 
 <svelte:head>
@@ -212,7 +274,7 @@
     </h1>
     <p class="hero-desc">
       Cruce entre el catálogo de vinos de wine-stats y las exportaciones de armamento
-      de SOS2526‑13, con resumen y gráfico de tarta.
+      de SOS2526‑13, con diagrama de Venn y tabla cruzada.
     </p>
   </div>
 
@@ -260,25 +322,22 @@
         <span class="summary-label">exportaciones SOS2526-13</span>
       </div>
       <div class="summary-card">
-        <span class="summary-num">
-          {crossRows.length}
-        </span>
+        <span class="summary-num">{crossRows.length}</span>
         <span class="summary-label">países productores de vino</span>
       </div>
       <div class="summary-card">
-        <span class="summary-num">
-          {crossRows.filter((r) => r.receivedTiv !== null || r.exportedTiv !== null).length}
-        </span>
-        <span class="summary-label">con datos de armamento</span>
+        <span class="summary-num">{both}</span>
+        <span class="summary-label">países en ambos datasets</span>
       </div>
     </div>
 
     <section class="chart-panel">
-      <h2 class="section-title">Top proveedores de armamento</h2>
+      <h2 class="section-title">Intersección de países entre datasets</h2>
       <p class="chart-note">
-        Distribución de TIV total exportado por los principales proveedores.
+        El diagrama muestra cuántos países de wine-stats también aparecen en
+        exportations-stats como proveedores o receptores de armamento.
       </p>
-      <div bind:this={pieContainer} class="chart-frame"></div>
+      <div bind:this={vennContainer} class="chart-frame"></div>
     </section>
 
     <section>
@@ -314,10 +373,7 @@
                 <td class="td-num">
                   {#if row.receivedTiv !== null}
                     {fmtDec.format(row.receivedTiv)}
-                    <small>
-                      ({row.receivedCount}
-                      pedido{row.receivedCount !== 1 ? "s" : ""})
-                    </small>
+                    <small>({row.receivedCount} pedido{row.receivedCount !== 1 ? "s" : ""})</small>
                   {:else}
                     <span class="na">Sin datos</span>
                   {/if}
@@ -332,10 +388,7 @@
                 <td class="td-num">
                   {#if row.exportedTiv !== null}
                     {fmtDec.format(row.exportedTiv)}
-                    <small>
-                      ({row.exportedCount}
-                      pedido{row.exportedCount !== 1 ? "s" : ""})
-                    </small>
+                    <small>({row.exportedCount} pedido{row.exportedCount !== 1 ? "s" : ""})</small>
                   {:else}
                     <span class="na">Sin datos</span>
                   {/if}
@@ -368,9 +421,7 @@
   }
   .back-link:hover { color: #01696f; }
 
-  .hero {
-    margin-bottom: 2rem;
-  }
+  .hero { margin-bottom: 2rem; }
 
   .hero-badge {
     display: inline-block;
@@ -434,9 +485,8 @@
   .source-card span { color: #777; font-size: 0.82rem; }
   .source-card strong { color: #1a1a1a; font-size: 0.95rem; word-break: break-all; }
 
-  .toolbar {
-    margin-bottom: 1.5rem;
-  }
+  .toolbar { margin-bottom: 1.5rem; }
+
   button {
     min-height: 40px;
     border: 0;
@@ -476,10 +526,7 @@
     font-variant-numeric: tabular-nums;
     line-height: 1;
   }
-  .summary-label {
-    font-size: 0.8rem;
-    color: #777;
-  }
+  .summary-label { font-size: 0.8rem; color: #777; }
 
   .chart-panel {
     background: #fff;
@@ -500,9 +547,7 @@
     color: #888;
     margin-bottom: 1rem;
   }
-  .chart-frame {
-    min-height: 340px;
-  }
+  .chart-frame { min-height: 400px; }
 
   section { margin-bottom: 3rem; }
 

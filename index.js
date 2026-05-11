@@ -199,7 +199,7 @@ app.get("/api/proxy/exportations-stats", async (req, res) => {
 });
 
 // =============================================================================
-// 4. FRONTEND ESTATICO Y RUTAS DE NAVEGACION
+// 3. FRONTEND ESTATICO Y RUTAS DE NAVEGACION
 // =============================================================================
 
 app.use("/", express.static(path.join(__dirname, "public")));
