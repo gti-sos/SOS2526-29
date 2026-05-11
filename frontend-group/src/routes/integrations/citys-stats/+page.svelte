@@ -1962,6 +1962,12 @@
     color: #991b1b;
   }
 
+  .error-card p,
+  .error-card dt,
+  .error-card small {
+    color: #7f1d1d;
+  }
+
   @media (max-width: 960px) {
     .country-card-grid,
     .split-grid,

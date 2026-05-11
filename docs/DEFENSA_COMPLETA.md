@@ -12,33 +12,33 @@ Fuente actualizada para estudiar y modificar: este Markdown. Si se quiere una co
 
 ## Indice
 
-- [1. Resumen ejecutivo](#1-resumen-ejecutivo) - pag. 2
-- [2. Problema, objetivos y publico](#2-problema-objetivos-y-publico) - pag. 3
-- [3. Equipo y recursos](#3-equipo-y-recursos) - pag. 3
-- [4. Stack tecnologico](#4-stack-tecnologico) - pag. 4
-- [5. Arquitectura general](#5-arquitectura-general) - pag. 5
-- [6. Estructura real de carpetas](#6-estructura-real-de-carpetas) - pag. 6
-- [7. Instalacion, configuracion y ejecucion](#7-instalacion-configuracion-y-ejecucion) - pags. 7-8
-- [8. Scripts, tests y validaciones](#8-scripts-tests-y-validaciones) - pag. 9
-- [9. Rutas utiles para abrir](#9-rutas-utiles-para-abrir) - pag. 10
-- [10. Modelo de datos](#10-modelo-de-datos) - pag. 11
-- [11. Backend: arranque y responsabilidades](#11-backend-arranque-y-responsabilidades) - pags. 11-12
-- [12. APIs REST del proyecto](#12-apis-rest-del-proyecto) - pags. 13-14
-- [13. Frontend: rutas, servicios y pantallas](#13-frontend-rutas-servicios-y-pantallas) - pag. 15
-- [14. Parte LCC: `citys-stats`](#14-parte-lcc-citys-stats) - pags. 16-18
-- [15. Integraciones LCC](#15-integraciones-lcc) - pags. 19-21
-- [16. Funciones importantes explicadas](#16-funciones-importantes-explicadas) - pags. 22-48
-- [17. Flujos de ejecucion](#17-flujos-de-ejecucion) - pags. 49-62
-- [18. Codigos HTTP y contrato REST](#18-codigos-http-y-contrato-rest) - pags. 63-66
-- [19. Cambios que pueden pedir en directo](#19-cambios-que-pueden-pedir-en-directo) - pags. 67-71
-- [20. Errores comunes y soluciones](#20-errores-comunes-y-soluciones) - pags. 72-74
-- [21. Decisiones tecnicas](#21-decisiones-tecnicas) - pag. 75
-- [22. Limitaciones y mejoras futuras](#22-limitaciones-y-mejoras-futuras) - pag. 76
-- [23. Guion de defensa oral](#23-guion-de-defensa-oral) - pags. 77-89
-- [24. Preguntas dificiles y respuestas](#24-preguntas-dificiles-y-respuestas) - pags. 90-91
-- [25. Glosario para personas no tecnicas](#25-glosario-para-personas-no-tecnicas) - pag. 92
-- [26. Checklists finales](#26-checklists-finales) - pag. 93
-- [27. Anexos tecnicos](#27-anexos-tecnicos) - pags. 94-95
+- [1. Resumen ejecutivo](#1-resumen-ejecutivo)
+- [2. Problema, objetivos y publico](#2-problema-objetivos-y-publico)
+- [3. Equipo y recursos](#3-equipo-y-recursos)
+- [4. Stack tecnologico](#4-stack-tecnologico)
+- [5. Arquitectura general](#5-arquitectura-general)
+- [6. Estructura real de carpetas](#6-estructura-real-de-carpetas)
+- [7. Instalacion, configuracion y ejecucion](#7-instalacion-configuracion-y-ejecucion)
+- [8. Scripts, tests y validaciones](#8-scripts-tests-y-validaciones)
+- [9. Rutas utiles para abrir](#9-rutas-utiles-para-abrir)
+- [10. Modelo de datos](#10-modelo-de-datos)
+- [11. Backend: arranque y responsabilidades](#11-backend-arranque-y-responsabilidades)
+- [12. APIs REST del proyecto](#12-apis-rest-del-proyecto)
+- [13. Frontend: rutas, servicios y pantallas](#13-frontend-rutas-servicios-y-pantallas)
+- [14. Parte LCC: `citys-stats`](#14-parte-lcc-citys-stats)
+- [15. Integraciones LCC](#15-integraciones-lcc)
+- [16. Funciones importantes explicadas](#16-funciones-importantes-explicadas)
+- [17. Flujos de ejecucion](#17-flujos-de-ejecucion)
+- [18. Codigos HTTP y contrato REST](#18-codigos-http-y-contrato-rest)
+- [19. Cambios que pueden pedir en directo](#19-cambios-que-pueden-pedir-en-directo)
+- [20. Errores comunes y soluciones](#20-errores-comunes-y-soluciones)
+- [21. Decisiones tecnicas](#21-decisiones-tecnicas)
+- [22. Limitaciones y mejoras futuras](#22-limitaciones-y-mejoras-futuras)
+- [23. Guion de defensa practica](#23-guion-de-defensa-practica)
+- [24. Preguntas dificiles y respuestas](#24-preguntas-dificiles-y-respuestas)
+- [25. Glosario para personas no tecnicas](#25-glosario-para-personas-no-tecnicas)
+- [26. Checklists finales](#26-checklists-finales)
+- [27. Anexos tecnicos](#27-anexos-tecnicos)
 
 Ruta de lectura recomendada para defender LCC `citys-stats`:
 
@@ -46,7 +46,7 @@ Ruta de lectura recomendada para defender LCC `citys-stats`:
 2. Despues lee las secciones 10 a 15 para centrarte en el modelo, API, frontend e integraciones de `citys-stats`.
 3. Estudia muy bien la seccion 16: ahi esta el codigo de funciones, como explicarlas y como modificarlas.
 4. Usa las secciones 17 a 20 para responder flujos, codigos HTTP, cambios en directo y errores.
-5. Termina con las secciones 23, 24 y 26 para practicar guion oral, preguntas dificiles y checklist final.
+5. Termina con las secciones 23, 24 y 26 para practicar la defensa practica, preguntas dificiles y checklist final.
 
 ## 1. Resumen ejecutivo
 
@@ -3947,9 +3947,9 @@ Comprobaciones externas no verificables desde el codigo:
 
 Estos puntos no se pueden confirmar mirando solo el repositorio local, asi que no deben presentarse como errores del proyecto ni como funcionalidades pendientes del codigo.
 
-## 23. Guion de defensa oral
+## 23. Guion de defensa practica
 
-Esta seccion esta reescrita para la defensa real: no es un discurso de 10 minutos. Es un guion de actuacion para cuando el profesor te pida tareas concretas delante del sistema, Chrome DevTools, Postman y el codigo.
+Esta seccion esta reescrita para la defensa real: no es un discurso cerrado. Es un guion de actuacion para cuando el profesor te pida tareas concretas delante del sistema, Chrome DevTools, Postman y el codigo.
 
 Regla de oro:
 
@@ -4036,14 +4036,25 @@ Si dicen:
 ```text
 Entra en la interfaz de gestion de tus datos.
 Abre la parte donde se muestran los datos.
+Abre la grafica donde aparecen tus datos.
 Ensename la pantalla donde puedes gestionar tus datos.
 ```
 
-Abres:
+Si piden gestionar, crear, editar o borrar, abres:
 
 ```text
 /citys-stats
 ```
+
+Si piden literalmente la grafica, abres:
+
+```text
+/analytics/citys-stats
+```
+
+Y dices:
+
+> La grafica no se edita directamente. La uso para identificar el dato; para cambiarlo voy a `/citys-stats`, edito el registro y luego vuelvo a la grafica para comprobar que se ha actualizado.
 
 Frase:
 
@@ -4079,7 +4090,7 @@ Haces:
 
 1. Ir a `/citys-stats`.
 2. Si no hay datos, pulsar `Cargar datos de ejemplo`.
-3. Buscar el registro.
+3. Buscar el registro por ciudad o pais.
 4. Pulsar `Editar`.
 5. Cambiar `Poblacion estimada en 2025`.
 6. Pulsar `Guardar cambios`.
@@ -4089,6 +4100,12 @@ Haces:
 Frase mientras lo haces:
 
 > Lo cambio desde la interfaz, no desde el codigo ni desde la base de datos. La pantalla de edicion llama al service y el service hace una peticion `PUT` al backend.
+
+Donde tocas literalmente:
+
+```text
+/citys-stats -> boton Editar -> campo "Poblacion estimada en 2025" -> Guardar cambios
+```
 
 Flujo si solo cambia la poblacion:
 
@@ -4206,6 +4223,12 @@ Base URL:
 https://sos2526-29.onrender.com
 ```
 
+Si lo haces en local:
+
+```text
+http://localhost:10000
+```
+
 Header para `POST` y `PUT`:
 
 ```text
@@ -4236,7 +4259,9 @@ Peticiones:
 
 Si piden `PATCH`:
 
-> Mi CRUD no implementa `PATCH`. Implementa `GET`, `POST`, `PUT` y `DELETE`.
+> Mi CRUD no implementa `PATCH`. Implementa `GET`, `POST`, `PUT` y `DELETE`. Si haces `PATCH /api/v2/citys-stats/defensa-demo/spain`, Express no encontrara una ruta `PATCH` y respondera `404` con la respuesta por defecto, no con un JSON propio de mi API.
+
+Para que el `POST` sea predecible, usa una ciudad que no exista o borra antes `defensa-demo`. Si ya existe, el resultado correcto no es `201`, sino `409`.
 
 ### Tarea 8: predecir respuesta sin pulsar Send
 
@@ -4259,6 +4284,7 @@ Tabla que debes memorizar:
 | `PUT /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
 | `DELETE /api/v2/citys-stats/tokyo/japan` | Existe | `204` | Sin cuerpo |
 | `DELETE /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
+| `PATCH /api/v2/citys-stats/tokyo/japan` | Metodo no implementado | `404` | Respuesta por defecto de Express |
 
 Campos exactos validos:
 
@@ -4269,6 +4295,12 @@ un_2025_population
 ```
 
 La poblacion debe ser entero mayor que cero.
+
+Si preguntan por un campo `year`:
+
+> En mi recurso LCC `citys-stats` no existe campo `year`. Mis campos son `city`, `country` y `un_2025_population`. La validacion equivalente a "valor invalido" es que `un_2025_population` no sea entero mayor que cero.
+
+Si el JSON esta roto de sintaxis, por ejemplo falta una llave, puede fallar antes de entrar al endpoint, en `express.json()`. Eso tambien es `400`, pero no lo genera `normalizeCityStat`.
 
 Frase para escribir:
 
@@ -4353,6 +4385,10 @@ Explicar `PUT`:
 6. Actualiza con db.update.
 7. Vuelve a buscar y responde 200.
 ```
+
+Si falla NeDB:
+
+> En las rutas CRUD, si la base de datos devuelve error, el backend responde `500`. Ese codigo significa error interno del servidor, no error de la peticion del cliente.
 
 ### Tarea 11: orden de ejecucion y asincronia
 
@@ -4472,6 +4508,79 @@ Donde viaja JSON:
 - En el `GET` de refresco no hay body, pero la respuesta trae array JSON.
 - Entre Express y NeDB no hay HTTP; es llamada interna.
 
+Editar dato:
+
+```text
+html -> Svelte script:
+  submit de guardar cambios
+
+Svelte script -> express:
+  PUT /api/v2/citys-stats/:city/:country con JSON
+
+express -> NeDB:
+  db.findOne para comprobar existencia
+
+express -> NeDB:
+  db.update para actualizar
+
+express -> NeDB:
+  db.findOne para leer el actualizado
+
+express -> Svelte script:
+  200 con JSON actualizado
+
+Svelte script -> html:
+  mensaje de exito y formulario actualizado
+```
+
+Borrar dato:
+
+```text
+html -> Svelte script:
+  click en Eliminar
+
+Svelte script -> express:
+  DELETE /api/v2/citys-stats/:city/:country sin body
+
+express -> NeDB:
+  db.remove
+
+NeDB -> express:
+  numRemoved
+
+express -> Svelte script:
+  204 sin cuerpo si se borro
+  404 con JSON si no existia
+
+Svelte script -> express:
+  GET /api/v2/citys-stats para refrescar
+
+express -> Svelte script:
+  200 con array JSON
+```
+
+Cargar grafica:
+
+```text
+html -> Svelte script:
+  se abre /analytics/citys-stats
+
+Svelte script -> express:
+  GET /api/v2/citys-stats?sort=-un_2025_population
+
+express -> NeDB:
+  db.find({})
+
+NeDB -> express:
+  documentos
+
+express -> Svelte script:
+  200 con array JSON
+
+Svelte script -> html:
+  Highcharts pinta la grafica
+```
+
 ### Respuestas relampago
 
 | Orden o pregunta | Respuesta |
@@ -4490,7 +4599,7 @@ Donde viaja JSON:
 | Donde se valida | `normalizeCityStat` y `hasExactCityFields` |
 | Donde se ve el JSON | Network: `Payload`, `Response`, `Preview` |
 
-### Simulacro de 10 minutos
+### Simulacro practico cronometrado
 
 1. Abrir Render.
 2. Abrir `/citys-stats`.
@@ -4507,6 +4616,7 @@ Donde viaja JSON:
 13. Preparar una peticion mala sin pulsar `Send`.
 14. Predecir codigo y JSON.
 15. Dibujar `html -> Svelte script -> express -> NeDB`.
+
 ## 24. Preguntas dificiles y respuestas
 
 ### Por que REST y no rutas tipo `/crearCiudad`
