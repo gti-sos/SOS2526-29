@@ -104,25 +104,25 @@
       name: "SOS2526-25",
       detail: "Tourist arrivals",
       proxy: "/api/v1/citys-stats/integrations/sos-tourist-arrivals",
-      url: "https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals/docs"
+      url: "https://sos2526-25.onrender.com/international-tourist-arrivals"
     },
     {
       name: "SOS2526-19",
       detail: "Earthquakes",
       proxy: "/api/v1/citys-stats/integrations/sos-earthquakes",
-      url: "https://sos2526-19.onrender.com/api/v1/earthquakes/docs"
+      url: "https://sos2526-19.onrender.com/earthquakes"
     },
     {
       name: "SOS2526-26",
       detail: "FIFA squad values",
       proxy: "/api/v1/citys-stats/integrations/sos-fifa-squad-values",
-      url: "https://documenter.getpostman.com/view/52260149/2sBXinGW4o"
+      url: "https://sos2526-26.onrender.com/front-rfr"
     },
     {
       name: "SOS2526-30",
       detail: "Esports earnings",
       proxy: "/api/v1/citys-stats/integrations/sos-esports-earnings",
-      url: "https://documenter.getpostman.com/view/52332561/2sBXijJWy6"
+      url: "https://sos2526-30.onrender.com/esportsearnings-stats"
     }
   ];
 
@@ -291,9 +291,7 @@
       if (typeof plugin === "function") plugin(Highcharts);
     }
 
-    await loadPlugin(() => import("highcharts/modules/dumbbell.js"));
     await loadPlugin(() => import("highcharts/modules/lollipop.js"));
-    await loadPlugin(() => import("highcharts/modules/variwide.js"));
     await loadPlugin(() => import("highcharts/modules/bullet.js"));
     await loadPlugin(() => import("highcharts/modules/sankey.js"));
     await loadPlugin(() => import("highcharts/modules/treemap.js"));
@@ -601,53 +599,53 @@
     });
   }
 
-  // Widget 4: variwide de turismo externo frente a poblacion local.
+  // Widget 4: packed bubble de turismo externo frente a poblacion local.
   function renderTourismChart() {
     const chartRows = combinedCountryRows(touristCountries, "totalArrivals");
 
     createChart(tourismChartContainer, {
       chart: {
-        type: "variwide"
+        type: "packedbubble"
       },
       title: {
         text: "SOS2526-25: llegadas turisticas",
         align: "left"
       },
       subtitle: {
-        text: "Widget variwide: altura por llegadas y anchura por poblacion citys-stats",
+        text: "Widget packedbubble: tamano por llegadas y contexto citys-stats",
         align: "left"
       },
       accessibility: {
         enabled: true,
         description:
-          "Grafico variwide con llegadas turisticas por pais y anchura proporcional al numero de registros desde SOS2526-25."
-      },
-      xAxis: {
-        type: "category",
-        title: { text: "Pais" }
-      },
-      yAxis: {
-        min: 0,
-        title: { text: "Llegadas totales" },
-        labels: {
-          formatter() {
-            return compactFormatter.format(this.value);
-          }
-        }
+          "Grafico packed bubble con llegadas turisticas por pais desde SOS2526-25 y poblacion local de referencia desde citys-stats."
       },
       tooltip: {
         pointFormatter() {
-          return `<strong>${this.name}</strong><br/>Llegadas SOS2526-25: ${displayNumber(this.y)}<br/>Poblacion citys-stats: ${displayNumber(this.options.custom.localPopulation)}<br/>Base local: ${this.options.custom.localLabel}<br/>Registros turismo: ${this.options.custom.records}<br/>Ultimo anio: ${this.options.custom.latestYear ?? "N/D"}`;
+          const arrivals = this.value ?? this.y;
+          return `<strong>${this.name}</strong><br/>Llegadas SOS2526-25: ${displayNumber(arrivals)}<br/>Poblacion citys-stats: ${displayNumber(this.options.custom.localPopulation)}<br/>Base local: ${this.options.custom.localLabel}<br/>Registros turismo: ${this.options.custom.records}<br/>Ultimo anio: ${this.options.custom.latestYear ?? "N/D"}`;
         }
       },
       plotOptions: {
-        variwide: {
-          borderRadius: 5,
-          color: "#db2777",
+        packedbubble: {
+          minSize: "18%",
+          maxSize: "58%",
+          layoutAlgorithm: {
+            splitSeries: false,
+            gravitationalConstant: 0.035
+          },
           dataLabels: {
             enabled: true,
-            formatter() {
-              return compactFormatter.format(this.y);
+            format: "{point.name}",
+            style: {
+              color: "#0f172a",
+              fontWeight: "800",
+              textOutline: "none"
+            },
+            filter: {
+              property: "value",
+              operator: ">",
+              value: 0
             }
           }
         }
@@ -655,10 +653,10 @@
       series: [
         {
           name: "Llegadas",
+          color: "#db2777",
           data: chartRows.map((match) => ({
             name: titleCase(match.external.country),
-            y: Number(match.external.totalArrivals ?? 0),
-            z: Math.max(Math.sqrt(localPopulationFor(match)), 1),
+            value: Number(match.external.totalArrivals ?? 0),
             custom: {
               latestYear: match.external.latestYear,
               records: match.external.records,
@@ -744,7 +742,7 @@
     });
   }
 
-  // Widget 6: dumbbell que compara ranking local con ranking de valor FIFA.
+  // Widget 6: column pyramid que compara ranking local con ranking de valor FIFA.
   function renderFifaChart() {
     const chartRows = fifaCountries
       .filter((country) => numberOrNull(country.latestTotalMarketValue) !== null)
@@ -758,28 +756,46 @@
       ...localRanks.map((country) => Number(country.un_2025_population ?? 0)),
       1
     );
+    const comparisonRows = chartRows.map((country, index) => {
+      const local = localRanks[index] ?? countrySummaries[index % Math.max(countrySummaries.length, 1)];
+      const squadSize = Number(country.latestSquadSize ?? country.squadSize ?? 0);
+      const totalValue = Number(country.latestTotalMarketValue ?? 0);
+      const localPopulation = Number(local?.un_2025_population ?? 0);
+      const localIndex = normalizedIndex(localPopulation, maxLocalPopulation);
+      const fifaIndex = normalizedIndex(totalValue, maxFifaValue);
+
+      return {
+        latestYear: country.latestYear,
+        squadSize,
+        totalValue,
+        localPopulation,
+        localCountry: titleCase(local?.country),
+        fifaCountry: titleCase(country.country),
+        localIndex,
+        fifaIndex
+      };
+    });
 
     createChart(fifaChartContainer, {
       chart: {
-        type: "dumbbell",
-        inverted: true
+        type: "columnpyramid"
       },
       title: {
         text: "SOS2526-26: valor de plantillas FIFA",
         align: "left"
       },
       subtitle: {
-        text: "Widget dumbbell: ranking citys-stats frente a ranking FIFA",
+        text: "Widget columnpyramid: indices normalizados citys-stats y FIFA",
         align: "left"
       },
       accessibility: {
         enabled: true,
         description:
-          "Grafico dumbbell que compara por posicion de ranking la poblacion agregada de citys-stats con el valor de plantilla de selecciones desde SOS2526-26."
+          "Grafico column pyramid que compara por pais el indice de poblacion agregada de citys-stats con el indice de valor de plantilla desde SOS2526-26."
       },
       xAxis: {
-        categories: chartRows.map((_, index) => `Top ${index + 1}`),
-        title: { text: "Pais" }
+        categories: comparisonRows.map((row) => row.fifaCountry),
+        title: { text: "Pais FIFA" }
       },
       yAxis: {
         min: 0,
@@ -791,46 +807,38 @@
       },
       tooltip: {
         pointFormatter() {
-          return `<strong>${this.category}</strong><br/>citys-stats: ${this.options.custom.localCountry} (${displayNumber(this.options.custom.localPopulation)})<br/>Indice local: ${displayDecimal(this.options.custom.localIndex)}%<br/>FIFA: ${this.options.custom.fifaCountry} (${displayCompact(this.options.custom.totalValue)})<br/>Indice FIFA: ${displayDecimal(this.options.custom.fifaIndex)}%<br/>Plantilla: ${displayNumber(this.options.custom.squadSize)} jugadores<br/>Anio: ${this.options.custom.latestYear ?? "N/D"}`;
+          return `<strong>${this.category}</strong><br/>Serie: ${this.series.name}: ${displayDecimal(this.y)}%<br/>citys-stats: ${this.options.custom.localCountry} (${displayNumber(this.options.custom.localPopulation)})<br/>Indice local: ${displayDecimal(this.options.custom.localIndex)}%<br/>FIFA: ${this.options.custom.fifaCountry} (${displayCompact(this.options.custom.totalValue)})<br/>Indice FIFA: ${displayDecimal(this.options.custom.fifaIndex)}%<br/>Plantilla: ${displayNumber(this.options.custom.squadSize)} jugadores<br/>Anio: ${this.options.custom.latestYear ?? "N/D"}`;
         }
       },
       plotOptions: {
-        dumbbell: {
-          color: "#0891b2",
-          lowColor: "#0f766e",
-          connectorWidth: 2,
+        columnpyramid: {
+          groupPadding: 0.12,
+          pointPadding: 0.08,
           dataLabels: {
-            enabled: false
+            enabled: true,
+            format: "{point.y:.0f}%"
           }
         }
       },
+      legend: {
+        enabled: true
+      },
       series: [
         {
-          name: "citys-stats / FIFA",
-          data: chartRows.map((country, index) => {
-            const local = localRanks[index] ?? countrySummaries[index % Math.max(countrySummaries.length, 1)];
-            const squadSize = Number(country.latestSquadSize ?? country.squadSize ?? 0);
-            const totalValue = Number(country.latestTotalMarketValue ?? 0);
-            const localPopulation = Number(local?.un_2025_population ?? 0);
-            const localIndex = normalizedIndex(localPopulation, maxLocalPopulation);
-            const fifaIndex = normalizedIndex(totalValue, maxFifaValue);
-
-            return {
-              name: `Top ${index + 1}`,
-              low: Math.min(localIndex, fifaIndex),
-              high: Math.max(localIndex, fifaIndex),
-              custom: {
-                latestYear: country.latestYear,
-                squadSize,
-                totalValue,
-                localPopulation,
-                localCountry: titleCase(local?.country),
-                fifaCountry: titleCase(country.country),
-                localIndex,
-                fifaIndex
-              }
-            };
-          })
+          name: "Indice citys-stats",
+          color: "#0f766e",
+          data: comparisonRows.map((row) => ({
+            y: row.localIndex,
+            custom: row
+          }))
+        },
+        {
+          name: "Indice FIFA",
+          color: "#0891b2",
+          data: comparisonRows.map((row) => ({
+            y: row.fifaIndex,
+            custom: row
+          }))
         }
       ]
     });
@@ -1118,10 +1126,17 @@
 
   <section class="source-grid" aria-label="APIs usadas">
     {#each sourceCards as source}
-      <a class="source-card" href={source.url} target="_blank" rel="noreferrer">
+      <a
+        class="source-card"
+        href={source.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Abrir ${source.name}: ${source.url}`}
+        title={source.url}
+      >
         <span>{source.detail}</span>
         <strong>{source.name}</strong>
-        <small>{source.proxy}</small>
+        <small>{source.url}</small>
       </a>
     {/each}
   </section>
