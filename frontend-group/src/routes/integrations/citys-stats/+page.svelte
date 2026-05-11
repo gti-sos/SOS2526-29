@@ -243,6 +243,26 @@
     }));
   }
 
+  // Mantiene mas filas externas aunque no todas coincidan con citys-stats.
+  function contextualCountryRows(rows, metric, limit = 8) {
+    const localPopulation = localAveragePopulation();
+
+    return (Array.isArray(rows) ? rows : [])
+      .filter((row) => numberOrNull(row?.[metric]) !== null)
+      .sort((a, b) => Number(b[metric] ?? 0) - Number(a[metric] ?? 0))
+      .slice(0, limit)
+      .map((external) => {
+        const local = findLocalCountry(external.country);
+
+        return {
+          external,
+          local,
+          localPopulation: numberOrNull(local?.un_2025_population) ?? localPopulation,
+          localLabel: local ? "Pais en citys-stats" : "Media citys-stats"
+        };
+      });
+  }
+
   // Convierte un valor a una escala visual, evitando ceros que desaparezcan.
   function normalizedIndex(value, max, scale = 100) {
     const parsed = numberOrNull(value);
@@ -295,6 +315,7 @@
     await loadPlugin(() => import("highcharts/modules/lollipop.js"));
     await loadPlugin(() => import("highcharts/modules/bullet.js"));
     await loadPlugin(() => import("highcharts/modules/sankey.js"));
+    await loadPlugin(() => import("highcharts/modules/heatmap.js"));
     await loadPlugin(() => import("highcharts/modules/treemap.js"));
     await loadPlugin(() => import("highcharts/modules/sunburst.js"));
     await loadPlugin(() => import("highcharts/modules/accessibility.js"));
@@ -325,7 +346,7 @@
     }));
   }
 
-  // Widget 1: burbujas de ciudades con coordenadas de Open-Meteo.
+  // Widget 1: treemap de ciudades con coordenadas de Open-Meteo.
   function renderGeocodingChart() {
     const chartRows = geocodingRows
       .filter((row) =>
@@ -348,9 +369,7 @@
 
         return {
           name: titleCase(row.topCity),
-          x: longitude,
-          y: latitude,
-          z: Math.max(localPopulation, 1),
+          value: Math.max(localPopulation, 1),
           color,
           custom: {
             country: titleCase(row.country),
@@ -366,10 +385,7 @@
 
     createChart(geocodingChartContainer, {
       chart: {
-        type: "bubble",
-        zooming: {
-          type: "xy"
-        },
+        type: "treemap",
         spacing: [8, 8, 8, 8]
       },
       title: {
@@ -377,33 +393,13 @@
         align: "left"
       },
       subtitle: {
-        text: "Widget bubble: posicion por coordenadas Open-Meteo y tamano por citys-stats",
+        text: "Widget treemap: area por citys-stats y color por latitud Open-Meteo",
         align: "left"
       },
       accessibility: {
         enabled: true,
         description:
-          "Grafico de burbujas donde la posicion usa longitud y latitud de Open-Meteo y el tamano representa la poblacion de citys-stats."
-      },
-      xAxis: {
-        min: -180,
-        max: 180,
-        gridLineWidth: 1,
-        title: {
-          text: "Longitud Open-Meteo"
-        }
-      },
-      yAxis: {
-        min: -60,
-        max: 80,
-        startOnTick: false,
-        endOnTick: false,
-        title: {
-          text: "Latitud Open-Meteo"
-        }
-      },
-      legend: {
-        enabled: false
+          "Treemap donde el area de cada rectangulo usa poblacion de citys-stats y el color agrupa la latitud obtenida desde Open-Meteo."
       },
       tooltip: {
         pointFormatter() {
@@ -411,22 +407,17 @@
         }
       },
       plotOptions: {
-        bubble: {
-          minSize: "6%",
-          maxSize: "24%",
-          sizeBy: "area",
-          marker: {
-            lineColor: "#ffffff",
-            lineWidth: 1.5,
-            fillOpacity: 0.76
-          },
+        treemap: {
+          layoutAlgorithm: "squarified",
+          borderColor: "#ffffff",
+          borderWidth: 3,
           dataLabels: {
             enabled: true,
             format: "{point.name}",
             style: {
-              color: "#111827",
+              color: "#ffffff",
               fontWeight: "800",
-              textOutline: "0 1px 2px rgba(255,255,255,0.75)"
+              textOutline: "0 1px 2px rgba(15,23,42,0.65)"
             }
           }
         }
@@ -632,65 +623,81 @@
     });
   }
 
-  // Widget 4: packed bubble de turismo externo frente a poblacion local.
+  // Widget 4: ranking de turismo externo frente a poblacion local.
   function renderTourismChart() {
-    const chartRows = combinedCountryRows(touristCountries, "totalArrivals");
+    const chartRows = contextualCountryRows(touristCountries, "totalArrivals", 8);
+    const arrivalsMax = Math.max(...chartRows.map((match) => Number(match.external.totalArrivals ?? 0)), 1);
+    const localMax = Math.max(...chartRows.map((match) => localPopulationFor(match)), 1);
 
     createChart(tourismChartContainer, {
       chart: {
-        type: "packedbubble"
+        type: "bar"
       },
       title: {
         text: "SOS2526-25: llegadas turisticas",
         align: "left"
       },
       subtitle: {
-        text: "Widget packedbubble: tamano por llegadas y contexto citys-stats",
+        text: "Widget bar: ranking de llegadas y referencia citys-stats normalizada",
         align: "left"
       },
       accessibility: {
         enabled: true,
         description:
-          "Grafico packed bubble con llegadas turisticas por pais desde SOS2526-25 y poblacion local de referencia desde citys-stats."
+          "Grafico de barras que compara el indice de llegadas turisticas de SOS2526-25 con una referencia normalizada de poblacion citys-stats."
+      },
+      xAxis: {
+        categories: chartRows.map((match) => titleCase(match.external.country)),
+        title: { text: "Pais" }
+      },
+      yAxis: {
+        min: 0,
+        max: 100,
+        title: { text: "Indice normalizado" }
       },
       tooltip: {
         pointFormatter() {
-          const arrivals = this.value ?? this.y;
-          return `<strong>${this.name}</strong><br/>Llegadas SOS2526-25: ${displayNumber(arrivals)}<br/>Poblacion citys-stats: ${displayNumber(this.options.custom.localPopulation)}<br/>Base local: ${this.options.custom.localLabel}<br/>Registros turismo: ${this.options.custom.records}<br/>Ultimo anio: ${this.options.custom.latestYear ?? "N/D"}`;
+          return `<strong>${this.category}</strong><br/>Serie: ${this.series.name}: ${displayDecimal(this.y)}%<br/>Llegadas SOS2526-25: ${displayNumber(this.options.custom.arrivals)}<br/>Poblacion citys-stats: ${displayNumber(this.options.custom.localPopulation)}<br/>Base local: ${this.options.custom.localLabel}<br/>Registros turismo: ${this.options.custom.records}<br/>Ultimo anio: ${this.options.custom.latestYear ?? "N/D"}`;
         }
       },
       plotOptions: {
-        packedbubble: {
-          minSize: "18%",
-          maxSize: "58%",
-          layoutAlgorithm: {
-            splitSeries: false,
-            gravitationalConstant: 0.035
-          },
+        bar: {
+          borderRadius: 4,
+          pointPadding: 0.12,
+          groupPadding: 0.08,
           dataLabels: {
             enabled: true,
-            format: "{point.name}",
+            format: "{point.y:.0f}%",
             style: {
               color: "#0f172a",
               fontWeight: "800",
               textOutline: "none"
-            },
-            filter: {
-              property: "value",
-              operator: ">",
-              value: 0
             }
           }
         }
       },
       series: [
         {
-          name: "Llegadas",
+          name: "Indice llegadas turisticas",
           color: "#db2777",
           data: chartRows.map((match) => ({
-            name: titleCase(match.external.country),
-            value: Number(match.external.totalArrivals ?? 0),
+            y: normalizedIndex(match.external.totalArrivals, arrivalsMax),
             custom: {
+              arrivals: match.external.totalArrivals,
+              latestYear: match.external.latestYear,
+              records: match.external.records,
+              localPopulation: localPopulationFor(match),
+              localLabel: match.localLabel
+            }
+          }))
+        },
+        {
+          name: "Indice poblacion citys-stats",
+          color: "#0f766e",
+          data: chartRows.map((match) => ({
+            y: normalizedIndex(localPopulationFor(match), localMax),
+            custom: {
+              arrivals: match.external.totalArrivals,
               latestYear: match.external.latestYear,
               records: match.external.records,
               localPopulation: localPopulationFor(match),
@@ -1106,7 +1113,7 @@
       collectError(errors, "SOS2526-26 FIFA", fifaResult);
       collectError(errors, "SOS2526-30 eSports", esportsResult);
 
-      touristCountries = topCountries(tourismResult.data, "totalArrivals");
+      touristCountries = topCountries(tourismResult.data, "totalArrivals", 8);
       earthquakeCountries = topCountries(earthquakeResult.data, "maxSeverity");
       fifaCountries = topCountries(fifaResult.data, "latestTotalMarketValue");
       esportsCountries = topCountries(esportsResult.data, "topCountryEarnings");

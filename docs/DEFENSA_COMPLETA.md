@@ -940,10 +940,10 @@ Frase de defensa:
 
 | API | Tipo | Fuente | Endpoint proxy local | Widget |
 | --- | --- | --- | --- | --- |
-| Open-Meteo Geocoding | No SOS | `https://geocoding-api.open-meteo.com/v1/search` | `/api/v1/citys-stats/integrations/geocoding/:city` | `bubble` |
+| Open-Meteo Geocoding | No SOS | `https://geocoding-api.open-meteo.com/v1/search` | `/api/v1/citys-stats/integrations/geocoding/:city` | `treemap` |
 | REST Countries | No SOS | `https://restcountries.com/v3.1/name/:country` | `/api/v1/citys-stats/integrations/country/:country` | `sankey` |
 | World Bank Indicators | No SOS | `https://api.worldbank.org/v2/country/:code/indicator/SP.POP.TOTL` | `/api/v1/citys-stats/integrations/world-bank/:countryCode` | `lollipop` |
-| SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals` | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` | `packedbubble` |
+| SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals` | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` | `bar` |
 | SOS2526-19 `earthquakes` | Alumno SOS | `https://sos2526-19.onrender.com/api/v1/earthquakes` | `/api/v1/citys-stats/integrations/sos-earthquakes` | `bullet` |
 | SOS2526-26 `fifa-squad-value-per-years` | Alumno SOS | `https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years` | `/api/v1/citys-stats/integrations/sos-fifa-squad-values` | `columnpyramid` |
 | SOS2526-30 `esportsearnings-stats` | Alumno SOS | `https://sos2526-30.onrender.com/api/v1/esportsearnings-stats` | `/api/v1/citys-stats/integrations/sos-esports-earnings` | `sunburst` |
@@ -2973,12 +2973,13 @@ tick
 loadHighcharts
   -> import("highcharts")
   -> import("highcharts/highcharts-more.js")
-  -> highcharts-more registra packedbubble y columnpyramid
+  -> highcharts-more registra columnpyramid y series avanzadas
   -> loadPlugin(dumbbell) como dependencia interna de lollipop
   -> loadPlugin(lollipop)
   -> loadPlugin(bullet)
   -> loadPlugin(sankey)
-  -> loadPlugin(treemap) como dependencia interna de sunburst
+  -> loadPlugin(heatmap) como dependencia interna de treemap
+  -> loadPlugin(treemap) para integracion 1 y como dependencia de sunburst
   -> loadPlugin(sunburst)
   -> loadPlugin(accessibility)
 renderIntegrationCharts
