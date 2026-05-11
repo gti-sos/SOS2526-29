@@ -294,7 +294,6 @@
     await loadPlugin(() => import("highcharts/modules/lollipop.js"));
     await loadPlugin(() => import("highcharts/modules/bullet.js"));
     await loadPlugin(() => import("highcharts/modules/sankey.js"));
-    await loadPlugin(() => import("highcharts/modules/treemap.js"));
     await loadPlugin(() => import("highcharts/modules/sunburst.js"));
     await loadPlugin(() => import("highcharts/modules/accessibility.js"));
 
@@ -324,7 +323,7 @@
     }));
   }
 
-  // Widget 1: treemap de ciudades con coordenadas de Open-Meteo.
+  // Widget 1: burbujas de ciudades con coordenadas de Open-Meteo.
   function renderGeocodingChart() {
     const chartRows = geocodingRows
       .filter((row) =>
@@ -333,6 +332,8 @@
       )
       .map((row) => {
         const latitude = Number(row.geocoding.latitude);
+        const longitude = Number(row.geocoding.longitude);
+        const localPopulation = Number(row.topCityPopulation ?? row.un_2025_population ?? 1);
         const color = latitude < 0
           ? "#0284c7"
           : latitude < 20
@@ -345,14 +346,16 @@
 
         return {
           name: titleCase(row.topCity),
-          value: Math.max(Number(row.topCityPopulation ?? row.un_2025_population ?? 1), 1),
+          x: longitude,
+          y: latitude,
+          z: Math.max(localPopulation, 1),
           color,
           custom: {
             country: titleCase(row.country),
             lat: latitude,
-            lon: Number(row.geocoding.longitude),
+            lon: longitude,
             externalPopulation: row.geocoding.population,
-            localPopulation: row.topCityPopulation ?? row.un_2025_population,
+            localPopulation,
             timezone: row.geocoding.timezone,
             elevation: row.geocoding.elevation
           }
@@ -361,7 +364,10 @@
 
     createChart(geocodingChartContainer, {
       chart: {
-        type: "treemap",
+        type: "bubble",
+        zooming: {
+          type: "xy"
+        },
         spacing: [8, 8, 8, 8]
       },
       title: {
@@ -369,13 +375,33 @@
         align: "left"
       },
       subtitle: {
-        text: "Widget treemap: area por citys-stats y color por latitud Open-Meteo",
+        text: "Widget bubble: posicion por coordenadas Open-Meteo y tamano por citys-stats",
         align: "left"
       },
       accessibility: {
         enabled: true,
         description:
-          "Treemap donde el area de cada rectangulo usa poblacion de citys-stats y el color agrupa la latitud obtenida desde Open-Meteo."
+          "Grafico de burbujas donde la posicion usa longitud y latitud de Open-Meteo y el tamano representa la poblacion de citys-stats."
+      },
+      xAxis: {
+        min: -180,
+        max: 180,
+        gridLineWidth: 1,
+        title: {
+          text: "Longitud Open-Meteo"
+        }
+      },
+      yAxis: {
+        min: -60,
+        max: 80,
+        startOnTick: false,
+        endOnTick: false,
+        title: {
+          text: "Latitud Open-Meteo"
+        }
+      },
+      legend: {
+        enabled: false
       },
       tooltip: {
         pointFormatter() {
@@ -383,17 +409,22 @@
         }
       },
       plotOptions: {
-        treemap: {
-          layoutAlgorithm: "squarified",
-          borderColor: "#ffffff",
-          borderWidth: 3,
+        bubble: {
+          minSize: "6%",
+          maxSize: "24%",
+          sizeBy: "area",
+          marker: {
+            lineColor: "#ffffff",
+            lineWidth: 1.5,
+            fillOpacity: 0.76
+          },
           dataLabels: {
             enabled: true,
             format: "{point.name}",
             style: {
-              color: "#ffffff",
+              color: "#111827",
               fontWeight: "800",
-              textOutline: "0 1px 2px rgba(15,23,42,0.65)"
+              textOutline: "0 1px 2px rgba(255,255,255,0.75)"
             }
           }
         }

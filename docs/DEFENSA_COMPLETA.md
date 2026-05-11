@@ -940,7 +940,7 @@ Frase de defensa:
 
 | API | Tipo | Fuente | Endpoint proxy local | Widget |
 | --- | --- | --- | --- | --- |
-| Open-Meteo Geocoding | No SOS | `https://geocoding-api.open-meteo.com/v1/search` | `/api/v1/citys-stats/integrations/geocoding/:city` | `treemap` |
+| Open-Meteo Geocoding | No SOS | `https://geocoding-api.open-meteo.com/v1/search` | `/api/v1/citys-stats/integrations/geocoding/:city` | `bubble` |
 | REST Countries | No SOS | `https://restcountries.com/v3.1/name/:country` | `/api/v1/citys-stats/integrations/country/:country` | `sankey` |
 | World Bank Indicators | No SOS | `https://api.worldbank.org/v2/country/:code/indicator/SP.POP.TOTL` | `/api/v1/citys-stats/integrations/world-bank/:countryCode` | `lollipop` |
 | SOS2526-25 `international-tourist-arrivals` | Alumno SOS | `https://sos2526-25.onrender.com/api/v2/international-tourist-arrivals` | `/api/v1/citys-stats/integrations/sos-tourist-arrivals` | `packedbubble` |
@@ -2977,7 +2977,6 @@ loadHighcharts
   -> loadPlugin(lollipop)
   -> loadPlugin(bullet)
   -> loadPlugin(sankey)
-  -> loadPlugin(treemap)
   -> loadPlugin(sunburst)
   -> loadPlugin(accessibility)
 renderIntegrationCharts
