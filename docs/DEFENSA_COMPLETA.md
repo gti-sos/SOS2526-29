@@ -2974,6 +2974,7 @@ loadHighcharts
   -> import("highcharts")
   -> import("highcharts/highcharts-more.js")
   -> highcharts-more registra packedbubble y columnpyramid
+  -> loadPlugin(dumbbell) como dependencia interna de lollipop
   -> loadPlugin(lollipop)
   -> loadPlugin(bullet)
   -> loadPlugin(sankey)

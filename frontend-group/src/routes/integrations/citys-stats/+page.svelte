@@ -291,6 +291,7 @@
       if (typeof plugin === "function") plugin(Highcharts);
     }
 
+    await loadPlugin(() => import("highcharts/modules/dumbbell.js"));
     await loadPlugin(() => import("highcharts/modules/lollipop.js"));
     await loadPlugin(() => import("highcharts/modules/bullet.js"));
     await loadPlugin(() => import("highcharts/modules/sankey.js"));
