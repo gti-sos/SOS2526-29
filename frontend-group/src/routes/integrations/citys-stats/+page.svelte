@@ -126,6 +126,72 @@
     }
   ];
 
+  const integrationDescriptions = {
+    openMeteo: {
+      summary:
+        "Parte de los paises agregados de citys-stats. Para cada pais se toma la ciudad local con mas poblacion, se consulta Open-Meteo con esa ciudad y el proxy devuelve coordenadas, zona horaria, altitud y poblacion externa.",
+      points: [
+        { label: "Union", value: "topCity + country de citys-stats" },
+        { label: "API externa", value: "Open-Meteo Geocoding" },
+        { label: "Grafica", value: "Tamano por poblacion local y color por latitud externa" }
+      ]
+    },
+    restCountries: {
+      summary:
+        "Cruza cada pais local con REST Countries usando el campo country. La API externa aporta datos oficiales del pais completo, mientras citys-stats aporta la suma de poblacion de las ciudades que tenemos guardadas para ese pais.",
+      points: [
+        { label: "Union", value: "country normalizado" },
+        { label: "API externa", value: "REST Countries" },
+        { label: "Grafica", value: "Flujo citys-stats -> pais -> REST Countries con escala logaritmica" }
+      ]
+    },
+    worldBank: {
+      summary:
+        "Primero REST Countries da el codigo ISO3 del pais. Con ese codigo se consulta World Bank para traer el indicador SP.POP.TOTL, que representa la poblacion nacional mas reciente disponible.",
+      points: [
+        { label: "Union", value: "country -> codigo ISO3 cca3" },
+        { label: "API externa", value: "World Bank Indicators" },
+        { label: "Grafica", value: "Compara poblacion local agregada con poblacion nacional World Bank" }
+      ]
+    },
+    tourism: {
+      summary:
+        "Descarga llegadas turisticas de SOS2526-25, normaliza las filas y las agrupa por pais. Luego intenta encontrar ese pais en citys-stats; si no hay coincidencia exacta, usa la media local como referencia.",
+      points: [
+        { label: "Union", value: "country normalizado; si falla, media citys-stats" },
+        { label: "API externa", value: "SOS2526-25 international-tourist-arrivals" },
+        { label: "Grafica", value: "Indices 0-100 para comparar turismo y poblacion local sin mezclar unidades" }
+      ]
+    },
+    earthquakes: {
+      summary:
+        "Toma los terremotos de SOS2526-19, convierte codigos ISO3 a pais cuando hace falta y agrupa por pais. Para cada pais conserva la severidad maxima, numero de eventos, poblacion expuesta y fecha mas reciente.",
+      points: [
+        { label: "Union", value: "country normalizado o ISO3 convertido a pais" },
+        { label: "API externa", value: "SOS2526-19 earthquakes" },
+        { label: "Grafica", value: "Barra de severidad externa con marca de referencia de poblacion local" }
+      ]
+    },
+    fifa: {
+      summary:
+        "Agrupa los datos FIFA por pais y se queda con el valor de plantilla del ultimo anio disponible. Como no siempre coinciden los mismos paises que citys-stats, la grafica compara rankings normalizados: ranking FIFA frente a ranking local de poblacion.",
+      points: [
+        { label: "Union", value: "ranking externo frente a ranking local" },
+        { label: "API externa", value: "SOS2526-26 fifa-squad-value-per-years" },
+        { label: "Grafica", value: "Dos indices 0-100: valor FIFA y poblacion citys-stats" }
+      ]
+    },
+    esports: {
+      summary:
+        "Agrupa premios de eSports de SOS2526-30 por pais y busca coincidencia con citys-stats. El sunburst muestra dos ramas por pais: una rama local de poblacion y otra rama externa del juego con premios destacados.",
+      points: [
+        { label: "Union", value: "country normalizado; si falla, media citys-stats" },
+        { label: "API externa", value: "SOS2526-30 esportsearnings-stats" },
+        { label: "Grafica", value: "Ramas por pais que separan poblacion local y premios eSports" }
+      ]
+    }
+  };
+
   // Convierte textos de API a una forma legible para titulos y etiquetas.
   function titleCase(value) {
     return String(value ?? "")
@@ -1181,6 +1247,16 @@
     {/each}
   </section>
 
+  <section class="integration-flow" aria-label="Como se leen las integraciones">
+    <strong>Como leer estas graficas</strong>
+    <p>
+      Todas parten de citys-stats: el backend agrupa nuestras ciudades por pais,
+      consulta APIs externas mediante proxies propios y normaliza nombres y numeros.
+      Cuando las unidades no son comparables directamente, la grafica usa indices
+      normalizados para ensenar relacion, no una suma literal de datos distintos.
+    </p>
+  </section>
+
   {#if loading}
     <p class="state" role="status">Cargando integraciones...</p>
   {:else if error}
@@ -1212,6 +1288,17 @@
       <div class="section-heading">
         <span>Integracion 1</span>
         <h2 id="open-meteo-title">Open-Meteo: geocoding de la ciudad principal</h2>
+      </div>
+      <div class="integration-explainer">
+        <p>{integrationDescriptions.openMeteo.summary}</p>
+        <dl>
+          {#each integrationDescriptions.openMeteo.points as point}
+            <div>
+              <dt>{point.label}</dt>
+              <dd>{point.value}</dd>
+            </div>
+          {/each}
+        </dl>
       </div>
       <div class="chart-frame" bind:this={geocodingChartContainer}></div>
       <div class="table-wrapper">
@@ -1255,6 +1342,17 @@
         <span>Integracion 2</span>
         <h2 id="rest-countries-title">REST Countries: ficha nacional</h2>
       </div>
+      <div class="integration-explainer">
+        <p>{integrationDescriptions.restCountries.summary}</p>
+        <dl>
+          {#each integrationDescriptions.restCountries.points as point}
+            <div>
+              <dt>{point.label}</dt>
+              <dd>{point.value}</dd>
+            </div>
+          {/each}
+        </dl>
+      </div>
       <div class="chart-frame" bind:this={countryChartContainer}></div>
       <div class="country-card-grid">
         {#each countryCards as row}
@@ -1296,6 +1394,17 @@
         <span>Integracion 3</span>
         <h2 id="world-bank-title">World Bank: indicador de poblacion</h2>
       </div>
+      <div class="integration-explainer">
+        <p>{integrationDescriptions.worldBank.summary}</p>
+        <dl>
+          {#each integrationDescriptions.worldBank.points as point}
+            <div>
+              <dt>{point.label}</dt>
+              <dd>{point.value}</dd>
+            </div>
+          {/each}
+        </dl>
+      </div>
       <div class="chart-frame" bind:this={worldBankChartContainer}></div>
     </section>
 
@@ -1304,6 +1413,17 @@
         <div class="section-heading">
           <span>Integracion 4</span>
           <h2 id="tourism-title">SOS2526-25: llegadas turisticas</h2>
+        </div>
+        <div class="integration-explainer">
+          <p>{integrationDescriptions.tourism.summary}</p>
+          <dl>
+            {#each integrationDescriptions.tourism.points as point}
+              <div>
+                <dt>{point.label}</dt>
+                <dd>{point.value}</dd>
+              </div>
+            {/each}
+          </dl>
         </div>
         <div class="chart-frame" bind:this={tourismChartContainer}></div>
         <div class="summary-list">
@@ -1325,6 +1445,17 @@
           <span>Integracion 5</span>
           <h2 id="earthquakes-title">SOS2526-19: severidad de terremotos</h2>
         </div>
+        <div class="integration-explainer">
+          <p>{integrationDescriptions.earthquakes.summary}</p>
+          <dl>
+            {#each integrationDescriptions.earthquakes.points as point}
+              <div>
+                <dt>{point.label}</dt>
+                <dd>{point.value}</dd>
+              </div>
+            {/each}
+          </dl>
+        </div>
         <div class="chart-frame" bind:this={earthquakeChartContainer}></div>
         <div class="summary-list">
           {#each earthquakeCountries as country, index}
@@ -1345,6 +1476,17 @@
           <span>Integracion 6</span>
           <h2 id="fifa-title">SOS2526-26: valor de plantillas FIFA</h2>
         </div>
+        <div class="integration-explainer">
+          <p>{integrationDescriptions.fifa.summary}</p>
+          <dl>
+            {#each integrationDescriptions.fifa.points as point}
+              <div>
+                <dt>{point.label}</dt>
+                <dd>{point.value}</dd>
+              </div>
+            {/each}
+          </dl>
+        </div>
         <div class="chart-frame" bind:this={fifaChartContainer}></div>
         <div class="kpi-grid">
           {#each fifaCountries as country}
@@ -1361,6 +1503,17 @@
         <div class="section-heading">
           <span>Integracion 7</span>
           <h2 id="esports-title">SOS2526-30: premios eSports</h2>
+        </div>
+        <div class="integration-explainer">
+          <p>{integrationDescriptions.esports.summary}</p>
+          <dl>
+            {#each integrationDescriptions.esports.points as point}
+              <div>
+                <dt>{point.label}</dt>
+                <dd>{point.value}</dd>
+              </div>
+            {/each}
+          </dl>
         </div>
         <div class="chart-frame" bind:this={esportsChartContainer}></div>
         <div class="prize-board">
@@ -1526,6 +1679,26 @@
     overflow-wrap: anywhere;
   }
 
+  .integration-flow {
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    background: #f0f9ff;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .integration-flow strong {
+    display: block;
+    color: #0f172a;
+    font-size: 1rem;
+  }
+
+  .integration-flow p {
+    margin-top: 6px;
+    color: #475569;
+    line-height: 1.55;
+  }
+
   .panel {
     padding: 20px;
     margin-top: 16px;
@@ -1535,6 +1708,45 @@
     display: grid;
     gap: 4px;
     margin-bottom: 16px;
+  }
+
+  .integration-explainer {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 14px;
+    margin: -2px 0 16px;
+  }
+
+  .integration-explainer p {
+    color: #475569;
+    line-height: 1.55;
+  }
+
+  .integration-explainer dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .integration-explainer dl > div {
+    min-width: 0;
+    border-left: 3px solid #0f766e;
+    padding-left: 10px;
+  }
+
+  .integration-explainer dt {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .integration-explainer dd {
+    margin-top: 3px;
+    color: #0f172a;
+    font-weight: 800;
+    overflow-wrap: anywhere;
   }
 
   .table-wrapper {
@@ -1763,6 +1975,10 @@
     .page-header {
       align-items: stretch;
       flex-direction: column;
+    }
+
+    .integration-explainer dl {
+      grid-template-columns: 1fr;
     }
 
     .toolbar {
