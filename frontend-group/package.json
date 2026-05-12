@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@highcharts/map-collection": "^2.3.2",
+    "echarts": "^6.0.0",
     "highcharts": "^12.6.0",
     "svelte-spa-router": "^5.0.0"
   }

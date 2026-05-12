@@ -78,8 +78,8 @@
 
 <style>
     .page { max-width: 1000px; margin: 0 auto; padding: 24px; color: #f5f7fb; }
-    h1 { font-size: 2rem; margin-bottom: 5px; color: #f5f7fb; }
-    p { margin-bottom: 24px; color: #9ca3af; }
+    h1 { font-size: 2rem; margin-bottom: 5px; color: #000000; }
+    p { margin-bottom: 24px; color: #434e63; }
     .chart-container { width: 100%; height: 500px; background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; margin-top: 20px;}
     .btn-back { background: #374151; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-bottom: 20px; font-weight: bold; }
     .mensaje { padding: 12px 16px; background: #374151; border-radius: 8px; text-align: center; }
