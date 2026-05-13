@@ -18,6 +18,7 @@
     "start": "node index.js",
     "build": "cd frontend-group && npm run build",
     "dev-front": "cd frontend-group && npm run dev -- --open",
+    "build-defense-pdf": "node scripts/generate-defense-pdf.cjs",
     "test-natural-disasters": "newman run ./tests/ALG/pruebas-alg.json -e ./tests/ALG/local_env.json",
     "test-citys-stats": "newman run ./tests/LCC/pruebas-lcc.json -e ./tests/LCC/local_env.json",
     "test-citys-stats-v2": "newman run ./tests/LCC/pruebas-lcc-v2.json -e ./tests/LCC/local_env_v2.json",
