@@ -69,8 +69,14 @@ module.exports = (app, db) => {
     const ESPORTS_EARNINGS_API_URL =
         "https://sos2526-30.onrender.com/api/v1/esportsearnings-stats";
 
+    // Cache corto para respuestas de APIs externas.
+    // No cachea NeDB ni los datos propios: solo evita repetir llamadas externas
+    // cuando la pantalla de integraciones se recarga varias veces seguidas.
     const EXTERNAL_CACHE_TTL_MS = 5 * 60 * 1000;
 
+    // externalJsonCache guarda respuestas ya completadas.
+    // externalJsonPendingRequests guarda promesas en curso para deduplicar
+    // dos peticiones iguales que lleguen al mismo tiempo.
     const externalJsonCache = new Map();
     const externalJsonPendingRequests = new Map();
 
@@ -444,6 +450,8 @@ module.exports = (app, db) => {
     // - errores HTTP
     // - respuestas que no son JSON
     // - timeout para que la petición no se quede colgada
+    // - cache de 5 minutos para no saturar APIs externas
+    // - deduplicacion de peticiones simultaneas iguales
     async function fetchJson(url, sourceName, timeoutMs = 20000) {
         const cacheKey = `${sourceName}:${url}`;
         const cached = readTimedCache(externalJsonCache, cacheKey);

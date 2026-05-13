@@ -523,12 +523,108 @@ function buildHtml(markdown) {
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
+  .toc-ranges {
+    margin: 8pt 0 12pt;
+  }
+
+  .toc-ranges table {
+    font-size: 8.1pt;
+  }
+
+  .toc-ranges td:first-child {
+    width: 12%;
+    color: var(--blue-700);
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .toc-ranges td:nth-child(3) {
+    width: 22%;
+    color: var(--green-700);
+    font-weight: 800;
+    text-align: right;
+    white-space: nowrap;
+  }
 </style>
 </head>
 <body>
 ${markdownToHtml(markdown)}
 </body>
 </html>`;
+}
+
+async function updateIndexWithPageRanges(page) {
+  // El indice del Markdown no conoce las paginas finales.
+  // Esta pasada ya renderizada calcula pagina inicial/final de cada h2 y lo
+  // sustituye por una tabla navegable con rangos reales.
+  return page.evaluate(({ pageHeight }) => {
+    function pageOf(element) {
+      return Math.floor((element.getBoundingClientRect().top + window.scrollY) / pageHeight) + 1;
+    }
+
+    const headings = Array.from(document.querySelectorAll("h2"))
+      .filter((heading) => heading.id !== "indice")
+      .map((heading) => ({
+        id: heading.id,
+        title: heading.textContent.trim(),
+        page: pageOf(heading)
+      }));
+
+    const totalPages = Math.ceil(document.documentElement.scrollHeight / pageHeight);
+    const ranges = headings.map((heading, index) => {
+      const next = headings[index + 1];
+      const end = Math.max(heading.page, next ? next.page - 1 : totalPages);
+      return { ...heading, end };
+    });
+
+    const indexHeading = document.querySelector("h2#indice");
+    if (!indexHeading) {
+      return ranges;
+    }
+
+    const previousToc = indexHeading.nextElementSibling;
+    if (previousToc?.classList.contains("toc-ranges")) {
+      previousToc.remove();
+    } else if (previousToc?.tagName === "UL") {
+      previousToc.remove();
+    }
+
+    const container = document.createElement("div");
+    container.className = "toc-ranges table-wrap";
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Seccion</th>
+            <th>Contenido</th>
+            <th>Paginas</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ranges
+            .map((range) => {
+              const match = range.title.match(/^(\\d+)\\.\\s*(.*)$/);
+              const section = match ? match[1] : "";
+              const title = match ? match[2] : range.title;
+              const pages =
+                range.page === range.end ? `p. ${range.page}` : `pp. ${range.page}-${range.end}`;
+              return `
+                <tr>
+                  <td>${section}</td>
+                  <td><a href="#${range.id}">${title}</a></td>
+                  <td>${pages}</td>
+                </tr>
+              `;
+            })
+            .join("")}
+        </tbody>
+      </table>
+    `;
+
+    indexHeading.after(container);
+    return ranges;
+  }, { pageHeight: PRINTABLE_HEIGHT_PX });
 }
 
 async function applySmartPageBreaks(page) {
@@ -677,6 +773,38 @@ async function countAwkwardSplits(page) {
   }, { pageHeight: PRINTABLE_HEIGHT_PX });
 }
 
+async function paginateAndIndex(page) {
+  // El indice cambia la altura del documento, y los saltos tambien.
+  // Por eso repetimos unas pocas pasadas hasta que los rangos se estabilizan.
+  let insertedBreaks = 0;
+  let ranges = [];
+  let previousKey = "";
+
+  for (let pass = 0; pass < 5; pass += 1) {
+    await page.evaluate(() => {
+      document.querySelectorAll(".smart-page-break").forEach((element) => element.remove());
+    });
+
+    insertedBreaks = await applySmartPageBreaks(page);
+    ranges = await updateIndexWithPageRanges(page);
+
+    const key = JSON.stringify(ranges.map((range) => [range.id, range.page, range.end]));
+    if (key === previousKey) {
+      break;
+    }
+
+    previousKey = key;
+  }
+
+  await page.evaluate(() => {
+    document.querySelectorAll(".smart-page-break").forEach((element) => element.remove());
+  });
+  insertedBreaks = await applySmartPageBreaks(page);
+  ranges = await updateIndexWithPageRanges(page);
+
+  return { insertedBreaks, ranges };
+}
+
 (async () => {
   const markdown = fs.readFileSync(MARKDOWN_PATH, "utf8");
   const html = buildHtml(markdown);
@@ -690,7 +818,7 @@ async function countAwkwardSplits(page) {
   });
 
   await page.setContent(html, { waitUntil: "load" });
-  const insertedBreaks = await applySmartPageBreaks(page);
+  const { insertedBreaks, ranges } = await paginateAndIndex(page);
   const awkwardSplits = await countAwkwardSplits(page);
   await page.pdf({
     path: PDF_PATH,
@@ -704,7 +832,7 @@ async function countAwkwardSplits(page) {
     `,
     footerTemplate: `
       <div style="width:100%;padding:0 11mm;font-family:Segoe UI,Arial,sans-serif;font-size:7.4px;color:#617084;display:flex;justify-content:space-between;">
-        <span>citys-stats · SOS2526-29</span>
+        <span>citys-stats - SOS2526-29</span>
         <span><span class="pageNumber"></span> / <span class="totalPages"></span></span>
       </div>
     `,
@@ -721,6 +849,7 @@ async function countAwkwardSplits(page) {
   const pages = countPdfPages(PDF_PATH);
   console.log(`PDF regenerated: ${PDF_PATH}`);
   console.log(`Pages: ${pages}`);
+  console.log(`Indexed sections: ${ranges.length}`);
   console.log(`Smart page breaks inserted: ${insertedBreaks}`);
   console.log(`Remaining awkward splits: ${awkwardSplits}`);
 })();
