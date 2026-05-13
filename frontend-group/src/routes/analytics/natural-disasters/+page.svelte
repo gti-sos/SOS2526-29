@@ -33,8 +33,8 @@
             if (chartContainer) {
                 Highcharts.chart(chartContainer, {
                     chart: { 
-                        type: 'scatter', // 👈 ¡CAMBIO PRINCIPAL: Gráfico de dispersión!
-                        zoomType: 'xy',  // 👈 Extra: Permite hacer zoom arrastrando el ratón (muy útil en scatter)
+                        type: 'scatter', //  Gráfico de dispersión
+                        zoomType: 'xy',  //  Extra: Permite hacer zoom arrastrando el ratón 
                         backgroundColor: 'transparent' 
                     },
                     title: { text: 'Impacto Total de Desastres Naturales', style: { color: '#f5f7fb' } },
@@ -45,7 +45,7 @@
                     ],
                     tooltip: { shared: true },
                     plotOptions: { 
-                        scatter: { // 👈 Cambiamos "area" por "scatter" en las opciones
+                        scatter: { 
                             marker: { 
                                 radius: 6, // Hacemos los puntos un poco más grandes para que se vean bien
                                 symbol: 'circle', // Forma del punto
