@@ -65,7 +65,7 @@
       title: "Comidas",
       description: "Relacion entre el porcentaje de alcohol en los vinos y el tipo de vino.",
       tipo: "INTEGRACION",
-      proxy:true,
+      proxy:false,
       icon: "🍷",
       color: "#5e2129",
       url: "/integrations/rmp/food"
