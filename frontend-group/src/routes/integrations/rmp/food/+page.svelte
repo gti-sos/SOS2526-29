@@ -1,57 +1,56 @@
 <script>
   import { onDestroy, onMount, tick } from "svelte";
 
-  // ── Configuración ──────────────────────────────────────────────────────────
+
+
+  const USDA_API_KEY = import.meta.env.VITE_USDA_API_KEY;
+
   const WINE_STATS_URL = "/api/v1/wine-stats?limit=200";
-  const USDA_API_KEY   = "DEMO_KEY";
   const USDA_SEARCH    = "https://api.nal.usda.gov/fdc/v1/foods/search";
 
-  // Mapeo tipo de vino → query de búsqueda en USDA
   const TYPE_TO_USDA_QUERY = {
     Red:       "red wine",
     White:     "white wine",
     "Rosé":    "rose wine",
-    Sparkling: "sparkling wine"
   };
 
-  // Colores para el gráfico
   const TYPE_COLOR = {
-    Red:       "rgb(220, 160, 160)",
-    White:     "rgb(240, 220, 140)",
-    "Rosé":    "rgb(240, 180, 210)",
-    Sparkling: "rgb(160, 200, 240)"
+    Red:       "#DC6060",
+    White:     "#D4A843",
+    "Rosé":    "#D45FA0",
   };
 
-  // ── Estado ─────────────────────────────────────────────────────────────────
+  // ── Caché en memoria ──────────────────────────────────────────────────────
+  // Persiste mientras el componente esté vivo (no se pierde al pulsar Actualizar)
+  // Se limpia solo si se recarga la pestaña o se navega fuera
+  let cachedUSDA = null; // { timestamp, results[] }
+  const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hora
+
+  function isCacheValid() {
+    return cachedUSDA && (Date.now() - cachedUSDA.timestamp) < CACHE_TTL_MS;
+  }
+
   let loading     = true;
   let error       = "";
   let loadingStep = 0;
+  let fromCache   = false;
 
   let totalWines   = 0;
   let crossRows    = [];
   let matchedTypes = 0;
 
-  // ── Highcharts ─────────────────────────────────────────────────────────────
-  let Highcharts;
-  let vennContainer;
-  let vennChart;
+  let chartContainer;
+  let chartInstance;
 
-  // ── Formateadores ──────────────────────────────────────────────────────────
   const fmtDec = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 });
   const fmtInt = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
 
-  // ── Utilidades ─────────────────────────────────────────────────────────────
   const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
   function norm(str) {
-    return String(str ?? "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
+    return String(str ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
   }
 
-  // Agrupa los nutrientes relevantes de un alimento USDA
   function extractNutrients(food) {
     const nutrients = {};
     for (const n of food.foodNutrients ?? []) {
@@ -63,140 +62,137 @@
     return nutrients;
   }
 
-  // Cuenta cuántos productos tienen cada categoría USDA (brandOwner como agrupador)
   function countBrands(foods) {
     const counts = {};
     for (const f of foods) {
       const brand = f.brandOwner || "Sin marca";
       counts[brand] = (counts[brand] || 0) + 1;
     }
-    // Devolver top 5
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([brand, count]) => ({ brand, count }));
   }
 
-  // ── Highcharts: carga dinámica ─────────────────────────────────────────────
-  async function loadHighcharts() {
-    if (Highcharts) return;
-    const mod = await import("highcharts");
-    Highcharts = mod.default;
+  // ── ECharts ───────────────────────────────────────────────────────────────
+  async function renderChart() {
+    if (!chartContainer || !crossRows.length) return;
 
-    const vennMod = await import("highcharts/modules/venn.js");
-    const vennFn = vennMod.default ?? vennMod;
-    if (typeof vennFn === "function") vennFn(Highcharts);
+    const echarts = await import("echarts");
+    chartInstance?.dispose();
+    chartInstance = echarts.init(chartContainer, null, { renderer: "svg" });
 
-    const accMod = await import("highcharts/modules/accessibility.js");
-    const accFn = accMod.default ?? accMod;
-    if (typeof accFn === "function") accFn(Highcharts);
-  }
+    const totalUSDA  = crossRows.reduce((s, r) => s + r.usdaCount, 0);
+    const totalLocal = crossRows.reduce((s, r) => s + r.wineCount, 0);
 
-  // ── Highcharts: construcción de datos ──────────────────────────────────────
-  function buildVennData() {
-    const data = [];
+    const outerData = crossRows.map(r => ({
+      name:      `${r.type} (USDA)`,
+      value:     r.usdaCount,
+      itemStyle: { color: TYPE_COLOR[r.type] ?? "#aaa" }
+    }));
 
-    for (const row of crossRows) {
-      data.push({
-        sets: [row.type],
-        value: Math.max(3, Math.round(row.usdaCount / 5)),
-        name: `${row.type} wine`,
-        color: TYPE_COLOR[row.type] ?? "rgb(200,200,200)",
-        dataLabels: { style: { fontSize: "13px" } },
-        customDesc:
-          `${fmtInt.format(row.usdaCount)} productos en USDA · ` +
-          `${row.wineCount} vinos propios · ` +
-          `precio medio £${fmtDec.format(row.avgPrice)} · ` +
-          `ABV medio ${fmtDec.format(row.avgAbv)} %`
-      });
-    }
+    const innerData = crossRows.map(r => ({
+      name:      `${r.type} (wine-stats)`,
+      value:     r.wineCount,
+      itemStyle: { color: TYPE_COLOR[r.type] ?? "#aaa", opacity: 0.45 }
+    }));
 
-    for (let i = 0; i < crossRows.length; i++) {
-      for (let j = i + 1; j < crossRows.length; j++) {
-        const a = crossRows[i];
-        const b = crossRows[j];
-        const abvDiff = Math.abs(a.avgAbv - b.avgAbv);
-
-        if (abvDiff < 2) {
-          data.push({
-            sets: [a.type, b.type],
-            value: Math.max(0.5, 2 - abvDiff),
-            name: `ABV similar (~${fmtDec.format((a.avgAbv + b.avgAbv) / 2)} %)`,
-            color: "rgb(200, 210, 200)"
-          });
-        }
-      }
-    }
-
-    return data;
-  }
-
-  // ── Highcharts: renderizado ────────────────────────────────────────────────
-  function renderVenn() {
-    if (!vennContainer || !Highcharts || !crossRows.length) return;
-    vennChart?.destroy();
-
-    vennChart = Highcharts.chart(vennContainer, {
-      chart: { backgroundColor: "transparent", height: 500 },
+    chartInstance.setOption({
+      backgroundColor: "transparent",
 
       title: {
-        text: "Relaciones entre tipos de vino: wine-stats vs. USDA FoodData Central",
-        align: "left",
-        style: { fontSize: "14px", color: "#1a1a1a" }
+        text: "% de tipos de vino: wine-stats vs. hits USDA FDC",
+        subtext: "Anillo exterior = hits USDA · Anillo interior = vinos propios",
+        left: "center", top: 12,
+        textStyle:    { fontSize: 14, color: "#1a1a1a", fontWeight: 700 },
+        subtextStyle: { fontSize: 11, color: "#888" }
       },
 
-      subtitle: {
-        text: "Tamaño proporcional a productos en USDA · Intersecciones = ABV similar",
-        align: "left",
-        style: { fontSize: "11px", color: "#888" }
+      legend: {
+        bottom: 10, left: "center",
+        data: crossRows.map(r => r.type),
+        formatter: (name) => {
+          const r = crossRows.find(x => x.type === name);
+          if (!r) return name;
+          const pctUSDA  = totalUSDA  ? ((r.usdaCount / totalUSDA)  * 100).toFixed(1) : 0;
+          const pctLocal = totalLocal ? ((r.wineCount  / totalLocal) * 100).toFixed(1) : 0;
+          return `{bold|${name}}  USDA ${pctUSDA}%  /  propios ${pctLocal}%`;
+        },
+        textStyle: {
+          color: "#555", fontSize: 12,
+          rich: { bold: { fontWeight: 700, color: "#1a1a1a" } }
+        }
       },
 
       tooltip: {
-        headerFormat: "",
-        pointFormat:
-          "{#if (eq 1 point.sets.length)}" +
-            "<b>{point.name}</b><br/>{point.customDesc}" +
-          "{else}" +
-            "Tipos: {#each point.sets}<b>{this}</b>{#unless @last} y {/unless}{/each}" +
-            "<br/><br/><b>{point.name}</b>" +
-          "{/if}"
+        trigger: "item",
+        formatter: (params) => {
+          const type = params.name.replace(/ \(.*\)$/, "");
+          const ring = params.name.includes("USDA") ? "USDA FDC" : "wine-stats";
+          const r    = crossRows.find(x => x.type === type);
+          if (!r) return params.name;
+          return [
+            `<b style="color:${TYPE_COLOR[type] ?? '#333'}">${type}</b> · ${ring}`,
+            `<b>${fmtInt.format(params.value)}</b> productos (${params.percent?.toFixed(1) ?? "—"}%)`,
+            ring === "USDA FDC"
+              ? `<span style="color:#888;font-size:11px">wine-stats: ${r.wineCount} vinos · £${fmtDec.format(r.avgPrice)} · ABV ${fmtDec.format(r.avgAbv)}%</span>`
+              : `<span style="color:#888;font-size:11px">USDA hits: ${fmtInt.format(r.usdaCount)}</span>`
+          ].join("<br/>");
+        }
       },
 
-      series: [{
-        type: "venn",
-        dataLabels: { style: { color: "#1a1a1a" } },
-        data: buildVennData()
-      }],
+      series: [
+        {
+          name: "USDA FDC", type: "pie",
+          radius: ["52%", "72%"], center: ["50%", "50%"],
+          avoidLabelOverlap: true,
+          label: {
+            show: true, position: "outside",
+            formatter: (p) => {
+              const type = p.name.replace(/ \(.*\)$/, "");
+              return `{bold|${type}}\n${p.percent?.toFixed(1)}%`;
+            },
+            rich: { bold: { fontWeight: 700, fontSize: 12, color: "#1a1a1a" } },
+            fontSize: 11, color: "#555"
+          },
+          labelLine: { length: 12, length2: 8 },
+          emphasis: { scale: true, scaleSize: 8, itemStyle: { shadowBlur: 16, shadowColor: "rgba(0,0,0,0.2)" } },
+          data: outerData
+        },
+        {
+          name: "wine-stats", type: "pie",
+          radius: ["28%", "48%"], center: ["50%", "50%"],
+          avoidLabelOverlap: false,
+          label: { show: false }, labelLine: { show: false },
+          emphasis: { scale: true, scaleSize: 6, itemStyle: { shadowBlur: 12, shadowColor: "rgba(0,0,0,0.15)" } },
+          data: innerData
+        }
+      ],
 
-      accessibility: { enabled: true },
-      credits: { enabled: false }
+      animation: true, animationDuration: 1000, animationEasing: "cubicOut"
     });
+
+    const onResize = () => chartInstance?.resize();
+    window.addEventListener("resize", onResize);
+    chartInstance._onResize = onResize;
   }
 
-  // ── Llamada a USDA FoodData Central ───────────────────────────────────────
+  // ── USDA fetch con reintentos ─────────────────────────────────────────────
   async function fetchUSDA(query, retries = 2) {
     const url =
       `${USDA_SEARCH}?api_key=${USDA_API_KEY}` +
-      `&query=${encodeURIComponent(query)}` +
-      `&dataType=Branded` +
-      `&pageSize=25`;
+      `&query=${encodeURIComponent(query)}&dataType=Branded&pageSize=25`;
 
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         const res = await fetch(url);
-
         if (res.status === 429) {
           if (attempt < retries) { await sleep(1500 * (attempt + 1)); continue; }
           return { totalHits: 0, foods: [] };
         }
-
         if (!res.ok) return { totalHits: 0, foods: [] };
-
         const data = await res.json();
-        return {
-          totalHits: data.totalHits ?? 0,
-          foods: Array.isArray(data.foods) ? data.foods : []
-        };
+        return { totalHits: data.totalHits ?? 0, foods: Array.isArray(data.foods) ? data.foods : [] };
       } catch {
         if (attempt < retries) await sleep(1000);
         else return { totalHits: 0, foods: [] };
@@ -205,20 +201,20 @@
     return { totalHits: 0, foods: [] };
   }
 
-  // ── Carga principal ────────────────────────────────────────────────────────
-  async function load() {
+  // ── Carga principal ───────────────────────────────────────────────────────
+  async function load(forceRefresh = false) {
     loading     = true;
     loadingStep = 0;
     error       = "";
+    fromCache   = false;
 
     try {
-      // 1. Cargar vinos propios
+      // 1. Vinos propios (siempre frescos)
       const wRes = await fetch(WINE_STATS_URL);
       if (!wRes.ok) throw new Error(`wine-stats: ${wRes.status}`);
       const wines = await wRes.json();
       totalWines = wines.length ?? 0;
 
-      // 2. Agrupar por tipo
       const byType = {};
       for (const wine of wines) {
         const type = String(wine.type ?? "").trim();
@@ -229,29 +225,31 @@
         byType[type].abvSum   += Number(wine.abv)   || 0;
       }
 
-      // 3. Consultar USDA con delay entre peticiones
+      // 2. USDA: usar caché si es válida y no se fuerza refresco
+      if (!forceRefresh && isCacheValid()) {
+        fromCache = true;
+        crossRows = cachedUSDA.results.map(cached => {
+          const stats = byType[cached.type];
+          return stats
+            ? { ...cached, wineCount: stats.count, avgPrice: stats.priceSum / stats.count, avgAbv: stats.abvSum / stats.count }
+            : cached;
+        });
+        matchedTypes = crossRows.length;
+        loading = false;
+        await tick();
+        await renderChart();
+        return;
+      }
+
+      // 3. Primera carga o refresco forzado: llamar a USDA
       const results = [];
       for (const [type, stats] of Object.entries(byType)) {
         const query = TYPE_TO_USDA_QUERY[type];
         if (!query) continue;
-
         if (results.length > 0) await sleep(500);
 
         const { totalHits, foods } = await fetchUSDA(query);
         loadingStep++;
-
-        const topBrands = countBrands(foods);
-
-        // Muestra de hasta 4 productos con nombre e info nutricional
-        const sample = foods
-          .filter(f => f.description)
-          .slice(0, 4)
-          .map(f => ({
-            fdcId:       f.fdcId,
-            description: f.description,
-            brandOwner:  f.brandOwner ?? "",
-            nutrients:   extractNutrients(f)
-          }));
 
         results.push({
           type,
@@ -259,18 +257,24 @@
           avgPrice:  stats.priceSum / stats.count,
           avgAbv:    stats.abvSum   / stats.count,
           usdaCount: totalHits,
-          topBrands,
-          sample
+          topBrands: countBrands(foods),
+          sample:    foods.filter(f => f.description).slice(0, 4).map(f => ({
+            fdcId:       f.fdcId,
+            description: f.description,
+            brandOwner:  f.brandOwner ?? "",
+            nutrients:   extractNutrients(f)
+          }))
         });
       }
 
+      // Guardar en caché con timestamp
+      cachedUSDA   = { timestamp: Date.now(), results };
       crossRows    = results.sort((a, b) => b.usdaCount - a.usdaCount);
       matchedTypes = crossRows.length;
 
       loading = false;
       await tick();
-      await loadHighcharts();
-      renderVenn();
+      await renderChart();
 
     } catch (e) {
       error   = e.message || "No se pudo cargar la integración.";
@@ -278,8 +282,14 @@
     }
   }
 
-  onMount(load);
-  onDestroy(() => vennChart?.destroy());
+  // Refresco forzado: ignora caché y vuelve a llamar a USDA
+  function forceRefresh() { load(true); }
+
+  onMount(() => load());
+  onDestroy(() => {
+    if (chartInstance?._onResize) window.removeEventListener("resize", chartInstance._onResize);
+    chartInstance?.dispose();
+  });
 </script>
 
 <svelte:head>
@@ -288,7 +298,6 @@
 
 <div class="page">
 
-  <!-- Cabecera -->
   <div class="hero">
     <a href="/integrations/rmp" class="back-link">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -300,19 +309,18 @@
     <h1>USDA FoodData Central <span class="accent">(FDC)</span></h1>
     <p class="hero-desc">
       Cruce entre los tipos de vino de wine-stats y los productos registrados
-      en USDA FoodData Central, con diagrama de relaciones y muestra de productos reales.
+      en USDA FoodData Central, con distribución por categorías y muestra de productos reales.
     </p>
   </div>
 
-  <!-- Fuentes de datos -->
   <section class="source-grid">
     <a class="source-card" href="https://fdc.nal.usda.gov" target="_blank" rel="noopener">
       <span>Base de datos pública</span>
       <strong>USDA FoodData Central</strong>
     </a>
-    <a class="source-card" href="https://fdc.nal.usda.gov/api-guide" target="_blank" rel="noopener">
-      <span>Documentación</span>
-      <strong>FDC API Docs</strong>
+    <a class="source-card" href="https://fdc.nal.usda.gov/api-key-signup" target="_blank" rel="noopener">
+      <span>Obtén tu key gratuita</span>
+      <strong>FDC API Key Signup</strong>
     </a>
     <a class="source-card" href="/api/v1/wine-stats" target="_blank" rel="noopener">
       <span>API propia</span>
@@ -321,15 +329,27 @@
   </section>
 
   <div class="toolbar">
-    <button on:click={load}>↺ Actualizar</button>
+    <button on:click={() => load()}>↺ Actualizar</button>
+    <button class="btn-secondary" on:click={forceRefresh}>↺ Forzar recarga USDA</button>
+    {#if fromCache}
+      <span class="cache-badge">
+        ✓ Datos USDA desde caché
+        {#if cachedUSDA}
+          · expira en {Math.max(0, Math.round((CACHE_TTL_MS - (Date.now() - cachedUSDA.timestamp)) / 60000))} min
+        {/if}
+      </span>
+    {/if}
   </div>
 
-  <!-- Estados -->
   {#if loading}
     <div class="status-box">
-      Cargando integración con USDA FoodData Central…
-      {#if loadingStep > 0}
-        <br/><span style="font-size:0.8rem;color:#aaa">{loadingStep} / 4 tipos cargados</span>
+      {#if fromCache}
+        Actualizando vinos…
+      {:else}
+        Cargando integración con USDA FoodData Central…
+        {#if loadingStep > 0}
+          <br/><span style="font-size:0.8rem;color:#aaa">{loadingStep} / 4 tipos cargados</span>
+        {/if}
       {/if}
     </div>
 
@@ -338,7 +358,6 @@
 
   {:else}
 
-    <!-- Resumen numérico -->
     <div class="summary-row">
       <div class="summary-card">
         <span class="summary-num">{fmtInt.format(totalWines)}</span>
@@ -360,19 +379,70 @@
       </div>
     </div>
 
-    <!-- Diagrama de Euler -->
     <section class="chart-panel">
-      <h2 class="section-title">Relaciones entre tipos de vino</h2>
+      <h2 class="section-title">% de tipos de vino: wine-stats vs. USDA FDC</h2>
       <p class="chart-note">
-        Cada círculo representa un tipo de vino. Su tamaño es proporcional al número de productos
-        en USDA FoodData Central. Las intersecciones aparecen cuando dos tipos comparten
-        un rango de ABV similar.
+        Anillo exterior: distribución porcentual de hits en USDA FoodData Central por tipo de vino.
+        Anillo interior: distribución de vinos propios en wine-stats.
       </p>
-      <div bind:this={vennContainer} class="chart-frame"></div>
+      <div bind:this={chartContainer} style="width: 100%; height: 460px;"></div>
     </section>
 
-    <!-- Detalle por tipo -->
-    
+    <section>
+      <h2 class="section-title">Detalle por tipo de vino</h2>
+      {#each crossRows as row}
+        <div class="type-block">
+          <div class="type-header">
+            <span class="type-badge" data-type={norm(row.type)}>{row.type}</span>
+            <span class="type-meta">
+              {row.wineCount} vino{row.wineCount !== 1 ? "s" : ""} propios ·
+              precio medio <strong>£{fmtDec.format(row.avgPrice)}</strong> ·
+              ABV medio <strong>{fmtDec.format(row.avgAbv)} %</strong> ·
+              <strong>{fmtInt.format(row.usdaCount)}</strong> hits en USDA FDC
+            </span>
+          </div>
+
+          {#if row.topBrands.length}
+            <div class="brands-row">
+              <span class="brands-label">Top marcas:</span>
+              {#each row.topBrands as b}
+                <span class="brand-chip">{b.brand} ({b.count})</span>
+              {/each}
+            </div>
+          {/if}
+
+          <div class="product-list">
+            {#each row.sample as p}
+              <a
+                class="product-item"
+                href="https://fdc.nal.usda.gov/food-details/{p.fdcId}/nutrients"
+                target="_blank"
+                rel="noopener"
+              >
+                <div class="product-info">
+                  <span class="product-name">{p.description}</span>
+                  {#if p.brandOwner}
+                    <span class="product-brand">{p.brandOwner}</span>
+                  {/if}
+                </div>
+                <div class="product-nutrients">
+                  {#if p.nutrients.alcohol != null}
+                    <span class="nutrient-chip">Alcohol {p.nutrients.alcohol} g</span>
+                  {/if}
+                  {#if p.nutrients.kcal != null}
+                    <span class="nutrient-chip">{p.nutrients.kcal} kcal</span>
+                  {/if}
+                  {#if p.nutrients.carbs != null}
+                    <span class="nutrient-chip">Carbs {p.nutrients.carbs} g</span>
+                  {/if}
+                </div>
+              </a>
+            {/each}
+          </div>
+        </div>
+      {/each}
+    </section>
+
   {/if}
 </div>
 
@@ -412,13 +482,28 @@
   .source-card span { color: #777; font-size: 0.82rem; }
   .source-card strong { color: #1a1a1a; font-size: 0.95rem; word-break: break-all; }
 
-  .toolbar { margin-bottom: 1.5rem; }
+  .toolbar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+
   button {
     min-height: 40px; border: 0; border-radius: 9999px; background: #01696f;
     color: #fff; padding: 0 18px; font: inherit; font-weight: 700;
     font-size: 0.875rem; cursor: pointer; transition: background 160ms ease;
   }
   button:hover { background: #005a5f; }
+
+  .btn-secondary {
+    background: transparent;
+    color: #01696f;
+    border: 1.5px solid #01696f;
+  }
+  .btn-secondary:hover { background: color-mix(in oklch, #01696f 8%, transparent); }
+
+  .cache-badge {
+    font-size: 0.78rem; color: #437a22; font-weight: 600;
+    background: color-mix(in oklab, #437a22 10%, white);
+    border: 1px solid color-mix(in oklab, #437a22 22%, white);
+    border-radius: 9999px; padding: 0.25rem 0.7rem;
+  }
 
   .summary-row { display: flex; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
   .summary-card {
@@ -431,11 +516,8 @@
   .chart-panel { background: #fff; border: 1px solid #e8e6e2; border-radius: 10px; padding: 1.5rem; margin-bottom: 3rem; overflow: hidden; }
   .section-title { font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.75rem; }
   .chart-note { font-size: 0.8rem; color: #888; margin-bottom: 1rem; }
-  .chart-frame { min-height: 500px; }
 
   section { margin-bottom: 3rem; }
-  .table-note { font-size: 0.8rem; color: #888; margin-bottom: 1.25rem; }
-  .table-note code { background: #f3f0ec; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.78rem; }
 
   .type-block { margin-bottom: 2rem; background: #fff; border: 1px solid #e8e6e2; border-radius: 10px; overflow: hidden; }
   .type-header {
@@ -462,8 +544,7 @@
 
   .brands-row {
     display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-    padding: 0.65rem 1.25rem; border-bottom: 1px solid #f0eeeb;
-    font-size: 0.8rem;
+    padding: 0.65rem 1.25rem; border-bottom: 1px solid #f0eeeb; font-size: 0.8rem;
   }
   .brands-label { color: #888; font-weight: 600; }
   .brand-chip {
@@ -474,23 +555,19 @@
     border: 1px solid color-mix(in oklab, #01696f 22%, white);
   }
 
-  .product-list { display: flex; flex-direction: column; gap: 0; }
+  .product-list { display: flex; flex-direction: column; }
   .product-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 1rem; padding: 0.75rem 1.25rem;
     text-decoration: none; color: inherit;
     border-bottom: 1px solid #f0eeeb;
-    transition: background 160ms ease;
-    flex-wrap: wrap;
+    transition: background 160ms ease; flex-wrap: wrap;
   }
   .product-item:last-child { border-bottom: none; }
   .product-item:hover { background: #f9f8f5; }
 
   .product-info { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
-  .product-name {
-    font-size: 0.875rem; font-weight: 600; color: #1a1a1a;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
+  .product-name { font-size: 0.875rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .product-brand { font-size: 0.775rem; color: #888; }
 
   .product-nutrients { display: flex; gap: 0.4rem; flex-wrap: wrap; flex-shrink: 0; }
@@ -507,5 +584,6 @@
     .summary-row { flex-direction: column; }
     .type-header { flex-direction: column; align-items: flex-start; }
     .product-item { flex-direction: column; align-items: flex-start; }
+    .toolbar { flex-direction: column; align-items: flex-start; }
   }
 </style>

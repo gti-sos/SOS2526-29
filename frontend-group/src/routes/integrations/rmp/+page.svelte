@@ -5,7 +5,7 @@
       title: "Exportations Stats",
       description: "Análisis de estadísticas de exportaciones mundiales cruzadas con datos de producción vinícola.",
       tipo: "INTEGRACION",
-      proxy:true,
+      proxy:false,
       icon: "📦",
       color: "#01696f",
       url: "/integrations/rmp/exportations-stats"
