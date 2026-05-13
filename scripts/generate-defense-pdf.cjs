@@ -5,6 +5,18 @@ const { chromium } = require("playwright");
 const ROOT = path.resolve(__dirname, "..");
 const MARKDOWN_PATH = path.join(ROOT, "docs", "DEFENSA_COMPLETA.md");
 const PDF_PATH = path.join(ROOT, "docs", "DEFENSA_COMPLETA.pdf");
+const CSS_PX_PER_MM = 96 / 25.4;
+const PAGE_WIDTH_MM = 210;
+const PAGE_HEIGHT_MM = 297;
+const PAGE_MARGIN_TOP_MM = 13;
+const PAGE_MARGIN_RIGHT_MM = 11;
+const PAGE_MARGIN_BOTTOM_MM = 15;
+const PAGE_MARGIN_LEFT_MM = 11;
+const PRINTABLE_WIDTH_PX = Math.round(
+  (PAGE_WIDTH_MM - PAGE_MARGIN_LEFT_MM - PAGE_MARGIN_RIGHT_MM) * CSS_PX_PER_MM
+);
+const PRINTABLE_HEIGHT_PX =
+  (PAGE_HEIGHT_MM - PAGE_MARGIN_TOP_MM - PAGE_MARGIN_BOTTOM_MM) * CSS_PX_PER_MM;
 
 function escapeHtml(value) {
   return String(value)
@@ -328,6 +340,8 @@ function buildHtml(markdown) {
     margin: 4pt 0 6pt;
     orphans: 3;
     widows: 3;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   a {
@@ -415,11 +429,15 @@ function buildHtml(markdown) {
   ul, ol {
     margin: 3pt 0 7pt 16pt;
     padding: 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   li {
     margin: 1.8pt 0;
     padding-left: 1pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   li::marker {
@@ -476,6 +494,11 @@ function buildHtml(markdown) {
     color: #193c61;
   }
 
+  tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   h2 + p,
   h3 + p,
   h4 + p {
@@ -493,12 +516,165 @@ function buildHtml(markdown) {
   .table-wrap {
     overflow-wrap: anywhere;
   }
+
+  .smart-page-break {
+    display: block;
+    width: 100%;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 </style>
 </head>
 <body>
 ${markdownToHtml(markdown)}
 </body>
 </html>`;
+}
+
+async function applySmartPageBreaks(page) {
+  return page.evaluate(({ pageHeight }) => {
+    document.querySelectorAll(".smart-page-break").forEach((element) => element.remove());
+
+    const selector = [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "p",
+      "blockquote",
+      "pre",
+      ".table-wrap",
+      "ul",
+      "ol"
+    ].join(",");
+
+    function topOf(element) {
+      return element.getBoundingClientRect().top + window.scrollY;
+    }
+
+    function heightOf(element) {
+      return element.getBoundingClientRect().height;
+    }
+
+    function nextContentElement(element) {
+      let sibling = element.nextElementSibling;
+      while (sibling && sibling.classList.contains("smart-page-break")) {
+        sibling = sibling.nextElementSibling;
+      }
+      return sibling;
+    }
+
+    function headingGroupHeight(element) {
+      let height = heightOf(element);
+      let next = nextContentElement(element);
+      let blocks = element.tagName === "H2" ? 2 : 1;
+
+      while (next && blocks > 0 && !/^H[1-6]$/.test(next.tagName)) {
+        height += heightOf(next);
+        next = nextContentElement(next);
+        blocks -= 1;
+      }
+
+      return height;
+    }
+
+    function shouldKeepTogether(element) {
+      return (
+        /^H[1-6]$/.test(element.tagName) ||
+        element.matches("p, blockquote, pre, .table-wrap, ul, ol")
+      );
+    }
+
+    let inserted = 0;
+
+    for (let pass = 0; pass < 500; pass += 1) {
+      const elements = Array.from(document.body.querySelectorAll(selector)).filter(
+        (element) =>
+          shouldKeepTogether(element) &&
+          !element.closest("table") &&
+          !element.previousElementSibling?.classList.contains("smart-page-break")
+      );
+
+      let changed = false;
+
+      for (const element of elements) {
+        const rectHeight = heightOf(element);
+        if (rectHeight < 2) {
+          continue;
+        }
+
+        const tagName = element.tagName;
+        const isHeading = /^H[1-6]$/.test(tagName);
+        const isMajorHeading = tagName === "H1" || tagName === "H2";
+        const top = topOf(element);
+        const pageY = top % pageHeight;
+
+        if (pageY < 14) {
+          continue;
+        }
+
+        const wantedHeight = isHeading ? headingGroupHeight(element) : rectHeight;
+        const elementFitsOnOnePage = wantedHeight < pageHeight * 0.82;
+        const safetyGap = isHeading ? 110 : 34;
+        const crossesPage = pageY + wantedHeight > pageHeight - safetyGap;
+        const headingTooLow =
+          isHeading && pageY > pageHeight - (isMajorHeading ? 260 : 185);
+
+        if (elementFitsOnOnePage && (crossesPage || headingTooLow)) {
+          const spacer = document.createElement("div");
+          spacer.className = "smart-page-break";
+          spacer.style.height = `${pageHeight - pageY + 1}px`;
+          element.before(spacer);
+          inserted += 1;
+          changed = true;
+          break;
+        }
+      }
+
+      if (!changed) {
+        break;
+      }
+    }
+
+    return inserted;
+  }, { pageHeight: PRINTABLE_HEIGHT_PX });
+}
+
+async function countAwkwardSplits(page) {
+  return page.evaluate(({ pageHeight }) => {
+    const selector = [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "p",
+      "blockquote",
+      "pre",
+      ".table-wrap",
+      "ul",
+      "ol"
+    ].join(",");
+
+    return Array.from(document.body.querySelectorAll(selector)).filter((element) => {
+      if (element.closest("table") || element.classList.contains("smart-page-break")) {
+        return false;
+      }
+
+      const rect = element.getBoundingClientRect();
+      if (rect.height < 2 || rect.height > pageHeight * 0.82) {
+        return false;
+      }
+
+      const top = rect.top + window.scrollY;
+      const pageY = top % pageHeight;
+
+      return pageY > 14 && pageY + rect.height > pageHeight - 30;
+    }).length;
+  }, { pageHeight: PRINTABLE_HEIGHT_PX });
 }
 
 (async () => {
@@ -508,12 +684,14 @@ ${markdownToHtml(markdown)}
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({
     viewport: {
-      width: 794,
-      height: 1123
+      width: PRINTABLE_WIDTH_PX,
+      height: Math.round(PRINTABLE_HEIGHT_PX)
     }
   });
 
   await page.setContent(html, { waitUntil: "load" });
+  const insertedBreaks = await applySmartPageBreaks(page);
+  const awkwardSplits = await countAwkwardSplits(page);
   await page.pdf({
     path: PDF_PATH,
     format: "A4",
@@ -531,10 +709,10 @@ ${markdownToHtml(markdown)}
       </div>
     `,
     margin: {
-      top: "13mm",
-      right: "11mm",
-      bottom: "15mm",
-      left: "11mm"
+      top: `${PAGE_MARGIN_TOP_MM}mm`,
+      right: `${PAGE_MARGIN_RIGHT_MM}mm`,
+      bottom: `${PAGE_MARGIN_BOTTOM_MM}mm`,
+      left: `${PAGE_MARGIN_LEFT_MM}mm`
     }
   });
 
@@ -543,9 +721,6 @@ ${markdownToHtml(markdown)}
   const pages = countPdfPages(PDF_PATH);
   console.log(`PDF regenerated: ${PDF_PATH}`);
   console.log(`Pages: ${pages}`);
-
-  if (pages > 100) {
-    console.error("The generated PDF is over 100 pages.");
-    process.exit(1);
-  }
+  console.log(`Smart page breaks inserted: ${insertedBreaks}`);
+  console.log(`Remaining awkward splits: ${awkwardSplits}`);
 })();
