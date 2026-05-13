@@ -1,62 +1,64 @@
-
 <svelte:head>
     <title>Sobre el Proyecto | SOS2526-29</title>
 </svelte:head>
 
 <div class="page">
     <div class="topbar">
-        <a href="/" class="btn-back">← Volver al Inicio</a>
+        <a href="/" class="btn-back">Volver al inicio</a>
     </div>
 
-    <h1>👥 Sobre el Proyecto y Vídeos</h1>
-    <p>Presentación de los miembros del grupo SOS2526-29 y defensa individual del entregable D03.</p>
+    <!-- Vista /about exigida por D03.A: aqui deben aparecer los videos de defensa del grupo. -->
+    <h1>Sobre el proyecto y videos</h1>
+    <p>Presentacion de los miembros del grupo SOS2526-29 y defensa individual del entregable D03.</p>
 
+    <!-- Tarjetas de miembros. Los href de video deben sustituirse por enlaces publicos reales. -->
     <section class="team-grid">
         <div class="member-card">
             <div class="member-info">
+                <h3>Rufino Moreno Pacheco</h3>
+                <p class="role">Responsable de: wine-stats</p>
+                <p class="github">Usuario GitHub: <code>rufmorpac</code></p>
+            </div>
+            <div class="video-box">
+                <a href="PENDIENTE_VIDEO_RMP" target="_blank" rel="noreferrer" class="btn-video">
+                    Ver video de defensa (D03)
+                </a>
+            </div>
+        </div>
+
+        <div class="member-card">
+            <div class="member-info">
+                <h3>Luis Cortes Cobos</h3>
+                <p class="role">Responsable de: citys-stats</p>
+                <p class="github">Usuario GitHub: <code>luicorcob</code></p>
+            </div>
+            <div class="video-box">
+                <a href="PENDIENTE_VIDEO_LCC" target="_blank" rel="noreferrer" class="btn-video">
+                    Ver video de defensa (D03)
+                </a>
+            </div>
+        </div>
+
+        <div class="member-card">
+            <div class="member-info">
                 <h3>Alberto Lirola Gomez</h3>
-                <p class="role">Responsable de: Desastres Naturales</p>
+                <p class="role">Responsable de: natural-disasters</p>
                 <p class="github">Usuario GitHub: <code>albertolg10</code></p>
             </div>
             <div class="video-box">
-                <a href="AQUÍ_TU_ENLACE_A_YOUTUBE" target="_blank" class="btn-video">
-                    📺 Ver Vídeo de Defensa (D03)
-                </a>
-            </div>
-        </div>
-
-        <div class="member-card">
-            <div class="member-info">
-                <h3>Nombre Compañero 2</h3>
-                <p class="role">Responsable de: Nombre de su API</p>
-                <p class="github">Usuario GitHub: <code>usuario-2</code></p>
-            </div>
-            <div class="video-box">
-                <a href="ENLACE_VIDEO_COMPAÑERO_2" target="_blank" class="btn-video">
-                    📺 Ver Vídeo de Defensa (D03)
-                </a>
-            </div>
-        </div>
-
-        <div class="member-card">
-            <div class="member-info">
-                <h3>Nombre Compañero 3</h3>
-                <p class="role">Responsable de: Nombre de su API</p>
-                <p class="github">Usuario GitHub: <code>usuario-3</code></p>
-            </div>
-            <div class="video-box">
-                <a href="ENLACE_VIDEO_COMPAÑERO_3" target="_blank" class="btn-video">
-                    📺 Ver Vídeo de Defensa (D03)
+                <a href="PENDIENTE_VIDEO_ALG" target="_blank" rel="noreferrer" class="btn-video">
+                    Ver video de defensa (D03)
                 </a>
             </div>
         </div>
     </section>
 
+    <!-- Enlace comun al repositorio oficial entregado en GitHub. -->
     <section class="project-info">
-        <h3>Información del Repositorio</h3>
+        <h3>Informacion del repositorio</h3>
         <p>Este proyecto ha sido desarrollado como parte de la asignatura Sistemas Orientados a Servicios (SOS).</p>
-        <a href="http://github.com/gti-sos/SOS2526-29/" target="_blank" class="btn-github">
-            📂 Repositorio Oficial en GitHub
+        <a href="http://github.com/gti-sos/SOS2526-29/" target="_blank" rel="noreferrer" class="btn-github">
+            Repositorio oficial en GitHub
         </a>
     </section>
 </div>
@@ -133,4 +135,3 @@
         border-radius: 10px; 
     }
 </style>
-

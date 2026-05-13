@@ -536,7 +536,7 @@ Responsabilidades:
    - `src/back/v2/citys-stats.js`
    - `src/back/v1/wine-stats.js`
 8. Sirve el frontend compilado desde `public`.
-9. Define `/` y `/about` para devolver el frontend. En la SPA actual, `/about` cae en la portada porque no hay una pantalla `routes/about`.
+9. Define `/` y `/about` para devolver el frontend compilado. La ruta `/about` se renderiza en Svelte desde `frontend-group/src/routes/about/+page.svelte`.
 10. Define proxy `/api/proxy/exportations-stats`.
 11. Define fallback para toda ruta que no empiece por `/api`.
 12. Lanza `app.listen`.

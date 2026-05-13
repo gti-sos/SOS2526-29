@@ -18,6 +18,7 @@ const PRINTABLE_WIDTH_PX = Math.round(
 const PRINTABLE_HEIGHT_PX =
   (PAGE_HEIGHT_MM - PAGE_MARGIN_TOP_MM - PAGE_MARGIN_BOTTOM_MM) * CSS_PX_PER_MM;
 
+// Escapa texto de Markdown antes de insertarlo como HTML generado.
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -26,6 +27,7 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+// Convierte titulos en ids estables para poder enlazar secciones desde el indice.
 function slugify(value) {
   return String(value)
     .toLowerCase()
@@ -36,6 +38,7 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+// Aplica el subconjunto de Markdown inline que usa la defensa: codigo, negrita y enlaces.
 function inlineMarkdown(value) {
   let text = escapeHtml(value);
   text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
@@ -44,6 +47,7 @@ function inlineMarkdown(value) {
   return text;
 }
 
+// Detecta si dos lineas consecutivas forman el inicio de una tabla Markdown.
 function isTableStart(lines, index) {
   const first = lines[index] || "";
   const second = lines[index + 1] || "";
@@ -54,6 +58,7 @@ function isTableStart(lines, index) {
   );
 }
 
+// Divide una fila de tabla Markdown conservando solo el contenido de sus celdas.
 function splitTableRow(row) {
   return row
     .trim()
@@ -63,6 +68,7 @@ function splitTableRow(row) {
     .map((cell) => cell.trim());
 }
 
+// Convierte una tabla Markdown completa en HTML imprimible.
 function parseTable(lines, start) {
   const rows = [];
   let index = start;
@@ -96,6 +102,7 @@ function parseTable(lines, start) {
   return { html, next: index };
 }
 
+// Parser Markdown minimalista: suficiente para el PDF de defensa sin meter dependencias nuevas.
 function markdownToHtml(source) {
   const lines = source.replace(/\r\n/g, "\n").split("\n");
   const output = [];
@@ -106,6 +113,7 @@ function markdownToHtml(source) {
   let paragraph = [];
   let listType = null;
 
+  // Vuelca el parrafo acumulado y marca como etiqueta las lineas de respuesta rapida.
   function flushParagraph() {
     if (paragraph.length === 0) {
       return;
@@ -119,6 +127,7 @@ function markdownToHtml(source) {
     paragraph = [];
   }
 
+  // Cierra listas abiertas cuando termina un bloque o empieza otro tipo de contenido.
   function closeList() {
     if (!listType) {
       return;
@@ -230,12 +239,14 @@ function markdownToHtml(source) {
   return output.join("\n");
 }
 
+// Cuenta paginas del PDF generado leyendo las marcas /Page del fichero final.
 function countPdfPages(pdfPath) {
   const pdf = fs.readFileSync(pdfPath);
   const text = pdf.toString("latin1");
   return (text.match(/\/Type\s*\/Page\b/g) || []).length;
 }
 
+// Envuelve el HTML generado con estilos de impresion, colores y reglas anti-corte.
 function buildHtml(markdown) {
   return `<!doctype html>
 <html lang="es">
@@ -554,6 +565,7 @@ ${markdownToHtml(markdown)}
 </html>`;
 }
 
+// Reemplaza el indice estatico por una tabla con paginas reales calculadas en Chromium.
 async function updateIndexWithPageRanges(page) {
   // El indice del Markdown no conoce las paginas finales.
   // Esta pasada ya renderizada calcula pagina inicial/final de cada h2 y lo
@@ -627,6 +639,7 @@ async function updateIndexWithPageRanges(page) {
   }, { pageHeight: PRINTABLE_HEIGHT_PX });
 }
 
+// Inserta saltos de pagina antes de bloques que quedarian partidos de forma incomoda.
 async function applySmartPageBreaks(page) {
   return page.evaluate(({ pageHeight }) => {
     document.querySelectorAll(".smart-page-break").forEach((element) => element.remove());
@@ -738,6 +751,7 @@ async function applySmartPageBreaks(page) {
   }, { pageHeight: PRINTABLE_HEIGHT_PX });
 }
 
+// Mide si siguen existiendo cortes feos despues de aplicar los saltos inteligentes.
 async function countAwkwardSplits(page) {
   return page.evaluate(({ pageHeight }) => {
     const selector = [
@@ -773,6 +787,7 @@ async function countAwkwardSplits(page) {
   }, { pageHeight: PRINTABLE_HEIGHT_PX });
 }
 
+// Itera paginacion e indice hasta que las paginas se estabilizan.
 async function paginateAndIndex(page) {
   // El indice cambia la altura del documento, y los saltos tambien.
   // Por eso repetimos unas pocas pasadas hasta que los rangos se estabilizan.

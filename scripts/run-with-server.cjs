@@ -13,6 +13,7 @@ const command = commandParts.join(" ");
 const timeoutMs = 120000;
 const intervalMs = 500;
 
+// Hace una peticion ligera a la URL objetivo y devuelve true si el servidor ya responde.
 function requestUrl(url) {
   return new Promise((resolve) => {
     const client = url.startsWith("https:") ? https : http;
@@ -30,6 +31,7 @@ function requestUrl(url) {
   });
 }
 
+// Espera a que el servidor local este listo antes de lanzar Playwright/Newman.
 async function waitForUrl(url, serverProcess) {
   const start = Date.now();
 
@@ -48,6 +50,7 @@ async function waitForUrl(url, serverProcess) {
   throw new Error(`Timed out waiting for ${url}`);
 }
 
+// Arranca el backend real del proyecto con Node, igual que haria npm start.
 function startServer() {
   return spawn(process.execPath, ["index.js"], {
     stdio: "inherit",
@@ -55,6 +58,7 @@ function startServer() {
   });
 }
 
+// Ejecuta el comando recibido por CLI una vez que el servidor esta disponible.
 function runCommand() {
   return new Promise((resolve) => {
     const child = spawn(command, {
@@ -78,6 +82,7 @@ function runCommand() {
   });
 }
 
+// Cierra el servidor que haya arrancado este script para no dejar procesos abiertos.
 function stopServer(serverProcess) {
   return new Promise((resolve) => {
     if (!serverProcess || serverProcess.exitCode !== null) {
@@ -108,6 +113,7 @@ function stopServer(serverProcess) {
   let serverProcess = null;
 
   try {
+    // Si el usuario ya tenia el servidor levantado, reutilizamos ese proceso.
     const alreadyRunning = await requestUrl(targetUrl);
 
     if (!alreadyRunning) {
