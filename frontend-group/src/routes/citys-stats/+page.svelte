@@ -774,7 +774,7 @@
   button {
     border: none;
     border-radius: 999px;
-    background: linear-gradient(135deg, #0f766e 0%, #0ea5e9 100%);
+    background: #075985;
     color: white;
     padding: 12px 18px;
     cursor: pointer;
@@ -795,7 +795,7 @@
   }
 
   button.danger {
-    background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+    background: #b91c1c;
     box-shadow: 0 14px 28px rgba(220, 38, 38, 0.16);
   }
 

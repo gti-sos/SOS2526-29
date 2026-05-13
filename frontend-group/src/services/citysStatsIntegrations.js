@@ -17,9 +17,8 @@
  *    fallida no rompa todos los widgets.
  *
  * ORDEN DE USO HABITUAL EN LA PANTALLA:
- * getCountrySummaries -> getGeocoding/getCountryInfo/getWorldBankPopulation
- * -> getSosTouristArrivals/getSosEarthquakes/getSosFifaSquadValues/
- *    getSosEsportsEarnings -> pintar widgets.
+ * getCitysStatsIntegrationSummary -> pintar widgets.
+ * Los endpoints individuales se mantienen para consumo externo y pruebas.
  */
 import { apiPath } from "./apiBase.js";
 

@@ -315,7 +315,7 @@
     margin: 0 0 8px;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: #0284c7;
+    color: #075985;
     font-size: 0.8rem;
     font-weight: 700;
   }
@@ -389,7 +389,7 @@
   button {
     border: none;
     border-radius: 999px;
-    background: linear-gradient(135deg, #0f766e 0%, #0ea5e9 100%);
+    background: #075985;
     color: white;
     padding: 12px 18px;
     cursor: pointer;

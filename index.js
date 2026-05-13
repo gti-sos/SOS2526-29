@@ -85,14 +85,10 @@ wineStatsApiV1(app, wineStatsDb);
 // =============================================================================
 // 3. PROXIES PARA APIS EXTERNAS (evita CORS desde el frontend)
 // =============================================================================
-//CORS es una protección del navegador que puede bloquear llamadas directas del frontend 
-// a APIs externas, por eso usamos un proxy en el backend que pide los datos por nosotros
-//y se los devuelve al frontend, evitando asi la proteccion de CORS.
-
-
-//OJO ESTO ES DE RUFINO, REALEMNTE NO VA AQUI PERO EL LO HA PUESTO AQUI POR LA CARA
-
-
+// CORS es una proteccion del navegador que puede bloquear llamadas directas del frontend
+// a APIs externas. Estos proxies comunes hacen la peticion desde Express y devuelven JSON
+// al frontend, de forma que las pantallas de integraciones no dependan de permisos CORS
+// del servidor externo.
 
 // -----------------------------------------------------------------------------
 // Proxy para la API externa de drought-stats
@@ -143,23 +139,30 @@ app.get("/api/proxy/drought-stats", async (req, res) => {
   }
 });
 
+// Proxy para la API age-specific-fertility-rates. Sigue el mismo patron:
+// leer datos externos, cargar datos iniciales si vienen vacios y devolver JSON.
 app.get("/api/proxy/age-specific-fertility-rates", async (req, res) => {
   try {
+    // URL base del recurso externo usado por una integracion del grupo.
     const baseUrl = "https://sos2526-12.onrender.com/api/v2/age-specific-fertility-rates";
 
+    // Primera lectura de la API externa.
     let response = await fetch(baseUrl);
     if (!response.ok) {
       throw new Error(`Error API externa: ${response.status}`);
     }
 
+    // La respuesta externa se parsea como JSON porque el backlog exige APIs RESTful JSON.
     let data = await response.json();
 
+    // Si la API del companero aun no tiene datos, se intenta inicializarla.
     if (Array.isArray(data) && data.length === 0) {
       const loadResponse = await fetch(`${baseUrl}/loadInitialData`);
       if (!loadResponse.ok) {
         throw new Error(`Error loadInitialData: ${loadResponse.status}`);
       }
 
+      // Tras loadInitialData se consulta de nuevo para devolver datos reales al frontend.
       response = await fetch(baseUrl);
       if (!response.ok) {
         throw new Error(`Error API externa tras loadInitialData: ${response.status}`);
@@ -168,16 +171,21 @@ app.get("/api/proxy/age-specific-fertility-rates", async (req, res) => {
       data = await response.json();
     }
 
+    // Se devuelve siempre JSON normalizado al cliente.
     res.status(200).json(data);
   } catch (err) {
+    // Si falla la API externa, el frontend recibe un mensaje controlado.
     res.status(500).json({ error: "No se pudo conectar con la API externa." });
   }
 }); 
 
+// Proxy para exportations-stats. Conserva los parametros recibidos para permitir filtros.
 app.get("/api/proxy/exportations-stats", async (req, res) => {
     try {
+        // URL del recurso externo al que se reenviaran los parametros de consulta.
         const targetUrl = new URL("https://sos2526-13.onrender.com/api/v2/exportations-stats");
 
+        // Copia cada query param original, incluyendo parametros repetidos.
         for (const [key, value] of Object.entries(req.query)) {
             if (Array.isArray(value)) {
                 value.forEach((item) => targetUrl.searchParams.append(key, item));
@@ -186,14 +194,17 @@ app.get("/api/proxy/exportations-stats", async (req, res) => {
             }
         }
 
+        // Fetch servidor-servidor: el navegador solo ve la llamada al proxy local.
         const response = await fetch(targetUrl);
         if (!response.ok) {
             throw new Error(`Error API externa: ${response.status}`);
         }
 
+        // Se devuelve el JSON externo sin exponer detalles de CORS al frontend.
         const data = await response.json();
         res.status(200).json(data);
     } catch (err) {
+        // Error generico y comprensible para no filtrar detalles internos.
         res.status(500).json({ error: "No se pudo conectar con la API externa." });
     }
 });

@@ -143,7 +143,7 @@ async function handleResponse(response) {
  */
 export async function getAllCitysStats(query = {}) {
     // Llamamos a la API con la URL construida.
-    const response = await fetch(buildUrl("", query));
+    const response = await fetch(buildUrl("", query), { cache: "no-store" });
     // Devolvemos la respuesta ya procesada.
     return handleResponse(response);
 }
@@ -186,7 +186,7 @@ export async function deleteAllCitysStats() {
  */
 export async function loadInitialCitysStats() {
     // Esta ruta solo inserta datos si la base esta vacia.
-    const response = await fetch(buildUrl("/loadInitialData"));
+    const response = await fetch(buildUrl("/loadInitialData"), { cache: "no-store" });
     // Devolvemos los datos cargados o el error.
     return handleResponse(response);
 }
@@ -220,7 +220,8 @@ export async function deleteCityStat(city, country) {
 export async function getOneCityStat(city, country) {
     // La API identifica cada ciudad con city + country.
     const response = await fetch(
-        buildUrl(`/${encodePathValue(city)}/${encodePathValue(country)}`)
+        buildUrl(`/${encodePathValue(city)}/${encodePathValue(country)}`),
+        { cache: "no-store" }
     );
     // Devolvemos el registro encontrado.
     return handleResponse(response);

@@ -14,7 +14,7 @@ module.exports = defineConfig({
   webServer: {
     command: "node ../../index.js",
     url: "http://127.0.0.1:10000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: Boolean(process.env.PLAYWRIGHT_REUSE_SERVER) || !process.env.CI,
     timeout: 120000
   }
 });

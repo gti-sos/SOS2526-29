@@ -1,18 +1,22 @@
 <script>
+  // Vista comun de integraciones: permite llegar rapido a la parte individual de cada miembro.
   const members = [
     {
+      // Integraciones asociadas al recurso de RMP.
       name: "Rufino Moreno",
       resource: "wine-stats",
       status: "Disponible",
       href: "/integrations/rmp"
     },
     {
+      // Integraciones LCC que se defenderan en /integrations/citys-stats.
       name: "Luis Cortes",
       resource: "citys-stats",
       status: "Disponible",
       href: "/integrations/citys-stats"
     },
     {
+      // Integraciones asociadas al recurso de ALG.
       name: "Alberto Lirola",
       resource: "natural-disasters",
       status: "Disponible",
@@ -30,12 +34,14 @@
     <a href="/" class="btn-back">Volver al inicio</a>
   </div>
 
+  <!-- Cabecera de la entrada comun a las integraciones del grupo. -->
   <header class="hero">
     <p class="eyebrow">SOS2526-29</p>
     <h1>Integraciones del grupo</h1>
     <p>Acceso a las vistas de integraciones implementadas en la aplicacion desplegada.</p>
   </header>
 
+  <!-- Cada tarjeta enlaza a la vista concreta donde se hacen los fetch a APIs externas. -->
   <section class="grid" aria-label="Integraciones por recurso">
     {#each members as member}
       <article class="card">

@@ -12,33 +12,33 @@ Fuente actualizada para estudiar y modificar: este Markdown. Si se quiere una co
 
 ## Indice
 
-- [1. Resumen ejecutivo](#1-resumen-ejecutivo) - pag. 2
-- [2. Problema, objetivos y publico](#2-problema-objetivos-y-publico) - pag. 3
-- [3. Equipo y recursos](#3-equipo-y-recursos) - pag. 3
-- [4. Stack tecnologico](#4-stack-tecnologico) - pag. 4
-- [5. Arquitectura general](#5-arquitectura-general) - pag. 5
-- [6. Estructura real de carpetas](#6-estructura-real-de-carpetas) - pag. 6
-- [7. Instalacion, configuracion y ejecucion](#7-instalacion-configuracion-y-ejecucion) - pags. 7-8
-- [8. Scripts, tests y validaciones](#8-scripts-tests-y-validaciones) - pag. 9
-- [9. Rutas utiles para abrir](#9-rutas-utiles-para-abrir) - pag. 10
-- [10. Modelo de datos](#10-modelo-de-datos) - pag. 11
-- [11. Backend: arranque y responsabilidades](#11-backend-arranque-y-responsabilidades) - pags. 11-12
-- [12. APIs REST del proyecto](#12-apis-rest-del-proyecto) - pags. 13-14
-- [13. Frontend: rutas, servicios y pantallas](#13-frontend-rutas-servicios-y-pantallas) - pag. 15
-- [14. Parte LCC: `citys-stats`](#14-parte-lcc-citys-stats) - pags. 16-18
-- [15. Integraciones LCC](#15-integraciones-lcc) - pags. 19-21
-- [16. Funciones importantes explicadas](#16-funciones-importantes-explicadas) - pags. 22-48
-- [17. Flujos de ejecucion](#17-flujos-de-ejecucion) - pags. 49-62
-- [18. Codigos HTTP y contrato REST](#18-codigos-http-y-contrato-rest) - pags. 63-66
-- [19. Cambios que pueden pedir en directo](#19-cambios-que-pueden-pedir-en-directo) - pags. 67-71
-- [20. Errores comunes y soluciones](#20-errores-comunes-y-soluciones) - pags. 72-74
-- [21. Decisiones tecnicas](#21-decisiones-tecnicas) - pag. 75
-- [22. Limitaciones y mejoras futuras](#22-limitaciones-y-mejoras-futuras) - pag. 76
-- [23. Guion de defensa oral](#23-guion-de-defensa-oral) - pags. 77-89
-- [24. Preguntas dificiles y respuestas](#24-preguntas-dificiles-y-respuestas) - pags. 90-91
-- [25. Glosario para personas no tecnicas](#25-glosario-para-personas-no-tecnicas) - pag. 92
-- [26. Checklists finales](#26-checklists-finales) - pag. 93
-- [27. Anexos tecnicos](#27-anexos-tecnicos) - pags. 94-95
+- [1. Resumen ejecutivo](#1-resumen-ejecutivo)
+- [2. Problema, objetivos y publico](#2-problema-objetivos-y-publico)
+- [3. Equipo y recursos](#3-equipo-y-recursos)
+- [4. Stack tecnologico](#4-stack-tecnologico)
+- [5. Arquitectura general](#5-arquitectura-general)
+- [6. Estructura real de carpetas](#6-estructura-real-de-carpetas)
+- [7. Instalacion, configuracion y ejecucion](#7-instalacion-configuracion-y-ejecucion)
+- [8. Scripts, tests y validaciones](#8-scripts-tests-y-validaciones)
+- [9. Rutas utiles para abrir](#9-rutas-utiles-para-abrir)
+- [10. Modelo de datos](#10-modelo-de-datos)
+- [11. Backend: arranque y responsabilidades](#11-backend-arranque-y-responsabilidades)
+- [12. APIs REST del proyecto](#12-apis-rest-del-proyecto)
+- [13. Frontend: rutas, servicios y pantallas](#13-frontend-rutas-servicios-y-pantallas)
+- [14. Parte LCC: `citys-stats`](#14-parte-lcc-citys-stats)
+- [15. Integraciones LCC](#15-integraciones-lcc)
+- [16. Funciones importantes explicadas](#16-funciones-importantes-explicadas)
+- [17. Flujos de ejecucion](#17-flujos-de-ejecucion)
+- [18. Codigos HTTP y contrato REST](#18-codigos-http-y-contrato-rest)
+- [19. Cambios que pueden pedir en directo](#19-cambios-que-pueden-pedir-en-directo)
+- [20. Errores comunes y soluciones](#20-errores-comunes-y-soluciones)
+- [21. Decisiones tecnicas](#21-decisiones-tecnicas)
+- [22. Limitaciones y mejoras futuras](#22-limitaciones-y-mejoras-futuras)
+- [23. Guion de defensa practica](#23-guion-de-defensa-practica)
+- [24. Preguntas dificiles y respuestas](#24-preguntas-dificiles-y-respuestas)
+- [25. Glosario para personas no tecnicas](#25-glosario-para-personas-no-tecnicas)
+- [26. Checklists finales](#26-checklists-finales)
+- [27. Anexos tecnicos](#27-anexos-tecnicos)
 
 Ruta de lectura recomendada para defender LCC `citys-stats`:
 
@@ -46,7 +46,7 @@ Ruta de lectura recomendada para defender LCC `citys-stats`:
 2. Despues lee las secciones 10 a 15 para centrarte en el modelo, API, frontend e integraciones de `citys-stats`.
 3. Estudia muy bien la seccion 16: ahi esta el codigo de funciones, como explicarlas y como modificarlas.
 4. Usa las secciones 17 a 20 para responder flujos, codigos HTTP, cambios en directo y errores.
-5. Termina con las secciones 23, 24 y 26 para practicar guion oral, preguntas dificiles y checklist final.
+5. Termina con las secciones 23, 24 y 26 para practicar la defensa practica, preguntas dificiles y checklist final.
 
 ## 1. Resumen ejecutivo
 
@@ -536,7 +536,7 @@ Responsabilidades:
    - `src/back/v2/citys-stats.js`
    - `src/back/v1/wine-stats.js`
 8. Sirve el frontend compilado desde `public`.
-9. Define `/` y `/about` para devolver el frontend. En la SPA actual, `/about` cae en la portada porque no hay una pantalla `routes/about`.
+9. Define `/` y `/about` para devolver el frontend compilado. La ruta `/about` se renderiza en Svelte desde `frontend-group/src/routes/about/+page.svelte`.
 10. Define proxy `/api/proxy/exportations-stats`.
 11. Define fallback para toda ruta que no empiece por `/api`.
 12. Lanza `app.listen`.
@@ -963,15 +963,15 @@ Frase de defensa:
 ### Flujo de integraciones
 
 1. El usuario abre `/integrations/citys-stats`.
-2. La pantalla llama a `getCountrySummaries(selectedLimit)`.
-3. El service hace `GET /api/v1/citys-stats/country-summaries?limit=N`.
-4. El backend lee NeDB.
-5. `buildCityCountrySummaries` agrega ciudades por pais.
-6. La pantalla usa esos paises como base.
-7. Para cada pais o ciudad principal, llama a endpoints proxy.
-8. Express llama a APIs externas con `fetchJson`.
-9. El backend normaliza datos y controla errores.
-10. El frontend construye widgets Highcharts distintos.
+2. La pantalla llama a `getCitysStatsIntegrationSummary(selectedLimit)`.
+3. El service hace una sola peticion a `GET /api/v1/citys-stats/integrations/summary?limit=N`.
+4. El backend lee NeDB y agrupa ciudades por pais con `buildCityCountrySummaries`.
+5. El backend consulta Open-Meteo, REST Countries, World Bank y APIs SOS mediante proxy propio.
+6. `fetchJson` cachea solo respuestas de APIs externas durante unos minutos y reutiliza peticiones externas identicas que llegan a la vez.
+7. El endpoint `summary` no se cachea: cada llamada vuelve a leer los datos locales de NeDB, por lo que un alta o edicion en Render se refleja al instante en la integracion.
+8. El backend normaliza datos y devuelve un resumen ya preparado.
+9. El frontend transforma ese resumen en `geocodingRows`, `countryCards`, `worldBankRows` y rankings externos.
+10. El frontend construye widgets Highcharts distintos sin volver a llamar a cada proxy individual.
 
 ### Endpoint resumen
 
@@ -988,6 +988,7 @@ Respuesta real resumida:
   localResource: "/api/v1/citys-stats/country-summaries",
   externalApis: string[],
   studentApis: object[],
+  studentApiDatasets: object,
   count: number,
   items: object[]
 }
@@ -1012,6 +1013,35 @@ Campos importantes de cada item:
 | `fifaSquadValue` | Datos agregados FIFA |
 | `esportsEarnings` | Datos agregados eSports |
 | `integrationErrors` | Errores parciales |
+
+### Incidencia resuelta: demasiadas peticiones
+
+Problema detectado:
+
+- Un consumidor externo aviso de que, a veces, al cargar una grafica conjunta con `citys-stats`, aparecia un error de servidor con demasiadas peticiones y la grafica no cargaba.
+- La causa probable era que la vista de integraciones hacia muchas llamadas encadenadas o paralelas desde el navegador: primero datos locales, despues Open-Meteo, REST Countries, World Bank y varias APIs SOS.
+- Si varios usuarios o integraciones externas cargaban la pagina a la vez, nuestro servidor y las APIs externas recibian demasiadas peticiones repetidas.
+
+Solucion aplicada:
+
+- La pantalla `/integrations/citys-stats` ya no coordina todas las llamadas externas una a una desde el navegador.
+- Ahora llama una sola vez a `/api/v1/citys-stats/integrations/summary?limit=N`.
+- El backend monta el resumen completo, normaliza los datos y devuelve tambien `studentApiDatasets` para que el frontend pueda pintar todos los widgets sin llamar de nuevo a cada proxy individual.
+- `fetchJson` cachea respuestas de APIs externas y colapsa peticiones identicas simultaneas. Esto reduce carga sobre servicios externos y evita picos.
+- No se cachea el resumen final ni los datos locales de `citys-stats`: si se crea, edita o borra un registro en Render, el siguiente resumen lee NeDB de nuevo y refleja el cambio inmediatamente.
+
+Que requisitos NO cambian:
+
+- La API principal de CRUD sigue siendo `/api/v2/citys-stats`.
+- Los endpoints proxy individuales siguen existiendo bajo `/api/v1/citys-stats/integrations/...`.
+- Se siguen usando APIs REST JSON.
+- Sigue habiendo mas de 5 integraciones, al menos 3 no SOS y al menos 2 SOS de otros grupos.
+- Los datos siguen mostrandose en HTML y widgets, no como JSON crudo.
+- No se cambia el tipo de grafica individual ni el contrato del recurso `citys-stats`.
+
+Respuesta corta de defensa:
+
+> Detectamos que la integracion podia generar demasiadas peticiones repetidas. Lo solucionamos moviendo la coordinacion al backend: el frontend hace una sola peticion al endpoint `summary`, el backend consulta y normaliza las fuentes externas, cachea solo respuestas externas y devuelve los datos listos para pintar. Los datos locales no se cachean, asi que los cambios del CRUD se ven al instante.
 
 ## 16. Funciones importantes explicadas
 
@@ -1051,12 +1081,12 @@ Frase comodin segura:
 | Backend integraciones v1 | `src/back/v1/citys-stats.js` | `parseLimit`, `normalizeCountryKey`, `buildCityCountrySummaries`, `fetchJson`, `safeExternal`, `buildIntegratedCity` |
 | Service base | `frontend-group/src/services/apiBase.js` | `API_ORIGIN`, `apiPath` |
 | Service CRUD | `frontend-group/src/services/citysStatsApi.js` | `buildUrl`, `encodePathValue`, `friendlyApiMessage`, `handleResponse`, `getAllCitysStats`, `createCityStat`, `updateCityStat` |
-| Service integraciones | `frontend-group/src/services/citysStatsIntegrations.js` | `handleResponse`, `getCountrySummaries`, `getGeocoding`, `getCountryInfo`, `getWorldBankPopulation`, `getSos...` |
+| Service integraciones | `frontend-group/src/services/citysStatsIntegrations.js` | `handleResponse`, `getCitysStatsIntegrationSummary`, endpoints proxy individuales para pruebas |
 | CRUD Svelte | `frontend-group/src/routes/citys-stats/+page.svelte` | `validateCityStatForm`, `buildSearchQuery`, `refreshList`, `handleCreate`, `handleSearch`, `openEdit` |
 | Edicion Svelte | `frontend-group/src/routes/citys-stats/editar/[city]/[country]/+page.svelte` | `loadResource`, `isSameResource`, `handleUpdate`, `updateRoute` |
 | Analytics LCC | `frontend-group/src/routes/analytics/citys-stats/+page.svelte` | `loadHighcharts`, `renderChart`, `loadAnalytics` |
 | Mapa LCC | `frontend-group/src/routes/analytics/citys-stats/map/+page.svelte` | `keyFor`, `colorFor`, `radiusFor`, `renderMap`, `loadMapData` |
-| Integraciones UI | `frontend-group/src/routes/integrations/citys-stats/+page.svelte` | `safeLoad`, `collectError`, `loadHighcharts`, `createChart`, `renderIntegrationCharts`, `loadIntegrations` |
+| Integraciones UI | `frontend-group/src/routes/integrations/citys-stats/+page.svelte` | `sourceLabel`, `collectSummaryErrors`, `summaryDataset`, `loadHighcharts`, `createChart`, `renderIntegrationCharts`, `loadIntegrations` |
 
 ### 16.3 Backend CRUD v2: contrato principal
 
@@ -2094,7 +2124,7 @@ Como te pueden pedir cambiarla:
 - Cambiar tamano: tocar `radiusFor`.
 - Cambiar tooltip: tocar `tooltip.pointFormatter`.
 
-#### `safeLoad`
+#### `collectSummaryErrors` y `summaryDataset`
 
 Archivo:
 
@@ -2105,24 +2135,45 @@ frontend-group/src/routes/integrations/citys-stats/+page.svelte
 Codigo:
 
 ```js
-async function safeLoad(task) {
-  try {
-    return { data: await task(), error: "" };
-  } catch (e) {
-    return { data: null, error: e.message || "No se pudo cargar la integracion." };
-  }
+function collectSummaryErrors(summary, items) {
+  const errors = [];
+  const seen = new Set();
+
+  items.forEach((item) => {
+    (item.integrationErrors ?? []).forEach((error) => {
+      // Normaliza y deduplica errores parciales.
+    });
+  });
+
+  (summary?.studentApis ?? []).forEach((api) => {
+    // Incluye errores generales de APIs SOS externas.
+  });
+
+  return errors;
+}
+
+function summaryDataset(summary, key, metric, limit = 8) {
+  const rows = Array.isArray(summary?.studentApiDatasets?.[key])
+    ? summary.studentApiDatasets[key]
+    : [];
+
+  return rows
+    .filter((row) => numberOrNull(row?.[metric]) !== null)
+    .slice(0, limit);
 }
 ```
 
 Que hace:
 
-Evita que una llamada externa fallida rompa toda la pantalla de integraciones.
+- `collectSummaryErrors` recoge errores parciales que ya vienen del backend y evita mostrar duplicados.
+- `summaryDataset` extrae rankings externos del objeto `studentApiDatasets` que devuelve el endpoint `summary`.
+- Estas funciones sustituyen al flujo antiguo donde el navegador llamaba una a una a cada API externa.
 
 Como te pueden pedir cambiarla:
 
-- Parar toda la pantalla si falla una API: quitar `safeLoad` y dejar que el error suba al `catch` general.
-- Mostrar mas informacion: devolver tambien `source` o `context`.
-- Ocultar errores: no llamar a `collectError`, aunque perderias transparencia.
+- Mostrar mas informacion de errores: ampliar los objetos que mete `collectSummaryErrors`.
+- Cambiar el numero de paises mostrados: modificar el `limit` usado al llamar a `summaryDataset`.
+- Cambiar una metrica externa: cambiar el nombre de `metric` que se pasa a `summaryDataset`.
 
 #### `loadIntegrations`
 
@@ -2137,27 +2188,30 @@ async function loadIntegrations() {
   destroyIntegrationCharts();
 
   try {
-    countrySummaries = await getCountrySummaries(selectedLimit);
+    let summary = await getCitysStatsIntegrationSummary(selectedLimit);
+    countrySummaries = Array.isArray(summary?.items) ? summary.items : [];
 
     if (countrySummaries.length === 0) {
       await loadInitialCitysStats();
-      countrySummaries = await getCountrySummaries(selectedLimit);
+      summary = await getCitysStatsIntegrationSummary(selectedLimit);
+      countrySummaries = Array.isArray(summary?.items) ? summary.items : [];
       restoredInitialData = countrySummaries.length > 0;
     }
 
-    const geocodingResults = await Promise.all(
-      countrySummaries.map((item) =>
-        safeLoad(() => getGeocoding(item.topCity, item.country))
-      )
-    );
+    geocodingRows = countrySummaries.map((item) => ({ ...item }));
+    countryCards = countrySummaries.map((item) => ({
+      ...item,
+      countryData: item.countryInfo
+    }));
+    worldBankRows = countrySummaries.map((item) => ({
+      country: item.country,
+      localPopulation: item.un_2025_population,
+      countryInfo: item.countryInfo,
+      worldBank: item.worldBankPopulation
+    }));
 
-    const [tourismResult, earthquakeResult, fifaResult, esportsResult] =
-      await Promise.all([
-        safeLoad(getSosTouristArrivals),
-        safeLoad(getSosEarthquakes),
-        safeLoad(getSosFifaSquadValues),
-        safeLoad(getSosEsportsEarnings)
-      ]);
+    touristCountries = summaryDataset(summary, "touristCountries", "totalArrivals", 8);
+    integrationErrors = collectSummaryErrors(summary, countrySummaries);
 
     loading = false;
     await tick();
@@ -2172,17 +2226,17 @@ async function loadIntegrations() {
 
 Que hace:
 
-Orquesta toda la vista de integraciones: carga datos locales, recupera APIs externas en paralelo, registra errores parciales, espera al DOM y pinta widgets.
+Orquesta toda la vista de integraciones: pide un unico resumen al backend, adapta ese resumen a las variables que usan los widgets, registra errores parciales, espera al DOM y pinta Highcharts.
 
 Como te pueden pedir cambiarla:
 
-- Anadir API externa: importar service, llamar con `safeLoad`, guardar estado, pintar widget y anadirlo a `renderIntegrationCharts`.
+- Anadir API externa: anadirla al backend `summary`, devolver su dataset y leerlo en la pantalla con `summaryDataset`.
 - Cambiar limite: tocar `selectedLimit` y el selector HTML.
 - Quitar autocarga inicial: eliminar el bloque `if (countrySummaries.length === 0)`.
 
 Respuesta de defensa:
 
-> En integraciones hay operaciones independientes. Por eso uso `Promise.all`: no espero una API para empezar la siguiente.
+> Antes la pantalla lanzaba muchas peticiones. Ahora el frontend hace una unica llamada a `summary`; el backend coordina las integraciones, controla errores parciales y devuelve datos listos para pintar.
 
 ### 16.8 Flujos completos que conviene memorizar
 
@@ -2319,9 +2373,9 @@ export async function getNuevaApi() {
 
 Pantalla:
 
-1. Importar service.
-2. Crear estado para sus filas.
-3. Llamar con `safeLoad` dentro de `loadIntegrations`.
+1. Hacer que el backend incluya la nueva API dentro de `/integrations/summary`.
+2. Si el widget necesita ranking externo completo, devolverlo en `studentApiDatasets`.
+3. En `loadIntegrations`, leerlo con `summaryDataset`.
 4. Crear `renderNuevaApiChart`.
 5. Anadirlo a `renderIntegrationCharts`.
 6. Anadir panel HTML.
@@ -2329,7 +2383,7 @@ Pantalla:
 
 Frase de defensa:
 
-> Primero backend proxy, luego service, luego pantalla. Asi el navegador no depende directamente de la API externa.
+> Primero backend proxy, luego resumen agregado, luego pantalla. Asi el navegador no depende directamente de la API externa y no dispara demasiadas peticiones.
 
 ### 16.10 Asincronia sin liarse
 
@@ -2382,8 +2436,9 @@ Frases utiles:
 | Por que `POST` devuelve `409`? | Porque ya existe un recurso con la misma clave `city + country`. |
 | Por que `PUT` compara URL y body? | Para asegurar que actualizo exactamente el recurso identificado por la URL. |
 | Por que integras por pais? | REST Countries, World Bank y varias APIs SOS encajan mejor por `country` que por ciudad. |
-| Por que `safeLoad` no lanza error? | Porque en integraciones interesa mostrar datos parciales aunque una fuente falle. |
-| Por que `Promise.all`? | Para cargar APIs independientes en paralelo y reducir espera. |
+| Por que la pantalla usa `summary`? | Para hacer una sola peticion desde el navegador y evitar picos de demasiadas peticiones. |
+| Por que `safeExternal` no rompe todo? | Porque en integraciones interesa mostrar datos parciales aunque una fuente externa falle. |
+| Por que `Promise.all`? | En el backend permite consultar APIs independientes en paralelo y reducir espera. |
 | Por que `tick` antes de Highcharts? | Porque Highcharts necesita que el contenedor ya exista en el DOM. |
 | Donde cambiarias mensajes de error? | En `friendlyApiMessage` para CRUD y en `handleResponse` de integraciones si son externas. |
 | Como buscas quien llama a una funcion? | Con `rg "nombreFuncion"` desde la raiz del repositorio. |
@@ -2784,14 +2839,14 @@ select on:change={loadIntegrations}
 button on:click={loadIntegrations}
 ```
 
-Carga local inicial:
+Carga del resumen agregado:
 
 ```text
 loadIntegrations
   -> destroyIntegrationCharts
-  -> getCountrySummaries(selectedLimit)
-     -> fetch GET /api/v1/citys-stats/country-summaries?limit=N
-        -> backend v1 app.get(`${BASE_API_URL}/country-summaries`)
+  -> getCitysStatsIntegrationSummary(selectedLimit)
+     -> fetch GET /api/v1/citys-stats/integrations/summary?limit=N
+        -> backend v1 app.get(`${BASE_API_URL}/integrations/summary`)
            -> parseLimit
            -> findAllCityStats
               -> db.find
@@ -2799,8 +2854,17 @@ loadIntegrations
            -> buildCityCountrySummaries
               -> normalizeCountryKey
               -> readFiniteNumber
-           -> slice(0, limit)
-           -> res.status(200).json(...)
+           -> Promise.all(countrySummaries.map(buildIntegratedCityBase))
+              -> safeExternal(Open-Meteo)
+              -> safeExternal(REST Countries)
+           -> getWorldBankPopulations(countryCodes)
+           -> Promise.all de APIs SOS externas
+              -> getTouristArrivals
+              -> getEarthquakes
+              -> getFifaSquadValues
+              -> getEsportsEarnings
+           -> buildIntegratedCity
+           -> devuelve items + studentApiDatasets
      -> handleResponse(response)
 ```
 
@@ -2816,153 +2880,28 @@ if countrySummaries.length === 0
         -> db.find o db.insert(initialData)
         -> removeDatabaseId
      -> handleResponse(response)
-  -> getCountrySummaries(selectedLimit) otra vez
-```
-
-Bloque Open-Meteo:
-
-```text
-Promise.all(countrySummaries.map(...))
-  -> safeLoad(() => getGeocoding(item.topCity, item.country))
-     -> getGeocoding del service
-        -> fetch GET /api/v1/citys-stats/integrations/geocoding/:city
-           -> backend v1 app.get(`${BASE_API_URL}/integrations/geocoding/:city`)
-              -> getGeocoding del backend
-                 -> cleanSearchTerm(city)
-                 -> cleanSearchTerm(country)
-                 -> fetchJson(Open-Meteo)
-                    -> fetch
-                    -> response.text()
-                    -> JSON.parse
-           -> res.status(200).json(...)
-        -> handleResponse(response)
-  -> geocodingResults.map(...)
-     -> collectError
-     -> titleCase en el contexto del error
-  -> geocodingRows
-```
-
-Bloque REST Countries:
-
-```text
-Promise.all(countrySummaries.map(...))
-  -> safeLoad(() => getCountryInfo(item.country))
-     -> getCountryInfo del service
-        -> fetch GET /api/v1/citys-stats/integrations/country/:country
-           -> backend v1 app.get(`${BASE_API_URL}/integrations/country/:country`)
-              -> getCountryInfo del backend
-                 -> cleanSearchTerm(country)
-                 -> fetchJson(REST Countries)
-                 -> selecciona pais correcto
-           -> res.status(200).json(...)
-        -> handleResponse(response)
-  -> countryResults.map(...)
-     -> collectError
-     -> titleCase
-  -> countryCards
-```
-
-Bloque World Bank:
-
-```text
-Promise.all(countryCards.map(...))
-  -> si no hay cca3:
-     -> Promise.resolve({ data: null, error: "Codigo ISO3 no disponible" })
-  -> si hay cca3:
-     -> safeLoad(() => getWorldBankPopulation(row.countryData.cca3))
-        -> getWorldBankPopulation del service
-           -> fetch GET /api/v1/citys-stats/integrations/world-bank/:countryCode
-              -> backend v1 app.get(`${BASE_API_URL}/integrations/world-bank/:countryCode`)
-                 -> getWorldBankPopulation del backend
-                    -> mira worldBankPopulationCache
-                    -> fetchJson(World Bank) si no esta en cache
-                    -> normalizeWorldBankRow
-                    -> guarda en cache
-              -> res.status(200).json(...)
-           -> handleResponse(response)
-  -> worldBankResults.map(...)
-     -> collectError
-     -> titleCase
-  -> worldBankRows
-```
-
-Bloque APIs SOS externas:
-
-```text
-Promise.all([
-  safeLoad(getSosTouristArrivals),
-  safeLoad(getSosEarthquakes),
-  safeLoad(getSosFifaSquadValues),
-  safeLoad(getSosEsportsEarnings)
-])
-
-getSosTouristArrivals
-  -> fetch GET /api/v1/citys-stats/integrations/sos-tourist-arrivals
-     -> backend getTouristArrivals
-        -> fetchJson(SOS2526-25)
-        -> asArray
-        -> normalizeTouristArrival
-           -> readFiniteNumber
-        -> filter(Boolean)
-     -> buildTouristArrivalsByCountry
-        -> normalizeCountryKey
-     -> sort por totalArrivals
-  -> handleResponse
-
-getSosEarthquakes
-  -> fetch GET /api/v1/citys-stats/integrations/sos-earthquakes
-     -> backend getEarthquakes
-        -> fetchJson(SOS2526-19)
-        -> asArray
-        -> normalizeEarthquake
-           -> countryFromIso3
-           -> readFiniteNumber
-        -> filter(Boolean)
-     -> buildEarthquakesByCountry
-        -> normalizeCountryKey
-     -> sort por maxSeverity
-  -> handleResponse
-
-getSosFifaSquadValues
-  -> fetch GET /api/v1/citys-stats/integrations/sos-fifa-squad-values
-     -> backend getFifaSquadValues
-        -> fetchJson(SOS2526-26)
-        -> asArray
-        -> normalizeFifaSquadValue
-           -> readFiniteNumber
-        -> filter(Boolean)
-     -> buildFifaSquadValuesByCountry
-        -> normalizeCountryKey
-     -> sort por latestTotalMarketValue
-  -> handleResponse
-
-getSosEsportsEarnings
-  -> fetch GET /api/v1/citys-stats/integrations/sos-esports-earnings
-     -> backend getEsportsEarnings
-        -> fetchJson(SOS2526-30)
-        -> asArray
-        -> normalizeEsportsEarning
-           -> readFiniteNumber
-        -> filter(Boolean)
-     -> buildEsportsEarningsByCountry
-        -> normalizeCountryKey
-     -> sort por topCountryEarnings
-  -> handleResponse
+  -> getCitysStatsIntegrationSummary(selectedLimit) otra vez
 ```
 
 Preparar datos finales de pantalla:
 
 ```text
-collectError para turismo, terremotos, FIFA y eSports
-touristCountries = topCountries(tourismResult.data, "totalArrivals")
-  -> numberOrNull
-earthquakeCountries = topCountries(earthquakeResult.data, "maxSeverity")
-  -> numberOrNull
-fifaCountries = topCountries(fifaResult.data, "latestTotalMarketValue")
-  -> numberOrNull
-esportsCountries = topCountries(esportsResult.data, "topCountryEarnings")
-  -> numberOrNull
-integrationErrors = errors
+geocodingRows = countrySummaries.map(...)
+countryCards = countrySummaries.map(... countryInfo ...)
+worldBankRows = countrySummaries.map(... worldBankPopulation ...)
+touristCountries = summaryDataset(summary, "touristCountries", "totalArrivals")
+earthquakeCountries = summaryDataset(summary, "earthquakeCountries", "maxSeverity")
+fifaCountries = summaryDataset(summary, "fifaCountries", "latestTotalMarketValue")
+esportsCountries = summaryDataset(summary, "esportsCountries", "topCountryEarnings")
+integrationErrors = collectSummaryErrors(summary, countrySummaries)
+```
+
+Punto importante para defensa:
+
+```text
+El resumen NO se cachea.
+Cada peticion lee NeDB de nuevo.
+Solo se cachean respuestas de APIs externas dentro de fetchJson.
 ```
 
 Final de la pantalla:
@@ -3947,9 +3886,9 @@ Comprobaciones externas no verificables desde el codigo:
 
 Estos puntos no se pueden confirmar mirando solo el repositorio local, asi que no deben presentarse como errores del proyecto ni como funcionalidades pendientes del codigo.
 
-## 23. Guion de defensa oral
+## 23. Guion de defensa practica
 
-Esta seccion esta reescrita para la defensa real: no es un discurso de 10 minutos. Es un guion de actuacion para cuando el profesor te pida tareas concretas delante del sistema, Chrome DevTools, Postman y el codigo.
+Esta seccion esta reescrita para la defensa real: no es un discurso cerrado. Es un guion de actuacion para cuando el profesor te pida tareas concretas delante del sistema, Chrome DevTools, Postman y el codigo.
 
 Regla de oro:
 
@@ -4036,14 +3975,25 @@ Si dicen:
 ```text
 Entra en la interfaz de gestion de tus datos.
 Abre la parte donde se muestran los datos.
+Abre la grafica donde aparecen tus datos.
 Ensename la pantalla donde puedes gestionar tus datos.
 ```
 
-Abres:
+Si piden gestionar, crear, editar o borrar, abres:
 
 ```text
 /citys-stats
 ```
+
+Si piden literalmente la grafica, abres:
+
+```text
+/analytics/citys-stats
+```
+
+Y dices:
+
+> La grafica no se edita directamente. La uso para identificar el dato; para cambiarlo voy a `/citys-stats`, edito el registro y luego vuelvo a la grafica para comprobar que se ha actualizado.
 
 Frase:
 
@@ -4079,7 +4029,7 @@ Haces:
 
 1. Ir a `/citys-stats`.
 2. Si no hay datos, pulsar `Cargar datos de ejemplo`.
-3. Buscar el registro.
+3. Buscar el registro por ciudad o pais.
 4. Pulsar `Editar`.
 5. Cambiar `Poblacion estimada en 2025`.
 6. Pulsar `Guardar cambios`.
@@ -4089,6 +4039,12 @@ Haces:
 Frase mientras lo haces:
 
 > Lo cambio desde la interfaz, no desde el codigo ni desde la base de datos. La pantalla de edicion llama al service y el service hace una peticion `PUT` al backend.
+
+Donde tocas literalmente:
+
+```text
+/citys-stats -> boton Editar -> campo "Poblacion estimada en 2025" -> Guardar cambios
+```
 
 Flujo si solo cambia la poblacion:
 
@@ -4169,11 +4125,294 @@ Peticiones que debes reconocer:
 | Borrar | `DELETE /api/v2/citys-stats/:city/:country` |
 | Grafica | `GET /api/v2/citys-stats?sort=-un_2025_population` |
 | Mapa | `GET /api/v2/citys-stats?sort=-un_2025_population` |
-| Integraciones | `GET /api/v1/citys-stats/integrations/...` |
+| Integraciones | `GET /api/v1/citys-stats/integrations/summary?limit=N` |
 
 Frase:
 
 > En `Headers` se ve el metodo, la URL y el status. En `Payload` se ve el JSON enviado en `POST` o `PUT`. En `Response` o `Preview` se ve el JSON que devuelve la API.
+
+### Tarea 5B: que mirar exactamente en Network
+
+Esta parte es importante porque el profesor puede abrir DevTools y pedir:
+
+```text
+Senalame cual es la peticion que carga los datos.
+Senalame si esta peticion pasa por proxy.
+Explicame por que salen tantas lineas en Network.
+```
+
+Primero, no te asustes por ver muchas filas. Network mezcla cosas distintas:
+
+| Tipo en Network | Que es | Importancia |
+| --- | --- | --- |
+| `document` | La pagina HTML que abre el navegador, por ejemplo `/citys-stats` | No es la API de datos |
+| `script` | JS compilado de Svelte/Vite, por ejemplo `index-....js` | No es la API de datos |
+| `stylesheet` | CSS compilado, por ejemplo `index-....css` | No es la API de datos |
+| `png`, `svg` | Imagenes, favicon o banderas | No es la API de datos |
+| `fetch` | Peticiones hechas con `fetch()` desde el frontend | Estas son las importantes |
+
+Filtro recomendado:
+
+```text
+Network -> Fetch/XHR
+```
+
+Si aun asi ves muchas cosas, mira la columna `Name` y abre solo las filas que empiecen por:
+
+```text
+/api/
+```
+
+O haz clic en la fila y mira en `Headers` el campo:
+
+```text
+Request URL
+```
+
+Chrome a veces muestra en `Name` solo la ultima parte de la URL. Por ejemplo puede mostrar `citys-stats`, pero al abrirla en `Headers` se ve la ruta completa:
+
+```text
+/api/v2/citys-stats
+```
+
+#### Caso 1: entrar en `/citys-stats`
+
+Captura real esperada al abrir la pantalla:
+
+```text
+GET 200 document   /citys-stats
+GET 200 stylesheet /assets/index-....css
+GET 200 script     /assets/chunk-....js
+GET 200 script     /assets/index-....js
+GET 200 fetch      /api/v2/citys-stats
+```
+
+La peticion de datos es:
+
+```text
+GET /api/v2/citys-stats
+```
+
+Respuesta:
+
+```text
+200 OK
+Array JSON con los registros de citys-stats
+```
+
+Frase para decir:
+
+> La fila importante es la de tipo `fetch` hacia `/api/v2/citys-stats`. Las filas `script`, `stylesheet` o `document` son solo recursos de la web. Esta peticion no es un proxy externo: es el frontend llamando a mi backend REST en el mismo dominio.
+
+#### Caso 2: crear un registro desde `/citys-stats`
+
+Al crear desde el formulario deben aparecer dos peticiones importantes:
+
+```text
+POST 201 fetch /api/v2/citys-stats
+GET  200 fetch /api/v2/citys-stats
+```
+
+Explicacion:
+
+1. `POST /api/v2/citys-stats`: envia el JSON nuevo al backend.
+2. El backend valida, comprueba duplicados e inserta en NeDB.
+3. Si va bien devuelve `201 Created`.
+4. Despues el frontend recarga la lista con `GET /api/v2/citys-stats`.
+
+En la fila del `POST`, abre:
+
+```text
+Payload
+```
+
+Debe verse un JSON parecido:
+
+```json
+{
+  "city": "granada",
+  "country": "spain",
+  "un_2025_population": 230000
+}
+```
+
+En `Response` o `Preview` debe verse el objeto creado.
+
+Si ya existe la ciudad y el pais:
+
+```text
+POST /api/v2/citys-stats -> 409 Conflict
+```
+
+Frase para decir:
+
+> Al crear, la accion real de escritura es el `POST`. El `GET` posterior es la recarga automatica de la tabla para que el usuario vea el dato nuevo sin refrescar a mano.
+
+#### Caso 3: buscar con filtros
+
+Ejemplo real:
+
+```text
+GET /api/v2/citys-stats?country=china&sort=-un_2025_population&limit=1
+```
+
+Respuesta:
+
+```text
+200 OK
+Array JSON filtrado, ordenado y limitado
+```
+
+Frase:
+
+> Los filtros no se aplican solo en el navegador. El frontend construye query params y la API responde ya con el subconjunto pedido.
+
+#### Caso 4: abrir y guardar edicion
+
+Al abrir una edicion:
+
+```text
+GET /api/v2/citys-stats/:city/:country
+```
+
+Ejemplo:
+
+```text
+GET /api/v2/citys-stats/tokyo/japan
+```
+
+Al guardar sin cambiar `city` ni `country`:
+
+```text
+PUT /api/v2/citys-stats/tokyo/japan
+```
+
+En `Payload` se ve el JSON enviado. En `Response` se ve el objeto actualizado.
+
+Si cambias `city` o `country`, como la clave del recurso es compuesta, la interfaz hace:
+
+```text
+POST   /api/v2/citys-stats
+DELETE /api/v2/citys-stats/:oldCity/:oldCountry
+```
+
+Frase:
+
+> Si solo cambia la poblacion es un `PUT`. Si cambia la clave `city + country`, no puedo actualizar el identificador directamente; creo el recurso nuevo y borro el antiguo.
+
+#### Caso 5: entrar en `/integrations/citys-stats`
+
+Captura real actual esperada:
+
+```text
+GET 200 document /integrations/citys-stats
+GET 304 script   /assets/index-....js
+GET 304 css      /assets/index-....css
+GET 200 fetch    /api/v1/citys-stats/integrations/summary?limit=8
+GET 200 script   /assets/highcharts-more-....js
+GET 200 script   /assets/sankey-....js
+GET 200 script   /assets/treemap-....js
+GET 200 script   /assets/sunburst-....js
+```
+
+La peticion importante es:
+
+```text
+GET /api/v1/citys-stats/integrations/summary?limit=8
+```
+
+Respuesta:
+
+```text
+200 OK
+JSON resumen con datos locales, APIs no SOS y APIs SOS
+```
+
+Frase:
+
+> En integraciones el navegador no llama directamente a Open-Meteo, REST Countries, World Bank ni a las APIs SOS externas. El navegador hace una unica llamada a mi backend: `/api/v1/citys-stats/integrations/summary?limit=8`. Luego Express, en el servidor, hace las peticiones externas, normaliza los datos y devuelve un JSON preparado para los widgets.
+
+Esto es proxy propio porque:
+
+```text
+navegador -> mi Express en Render -> APIs externas
+```
+
+No es:
+
+```text
+navegador -> APIs externas directamente
+```
+
+#### Que significa `304`
+
+`304 Not Modified` no es un fallo. Significa:
+
+```text
+El navegador pregunto si ese recurso habia cambiado.
+El servidor respondio que no.
+Chrome reutiliza la version cacheada.
+```
+
+Suele salir en:
+
+```text
+document
+script
+stylesheet
+imagenes
+```
+
+Tambien puede aparecer en alguna llamada si Chrome esta reutilizando cache. Para ver todo como nuevo:
+
+```text
+DevTools abierto -> Network -> marcar Disable cache -> recargar
+```
+
+Frase:
+
+> `304` no significa error de mi API. Significa que el navegador ha usado cache porque el recurso no ha cambiado. Si quiero ver la respuesta completa, marco `Disable cache` y recargo con DevTools abierto.
+
+#### Si aparecen muchas peticiones antiguas en integraciones
+
+Antes, la vista podia lanzar muchas llamadas separadas, por ejemplo:
+
+```text
+IND
+CHN
+IDN
+BGD
+sos-tourist-arrivals
+sos-earthquakes
+sos-fifa-squad-values
+sos-esports-earnings
+```
+
+Eso era justo el problema de "demasiadas peticiones". La solucion actual es agruparlo en:
+
+```text
+GET /api/v1/citys-stats/integrations/summary?limit=8
+```
+
+Si en Render todavia ves muchas filas antiguas:
+
+1. Puede que Render aun no haya terminado el deploy.
+2. Puede que Chrome tenga JS antiguo cacheado.
+3. Haz hard reload:
+
+```text
+Ctrl + Shift + R
+```
+
+O:
+
+```text
+DevTools -> Network -> Disable cache -> recargar
+```
+
+Frase:
+
+> Si veo muchas llamadas antiguas es porque estoy usando un build viejo o cacheado. En la version corregida, la pantalla de integraciones carga mediante una sola llamada summary al backend.
 
 ### Tarea 6: explicar si usas proxy
 
@@ -4196,7 +4435,7 @@ src/back/v1/citys-stats.js
 
 Frase para demostrarlo:
 
-> En Network, para CRUD veo llamadas a `/api/v2/citys-stats` en el mismo origen de Render. Para integraciones veo llamadas a `/api/v1/citys-stats/integrations/...`; despues, en el backend, Express hace el `fetch` a APIs externas.
+> En Network, para CRUD veo llamadas a `/api/v2/citys-stats` en el mismo origen de Render. Para integraciones veo una llamada a `/api/v1/citys-stats/integrations/summary?limit=N`; despues, en el backend, Express hace el `fetch` a APIs externas.
 
 ### Tarea 7: Postman
 
@@ -4204,6 +4443,12 @@ Base URL:
 
 ```text
 https://sos2526-29.onrender.com
+```
+
+Si lo haces en local:
+
+```text
+http://localhost:10000
 ```
 
 Header para `POST` y `PUT`:
@@ -4236,7 +4481,9 @@ Peticiones:
 
 Si piden `PATCH`:
 
-> Mi CRUD no implementa `PATCH`. Implementa `GET`, `POST`, `PUT` y `DELETE`.
+> Mi CRUD no implementa `PATCH`. Implementa `GET`, `POST`, `PUT` y `DELETE`. Si haces `PATCH /api/v2/citys-stats/defensa-demo/spain`, Express no encontrara una ruta `PATCH` y respondera `404` con la respuesta por defecto, no con un JSON propio de mi API.
+
+Para que el `POST` sea predecible, usa una ciudad que no exista o borra antes `defensa-demo`. Si ya existe, el resultado correcto no es `201`, sino `409`.
 
 ### Tarea 8: predecir respuesta sin pulsar Send
 
@@ -4259,6 +4506,7 @@ Tabla que debes memorizar:
 | `PUT /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
 | `DELETE /api/v2/citys-stats/tokyo/japan` | Existe | `204` | Sin cuerpo |
 | `DELETE /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
+| `PATCH /api/v2/citys-stats/tokyo/japan` | Metodo no implementado | `404` | Respuesta por defecto de Express |
 
 Campos exactos validos:
 
@@ -4269,6 +4517,12 @@ un_2025_population
 ```
 
 La poblacion debe ser entero mayor que cero.
+
+Si preguntan por un campo `year`:
+
+> En mi recurso LCC `citys-stats` no existe campo `year`. Mis campos son `city`, `country` y `un_2025_population`. La validacion equivalente a "valor invalido" es que `un_2025_population` no sea entero mayor que cero.
+
+Si el JSON esta roto de sintaxis, por ejemplo falta una llave, puede fallar antes de entrar al endpoint, en `express.json()`. Eso tambien es `400`, pero no lo genera `normalizeCityStat`.
 
 Frase para escribir:
 
@@ -4354,6 +4608,10 @@ Explicar `PUT`:
 7. Vuelve a buscar y responde 200.
 ```
 
+Si falla NeDB:
+
+> En las rutas CRUD, si la base de datos devuelve error, el backend responde `500`. Ese codigo significa error interno del servidor, no error de la peticion del cliente.
+
 ### Tarea 11: orden de ejecucion y asincronia
 
 Arranque del servidor:
@@ -4391,6 +4649,98 @@ handler POST
 Si hay `await`:
 
 > La funcion se pausa hasta que se resuelve la promesa. Node no se queda bloqueado para siempre; cuando llega el resultado continua justo despues del `await` o entra en `catch` si falla.
+
+### Tarea 11B: ejercicio de letras A, B, C
+
+Si el profesor da numeros de linea y dice:
+
+```text
+Imagina que al principio de estas lineas hay console.log A, B, C...
+Predice que secuencia saldria al arrancar el servidor y hacer loadInitialData.
+```
+
+Hazlo asi:
+
+1. No ejecutes nada al principio; primero predice en papel.
+2. Marca las lineas con comentarios en la misma linea, por ejemplo `/* A */`.
+3. No anadas lineas nuevas, porque cambiarian los numeros.
+4. Separa dos fases: arranque del servidor y peticion HTTP.
+5. En el arranque, Node ejecuta `index.js` de arriba abajo y registra rutas, pero no ejecuta handlers.
+6. Cuando llega `GET /api/v2/citys-stats/loadInitialData`, entonces entra en el handler de esa ruta.
+7. Las llamadas a NeDB son asincronas con callback; el codigo que esta dentro del callback sale despues de que NeDB responda.
+8. Si te deja comprobarlo despues, cambia los comentarios por `console.log("A")`, ejecuta y compara.
+
+Frase clave:
+
+> Que una ruta este escrita en el archivo no significa que se ejecute al arrancar. Al arrancar solo se registra. El handler de `loadInitialData` se ejecuta cuando llega esa peticion desde Postman o desde la interfaz.
+
+### Tarea 11C: chuleta para no fallar el orden de ejecucion
+
+Cuando te den lineas concretas, clasificalas antes de intentar decir letras:
+
+| Tipo de linea | Se ejecuta al arrancar el servidor | Se ejecuta al llegar una peticion | Como explicarlo |
+| --- | --- | --- | --- |
+| `const express = require(...)` | Si | No | Node carga dependencias al leer `index.js`. |
+| `const app = express()` | Si | No | Se crea la aplicacion Express al arrancar. |
+| `app.use(cors())` | Si, se registra | Despues actua como middleware en cada peticion | Al arrancar se instala; en peticiones se aplica. |
+| `const api = require("./src/back/v2/citys-stats")` | Si | No | Carga el modulo de la API. |
+| `citysStatsApiV2(app, db)` | Si | No | Ejecuta el modulo para registrar rutas. |
+| `function normalizeCityStat(...)` | No por si sola | Solo si alguien la llama | Declarar una funcion no ejecuta su cuerpo. |
+| `app.get("/ruta", (req, res) => { ... })` | Si, registra la ruta | El cuerpo se ejecuta si llega esa ruta | La cabecera registra; el interior espera peticion. |
+| Codigo dentro del callback de `app.get` | No | Si coincide metodo y URL | Es el handler real de la peticion. |
+| `db.count(..., callback)` | Dentro de la peticion | Si | Lanza una operacion asincrona a NeDB. |
+| Codigo dentro del callback de NeDB | No inmediatamente | Despues de que NeDB responda | Sale mas tarde que el codigo sincrono que ya estaba en marcha. |
+| `return res.status(...).json(...)` | No al arrancar | Si esa rama se alcanza | Envia la respuesta y termina esa rama. |
+
+Regla practica:
+
+```text
+1. Primero apunta las letras que estan en codigo de arranque.
+2. Ignora el cuerpo de handlers hasta que exista una peticion.
+3. Cuando haya peticion, entra solo en la ruta que coincide con metodo + URL.
+4. Dentro de esa ruta, sigue el codigo de arriba abajo.
+5. Si aparece NeDB o fetch con await, marca que ahi hay espera asincrona.
+6. El callback o lo que va despues del await continua cuando llega el resultado.
+```
+
+Ejemplo mental para `GET /api/v2/citys-stats/loadInitialData` desde servidor recien arrancado:
+
+```text
+FASE 1: arranque
+index.js importa librerias
+index.js crea app y bases NeDB
+index.js carga citys-stats v2
+citys-stats v2 declara constantes y funciones
+citys-stats v2 registra app.get("/loadInitialData")
+index.js registra frontend y listen
+
+FASE 2: peticion
+Postman o frontend pide GET /api/v2/citys-stats/loadInitialData
+Express busca la ruta que coincide
+entra en el handler de loadInitialData
+llama a db.count({})
+cuando NeDB responde:
+  si count > 0:
+    llama a db.find({})
+    cuando NeDB responde:
+      responde 200 con array sin _id
+  si count === 0:
+    llama a db.insert(initialData)
+    cuando NeDB responde:
+      responde 201 con array sin _id
+```
+
+Frase para defender asincronia:
+
+> En JavaScript el archivo se lee de arriba abajo, pero una peticion HTTP y una consulta a NeDB no bloquean todo el programa. El handler arranca, llama a NeDB, y el codigo del callback continua cuando NeDB devuelve el resultado. Por eso, en el ejercicio de letras, las letras dentro de callbacks pueden salir mas tarde que las lineas sincronas.
+
+Si te pierdes durante el ejercicio:
+
+1. Di en voz baja: "arranque o peticion".
+2. Si es arranque, solo cuentan imports, constantes, creacion de app, bases, llamadas a modulos, registro de rutas y `listen`.
+3. Si es peticion, solo cuenta la ruta exacta que coincide.
+4. Si ves `db.find`, `db.count`, `db.insert`, `db.update` o `db.remove`, entra al callback despues.
+5. Si ves `return`, esa rama ya no sigue bajando.
 
 ### Tarea 12: marcar lineas sin cambiar numeros
 
@@ -4472,6 +4822,79 @@ Donde viaja JSON:
 - En el `GET` de refresco no hay body, pero la respuesta trae array JSON.
 - Entre Express y NeDB no hay HTTP; es llamada interna.
 
+Editar dato:
+
+```text
+html -> Svelte script:
+  submit de guardar cambios
+
+Svelte script -> express:
+  PUT /api/v2/citys-stats/:city/:country con JSON
+
+express -> NeDB:
+  db.findOne para comprobar existencia
+
+express -> NeDB:
+  db.update para actualizar
+
+express -> NeDB:
+  db.findOne para leer el actualizado
+
+express -> Svelte script:
+  200 con JSON actualizado
+
+Svelte script -> html:
+  mensaje de exito y formulario actualizado
+```
+
+Borrar dato:
+
+```text
+html -> Svelte script:
+  click en Eliminar
+
+Svelte script -> express:
+  DELETE /api/v2/citys-stats/:city/:country sin body
+
+express -> NeDB:
+  db.remove
+
+NeDB -> express:
+  numRemoved
+
+express -> Svelte script:
+  204 sin cuerpo si se borro
+  404 con JSON si no existia
+
+Svelte script -> express:
+  GET /api/v2/citys-stats para refrescar
+
+express -> Svelte script:
+  200 con array JSON
+```
+
+Cargar grafica:
+
+```text
+html -> Svelte script:
+  se abre /analytics/citys-stats
+
+Svelte script -> express:
+  GET /api/v2/citys-stats?sort=-un_2025_population
+
+express -> NeDB:
+  db.find({})
+
+NeDB -> express:
+  documentos
+
+express -> Svelte script:
+  200 con array JSON
+
+Svelte script -> html:
+  Highcharts pinta la grafica
+```
+
 ### Respuestas relampago
 
 | Orden o pregunta | Respuesta |
@@ -4490,7 +4913,7 @@ Donde viaja JSON:
 | Donde se valida | `normalizeCityStat` y `hasExactCityFields` |
 | Donde se ve el JSON | Network: `Payload`, `Response`, `Preview` |
 
-### Simulacro de 10 minutos
+### Simulacro practico cronometrado
 
 1. Abrir Render.
 2. Abrir `/citys-stats`.
@@ -4507,6 +4930,7 @@ Donde viaja JSON:
 13. Preparar una peticion mala sin pulsar `Send`.
 14. Predecir codigo y JSON.
 15. Dibujar `html -> Svelte script -> express -> NeDB`.
+
 ## 24. Preguntas dificiles y respuestas
 
 ### Por que REST y no rutas tipo `/crearCiudad`
