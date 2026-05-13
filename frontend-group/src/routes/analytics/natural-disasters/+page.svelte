@@ -32,7 +32,11 @@
             // Comprobación de seguridad: solo pintamos si el div ya existe
             if (chartContainer) {
                 Highcharts.chart(chartContainer, {
-                    chart: { type: 'area', backgroundColor: 'transparent' },
+                    chart: { 
+                        type: 'scatter', // 👈 ¡CAMBIO PRINCIPAL: Gráfico de dispersión!
+                        zoomType: 'xy',  // 👈 Extra: Permite hacer zoom arrastrando el ratón (muy útil en scatter)
+                        backgroundColor: 'transparent' 
+                    },
                     title: { text: 'Impacto Total de Desastres Naturales', style: { color: '#f5f7fb' } },
                     xAxis: { categories: categorias, labels: { style: { color: '#9ca3af' } } },
                     yAxis: [
@@ -40,11 +44,22 @@
                         { title: { text: 'Daños Económicos (USD)', style: { color: '#34d399' } }, labels: { style: { color: '#34d399' } }, opposite: true }
                     ],
                     tooltip: { shared: true },
-                    plotOptions: { area: { fillOpacity: 0.3, marker: { enabled: true, radius: 4 } } },
+                    plotOptions: { 
+                        scatter: { // 👈 Cambiamos "area" por "scatter" en las opciones
+                            marker: { 
+                                radius: 6, // Hacemos los puntos un poco más grandes para que se vean bien
+                                symbol: 'circle', // Forma del punto
+                                states: {
+                                    hover: { enabled: true, lineColor: 'rgb(100,100,100)' }
+                                }
+                            } 
+                        } 
+                    },
                     series: [
                         { name: 'Nº Muertes', data: muertes, color: '#ef4444', yAxis: 0 },
                         { name: 'Nº Heridos', data: heridos, color: '#f59e0b', yAxis: 0 },
-                        { name: 'Daños Económicos', data: daños, color: '#10b981', yAxis: 1, dashStyle: 'ShortDash' }
+                        // Quitamos el dashStyle porque en dispersión no hay líneas, solo puntos
+                        { name: 'Daños Económicos', data: daños, color: '#10b981', yAxis: 1 } 
                     ],
                     legend: { itemStyle: { color: '#f5f7fb' } }
                 });
