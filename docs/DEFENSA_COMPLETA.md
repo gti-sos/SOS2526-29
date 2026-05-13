@@ -4131,6 +4131,289 @@ Frase:
 
 > En `Headers` se ve el metodo, la URL y el status. En `Payload` se ve el JSON enviado en `POST` o `PUT`. En `Response` o `Preview` se ve el JSON que devuelve la API.
 
+### Tarea 5B: que mirar exactamente en Network
+
+Esta parte es importante porque el profesor puede abrir DevTools y pedir:
+
+```text
+Senalame cual es la peticion que carga los datos.
+Senalame si esta peticion pasa por proxy.
+Explicame por que salen tantas lineas en Network.
+```
+
+Primero, no te asustes por ver muchas filas. Network mezcla cosas distintas:
+
+| Tipo en Network | Que es | Importancia |
+| --- | --- | --- |
+| `document` | La pagina HTML que abre el navegador, por ejemplo `/citys-stats` | No es la API de datos |
+| `script` | JS compilado de Svelte/Vite, por ejemplo `index-....js` | No es la API de datos |
+| `stylesheet` | CSS compilado, por ejemplo `index-....css` | No es la API de datos |
+| `png`, `svg` | Imagenes, favicon o banderas | No es la API de datos |
+| `fetch` | Peticiones hechas con `fetch()` desde el frontend | Estas son las importantes |
+
+Filtro recomendado:
+
+```text
+Network -> Fetch/XHR
+```
+
+Si aun asi ves muchas cosas, mira la columna `Name` y abre solo las filas que empiecen por:
+
+```text
+/api/
+```
+
+O haz clic en la fila y mira en `Headers` el campo:
+
+```text
+Request URL
+```
+
+Chrome a veces muestra en `Name` solo la ultima parte de la URL. Por ejemplo puede mostrar `citys-stats`, pero al abrirla en `Headers` se ve la ruta completa:
+
+```text
+/api/v2/citys-stats
+```
+
+#### Caso 1: entrar en `/citys-stats`
+
+Captura real esperada al abrir la pantalla:
+
+```text
+GET 200 document   /citys-stats
+GET 200 stylesheet /assets/index-....css
+GET 200 script     /assets/chunk-....js
+GET 200 script     /assets/index-....js
+GET 200 fetch      /api/v2/citys-stats
+```
+
+La peticion de datos es:
+
+```text
+GET /api/v2/citys-stats
+```
+
+Respuesta:
+
+```text
+200 OK
+Array JSON con los registros de citys-stats
+```
+
+Frase para decir:
+
+> La fila importante es la de tipo `fetch` hacia `/api/v2/citys-stats`. Las filas `script`, `stylesheet` o `document` son solo recursos de la web. Esta peticion no es un proxy externo: es el frontend llamando a mi backend REST en el mismo dominio.
+
+#### Caso 2: crear un registro desde `/citys-stats`
+
+Al crear desde el formulario deben aparecer dos peticiones importantes:
+
+```text
+POST 201 fetch /api/v2/citys-stats
+GET  200 fetch /api/v2/citys-stats
+```
+
+Explicacion:
+
+1. `POST /api/v2/citys-stats`: envia el JSON nuevo al backend.
+2. El backend valida, comprueba duplicados e inserta en NeDB.
+3. Si va bien devuelve `201 Created`.
+4. Despues el frontend recarga la lista con `GET /api/v2/citys-stats`.
+
+En la fila del `POST`, abre:
+
+```text
+Payload
+```
+
+Debe verse un JSON parecido:
+
+```json
+{
+  "city": "granada",
+  "country": "spain",
+  "un_2025_population": 230000
+}
+```
+
+En `Response` o `Preview` debe verse el objeto creado.
+
+Si ya existe la ciudad y el pais:
+
+```text
+POST /api/v2/citys-stats -> 409 Conflict
+```
+
+Frase para decir:
+
+> Al crear, la accion real de escritura es el `POST`. El `GET` posterior es la recarga automatica de la tabla para que el usuario vea el dato nuevo sin refrescar a mano.
+
+#### Caso 3: buscar con filtros
+
+Ejemplo real:
+
+```text
+GET /api/v2/citys-stats?country=china&sort=-un_2025_population&limit=1
+```
+
+Respuesta:
+
+```text
+200 OK
+Array JSON filtrado, ordenado y limitado
+```
+
+Frase:
+
+> Los filtros no se aplican solo en el navegador. El frontend construye query params y la API responde ya con el subconjunto pedido.
+
+#### Caso 4: abrir y guardar edicion
+
+Al abrir una edicion:
+
+```text
+GET /api/v2/citys-stats/:city/:country
+```
+
+Ejemplo:
+
+```text
+GET /api/v2/citys-stats/tokyo/japan
+```
+
+Al guardar sin cambiar `city` ni `country`:
+
+```text
+PUT /api/v2/citys-stats/tokyo/japan
+```
+
+En `Payload` se ve el JSON enviado. En `Response` se ve el objeto actualizado.
+
+Si cambias `city` o `country`, como la clave del recurso es compuesta, la interfaz hace:
+
+```text
+POST   /api/v2/citys-stats
+DELETE /api/v2/citys-stats/:oldCity/:oldCountry
+```
+
+Frase:
+
+> Si solo cambia la poblacion es un `PUT`. Si cambia la clave `city + country`, no puedo actualizar el identificador directamente; creo el recurso nuevo y borro el antiguo.
+
+#### Caso 5: entrar en `/integrations/citys-stats`
+
+Captura real actual esperada:
+
+```text
+GET 200 document /integrations/citys-stats
+GET 304 script   /assets/index-....js
+GET 304 css      /assets/index-....css
+GET 200 fetch    /api/v1/citys-stats/integrations/summary?limit=8
+GET 200 script   /assets/highcharts-more-....js
+GET 200 script   /assets/sankey-....js
+GET 200 script   /assets/treemap-....js
+GET 200 script   /assets/sunburst-....js
+```
+
+La peticion importante es:
+
+```text
+GET /api/v1/citys-stats/integrations/summary?limit=8
+```
+
+Respuesta:
+
+```text
+200 OK
+JSON resumen con datos locales, APIs no SOS y APIs SOS
+```
+
+Frase:
+
+> En integraciones el navegador no llama directamente a Open-Meteo, REST Countries, World Bank ni a las APIs SOS externas. El navegador hace una unica llamada a mi backend: `/api/v1/citys-stats/integrations/summary?limit=8`. Luego Express, en el servidor, hace las peticiones externas, normaliza los datos y devuelve un JSON preparado para los widgets.
+
+Esto es proxy propio porque:
+
+```text
+navegador -> mi Express en Render -> APIs externas
+```
+
+No es:
+
+```text
+navegador -> APIs externas directamente
+```
+
+#### Que significa `304`
+
+`304 Not Modified` no es un fallo. Significa:
+
+```text
+El navegador pregunto si ese recurso habia cambiado.
+El servidor respondio que no.
+Chrome reutiliza la version cacheada.
+```
+
+Suele salir en:
+
+```text
+document
+script
+stylesheet
+imagenes
+```
+
+Tambien puede aparecer en alguna llamada si Chrome esta reutilizando cache. Para ver todo como nuevo:
+
+```text
+DevTools abierto -> Network -> marcar Disable cache -> recargar
+```
+
+Frase:
+
+> `304` no significa error de mi API. Significa que el navegador ha usado cache porque el recurso no ha cambiado. Si quiero ver la respuesta completa, marco `Disable cache` y recargo con DevTools abierto.
+
+#### Si aparecen muchas peticiones antiguas en integraciones
+
+Antes, la vista podia lanzar muchas llamadas separadas, por ejemplo:
+
+```text
+IND
+CHN
+IDN
+BGD
+sos-tourist-arrivals
+sos-earthquakes
+sos-fifa-squad-values
+sos-esports-earnings
+```
+
+Eso era justo el problema de "demasiadas peticiones". La solucion actual es agruparlo en:
+
+```text
+GET /api/v1/citys-stats/integrations/summary?limit=8
+```
+
+Si en Render todavia ves muchas filas antiguas:
+
+1. Puede que Render aun no haya terminado el deploy.
+2. Puede que Chrome tenga JS antiguo cacheado.
+3. Haz hard reload:
+
+```text
+Ctrl + Shift + R
+```
+
+O:
+
+```text
+DevTools -> Network -> Disable cache -> recargar
+```
+
+Frase:
+
+> Si veo muchas llamadas antiguas es porque estoy usando un build viejo o cacheado. En la version corregida, la pantalla de integraciones carga mediante una sola llamada summary al backend.
+
 ### Tarea 6: explicar si usas proxy
 
 Respuesta correcta, separando casos:
