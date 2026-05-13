@@ -12,6 +12,8 @@
   <a href="/analytics">Analytics</a>
   <!-- Enlace directo a las integraciones externas de citys-stats. -->
   <a href="/integrations">Integraciones</a>
+  <!-- Enlace directo a los videos de defensa. -->
+  <a href="/about">Videos defensa</a>
 </nav>
 
 <style>

@@ -146,7 +146,7 @@
 
 <style>
     .page { max-width: 1000px; margin: 0 auto; padding: 24px; color: #f5f7fb; }
-    h1 { font-size: 2rem; margin-bottom: 5px; color: #f5f7fb; }
+    h1 { font-size: 2rem; margin-bottom: 5px; color: #000000; }
     p { margin-bottom: 24px; color: #9ca3af; }
     .map-container { 
         width: 100%; 

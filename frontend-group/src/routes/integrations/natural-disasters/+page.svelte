@@ -838,7 +838,7 @@
     </div>
 
     <h1>🌍 Integraciones de Desastres Naturales</h1>
-    <p>Comparativa de mis datos con APIs externas y de compañeros.</p>
+    <p style="color: ;">Comparativa de mis datos con APIs externas y de compañeros.</p>
     
     <!-- BLOQUE DE LA INTEGRACIÓN 1 (Productividad) -->
     <section class="card integration-card">
@@ -919,7 +919,8 @@
 
 <style>
     .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px; color: #f5f7fb; }
-    .btn-back { color: white; text-decoration: none; padding: 8px 12px; border: 1px solid #4b5563; border-radius: 8px; }
+    .page > p { color: #555d6a; }
+    .btn-back { color: rgb(0, 0, 0); text-decoration: none; padding: 8px 12px; border: 1px solid #4b5563; border-radius: 8px; }
     .btn-back:hover { background: #374151; }
     .integration-card { margin-top: 30px; background: #ffffff; color: #333; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
     .integration-card h2 { color: #111827; margin-top: 0; }
