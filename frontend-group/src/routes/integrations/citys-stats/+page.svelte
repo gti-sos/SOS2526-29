@@ -1,15 +1,6 @@
 <script>
   import { onDestroy, onMount, tick } from "svelte";
-  import {
-    getCountryInfo,
-    getCountrySummaries,
-    getGeocoding,
-    getSosEarthquakes,
-    getSosEsportsEarnings,
-    getSosFifaSquadValues,
-    getSosTouristArrivals,
-    getWorldBankPopulation
-  } from "@/services/citysStatsIntegrations";
+  import { getCitysStatsIntegrationSummary } from "@/services/citysStatsIntegrations";
   import { loadInitialCitysStats } from "@/services/citysStatsApi";
 
   // Pantalla de integraciones: cruza citys-stats con APIs externas y pinta
@@ -18,24 +9,16 @@
   // FLUJO ASINCRONO DE ESTA PANTALLA
   // 1. Al abrir /integrations/citys-stats, Svelte registra onMount(loadIntegrations).
   // 2. loadIntegrations limpia estado y destruye graficas anteriores.
-  // 3. Primero carga datos locales agregados:
-  //    getCountrySummaries(selectedLimit).
-  //    Si vienen vacios, llama a loadInitialCitysStats y repite getCountrySummaries.
-  // 4. Con esos paises locales lanza llamadas externas por bloques:
-  //    - Promise.all(getGeocoding por cada pais) usando safeLoad.
-  //    - Promise.all(getCountryInfo por cada pais) usando safeLoad.
-  //    - Promise.all(getWorldBankPopulation por cada codigo ISO3) usando safeLoad.
-  //    - Promise.all de APIs SOS externas:
-  //      turismo + terremotos + FIFA + eSports.
-  // 5. safeLoad convierte cada fallo en { data: null, error }, asi una API externa
-  //    rota no impide pintar el resto de widgets.
-  // 6. Los resultados se normalizan en arrays de pantalla:
+  // 3. Pide al backend un unico resumen agregado con datos locales y externos.
+  //    Si viene vacio, llama a loadInitialCitysStats y repite el resumen.
+  // 4. El backend se encarga de cachear y coordinar llamadas a APIs externas.
+  // 5. Los resultados se normalizan en arrays de pantalla:
   //    geocodingRows, countryCards, worldBankRows, touristCountries,
   //    earthquakeCountries, fifaCountries y esportsCountries.
-  // 7. loading=false y await tick espera a que existan los contenedores HTML.
-  // 8. loadHighcharts importa Highcharts y todos los modulos necesarios una vez.
-  // 9. renderIntegrationCharts llama a cada renderXChart y guarda las instancias.
-  // 10. onDestroy limpia todas las graficas al salir.
+  // 6. loading=false y await tick espera a que existan los contenedores HTML.
+  // 7. loadHighcharts importa Highcharts y todos los modulos necesarios una vez.
+  // 8. renderIntegrationCharts llama a cada renderXChart y guarda las instancias.
+  // 9. onDestroy limpia todas las graficas al salir.
 
   // Highcharts se importa de forma diferida para no cargarlo en otras paginas.
   let Highcharts;
@@ -230,14 +213,6 @@
     return parsed === null ? fallback : decimalFormatter.format(parsed);
   }
 
-  // Ordena y limita paises externos por una metrica concreta.
-  function topCountries(data, metric, limit = 6) {
-    return (Array.isArray(data?.countries) ? data.countries : [])
-      .filter((item) => numberOrNull(item?.[metric]) !== null)
-      .sort((a, b) => Number(b[metric] ?? 0) - Number(a[metric] ?? 0))
-      .slice(0, limit);
-  }
-
   // Normaliza nombres de pais para poder cruzar fuentes con guiones, tildes o mayusculas.
   function normalizeCountryKey(value) {
     return String(value ?? "")
@@ -338,24 +313,60 @@
     return Math.max(1, Math.min(scale, (parsed / parsedMax) * scale));
   }
 
-  // Acumula errores de integracion para mostrarlos sin romper toda la pantalla.
-  function collectError(list, label, result, context = "") {
-    if (result.error) {
-      list.push({
-        label,
-        context,
-        message: result.error
-      });
-    }
+  function sourceLabel(source) {
+    if (source?.includes("Open-Meteo")) return "Open-Meteo";
+    if (source?.includes("REST Countries")) return "REST Countries";
+    if (source?.includes("World Bank")) return "World Bank";
+    if (source?.includes("Tourist")) return "SOS2526-25 turistas";
+    if (source?.includes("Earthquakes")) return "SOS2526-19 terremotos";
+    if (source?.includes("FIFA")) return "SOS2526-26 FIFA";
+    if (source?.includes("Esports")) return "SOS2526-30 eSports";
+    return source || "Integracion";
   }
 
-  // Ejecuta una llamada y devuelve siempre un objeto controlado de exito/error.
-  async function safeLoad(task) {
-    try {
-      return { data: await task(), error: "" };
-    } catch (e) {
-      return { data: null, error: e.message || "No se pudo cargar la integracion." };
+  function errorForSource(item, source) {
+    const match = item?.integrationErrors?.find((error) => error.source?.includes(source));
+    return match?.error ?? "";
+  }
+
+  function collectSummaryErrors(summary, items) {
+    const errors = [];
+    const seen = new Set();
+
+    function push(label, message, context = "") {
+      if (!message) return;
+
+      const key = `${label}|${context}|${message}`;
+      if (seen.has(key)) return;
+
+      seen.add(key);
+      errors.push({ label, context, message });
     }
+
+    items.forEach((item) => {
+      const context = titleCase(item.country);
+
+      (item.integrationErrors ?? []).forEach((error) => {
+        const label = sourceLabel(error.source);
+        push(label, error.error, label.startsWith("SOS2526") ? "" : context);
+      });
+    });
+
+    (summary?.studentApis ?? []).forEach((api) => {
+      push(sourceLabel(api.source), api.error);
+    });
+
+    return errors;
+  }
+
+  function summaryDataset(summary, key, metric, limit = 8) {
+    const rows = Array.isArray(summary?.studentApiDatasets?.[key])
+      ? summary.studentApiDatasets[key]
+      : [];
+
+    return rows
+      .filter((row) => numberOrNull(row?.[metric]) !== null)
+      .slice(0, limit);
   }
 
   // Carga Highcharts y todos los modulos usados por los widgets.
@@ -1104,87 +1115,41 @@
     destroyIntegrationCharts();
 
     try {
-      countrySummaries = await getCountrySummaries(selectedLimit);
+      let summary = await getCitysStatsIntegrationSummary(selectedLimit);
+      countrySummaries = Array.isArray(summary?.items) ? summary.items : [];
 
       if (countrySummaries.length === 0) {
         await loadInitialCitysStats();
-        countrySummaries = await getCountrySummaries(selectedLimit);
+        summary = await getCitysStatsIntegrationSummary(selectedLimit);
+        countrySummaries = Array.isArray(summary?.items) ? summary.items : [];
         restoredInitialData = countrySummaries.length > 0;
       }
 
-      const errors = [];
+      geocodingRows = countrySummaries.map((item) => ({
+        ...item,
+        error: errorForSource(item, "Open-Meteo")
+      }));
 
-      const geocodingResults = await Promise.all(
-        countrySummaries.map((item) =>
-          safeLoad(() => getGeocoding(item.topCity, item.country))
-        )
-      );
-      geocodingRows = geocodingResults.map((result, index) => {
-        const local = countrySummaries[index];
-        collectError(errors, "Open-Meteo", result, `${titleCase(local.topCity)}, ${titleCase(local.country)}`);
-        return {
-          ...local,
-          geocoding: result.data,
-          error: result.error
-        };
-      });
+      countryCards = countrySummaries.map((item) => ({
+        ...item,
+        countryData: item.countryInfo,
+        error: errorForSource(item, "REST Countries")
+      }));
 
-      const countryResults = await Promise.all(
-        countrySummaries.map((item) => safeLoad(() => getCountryInfo(item.country)))
-      );
-      countryCards = countryResults.map((result, index) => {
-        const local = countrySummaries[index];
-        collectError(errors, "REST Countries", result, titleCase(local.country));
-        return {
-          ...local,
-          countryData: result.data,
-          error: result.error
-        };
-      });
+      worldBankRows = countrySummaries.map((item) => ({
+        country: item.country,
+        localPopulation: item.un_2025_population,
+        countryInfo: item.countryInfo,
+        worldBank: item.worldBankPopulation,
+        error: errorForSource(item, "World Bank")
+      }));
 
-      const worldBankResults = await Promise.all(
-        countryCards.map((row) => {
-          if (!row.countryData?.cca3) {
-            return Promise.resolve({
-              data: null,
-              error: "Codigo ISO3 no disponible"
-            });
-          }
+      touristCountries = summaryDataset(summary, "touristCountries", "totalArrivals", 8);
+      earthquakeCountries = summaryDataset(summary, "earthquakeCountries", "maxSeverity", 8);
+      fifaCountries = summaryDataset(summary, "fifaCountries", "latestTotalMarketValue", 8);
+      esportsCountries = summaryDataset(summary, "esportsCountries", "topCountryEarnings", 8);
 
-          return safeLoad(() => getWorldBankPopulation(row.countryData.cca3));
-        })
-      );
-      worldBankRows = worldBankResults.map((result, index) => {
-        const local = countrySummaries[index];
-        const countryInfo = countryCards[index]?.countryData;
-        collectError(errors, "World Bank", result, countryInfo?.name || titleCase(local.country));
-        return {
-          country: local.country,
-          localPopulation: local.un_2025_population,
-          countryInfo,
-          worldBank: result.data,
-          error: result.error
-        };
-      });
-
-      const [tourismResult, earthquakeResult, fifaResult, esportsResult] = await Promise.all([
-        safeLoad(getSosTouristArrivals),
-        safeLoad(getSosEarthquakes),
-        safeLoad(getSosFifaSquadValues),
-        safeLoad(getSosEsportsEarnings)
-      ]);
-
-      collectError(errors, "SOS2526-25 turistas", tourismResult);
-      collectError(errors, "SOS2526-19 terremotos", earthquakeResult);
-      collectError(errors, "SOS2526-26 FIFA", fifaResult);
-      collectError(errors, "SOS2526-30 eSports", esportsResult);
-
-      touristCountries = topCountries(tourismResult.data, "totalArrivals", 8);
-      earthquakeCountries = topCountries(earthquakeResult.data, "maxSeverity");
-      fifaCountries = topCountries(fifaResult.data, "latestTotalMarketValue");
-      esportsCountries = topCountries(esportsResult.data, "topCountryEarnings");
-
-      integrationErrors = errors;
+      integrationErrors = collectSummaryErrors(summary, countrySummaries);
 
       loading = false;
       await tick();

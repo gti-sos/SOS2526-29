@@ -69,6 +69,11 @@ module.exports = (app, db) => {
     const ESPORTS_EARNINGS_API_URL =
         "https://sos2526-30.onrender.com/api/v1/esportsearnings-stats";
 
+    const EXTERNAL_CACHE_TTL_MS = 5 * 60 * 1000;
+
+    const externalJsonCache = new Map();
+    const externalJsonPendingRequests = new Map();
+
     // -------------------------------------------------------------------------
     // Diccionario de códigos ISO3 a nombres de países
     // -------------------------------------------------------------------------
@@ -308,6 +313,26 @@ module.exports = (app, db) => {
         return limit;
     }
 
+    function readTimedCache(cache, key) {
+        const entry = cache.get(key);
+
+        if (!entry) return { hit: false, value: null };
+
+        if (entry.expiresAt <= Date.now()) {
+            cache.delete(key);
+            return { hit: false, value: null };
+        }
+
+        return { hit: true, value: entry.value };
+    }
+
+    function writeTimedCache(cache, key, value, ttlMs) {
+        cache.set(key, {
+            value,
+            expiresAt: Date.now() + ttlMs
+        });
+    }
+
     // -------------------------------------------------------------------------
     // Caché para World Bank
     // -------------------------------------------------------------------------
@@ -420,6 +445,31 @@ module.exports = (app, db) => {
     // - respuestas que no son JSON
     // - timeout para que la petición no se quede colgada
     async function fetchJson(url, sourceName, timeoutMs = 20000) {
+        const cacheKey = `${sourceName}:${url}`;
+        const cached = readTimedCache(externalJsonCache, cacheKey);
+
+        if (cached.hit) {
+            return cached.value;
+        }
+
+        if (externalJsonPendingRequests.has(cacheKey)) {
+            return externalJsonPendingRequests.get(cacheKey);
+        }
+
+        const request = fetchJsonFromNetwork(url, sourceName, timeoutMs)
+            .then((data) => {
+                writeTimedCache(externalJsonCache, cacheKey, data, EXTERNAL_CACHE_TTL_MS);
+                return data;
+            })
+            .finally(() => {
+                externalJsonPendingRequests.delete(cacheKey);
+            });
+
+        externalJsonPendingRequests.set(cacheKey, request);
+        return request;
+    }
+
+    async function fetchJsonFromNetwork(url, sourceName, timeoutMs = 20000) {
         // AbortController permite cancelar una petición fetch.
         const controller = new AbortController();
 
@@ -1896,8 +1946,20 @@ module.exports = (app, db) => {
                 buildIntegratedCity(base, worldBankByCode, worldBankBatchError, studentApis)
             );
 
+            const touristCountries = [...touristByCountry.values()]
+                .sort((a, b) => b.totalArrivals - a.totalArrivals);
+
+            const earthquakeCountries = [...earthquakesByCountry.values()]
+                .sort((a, b) => b.maxSeverity - a.maxSeverity);
+
+            const fifaCountries = [...fifaByCountry.values()]
+                .sort((a, b) => b.latestTotalMarketValue - a.latestTotalMarketValue);
+
+            const esportsCountries = [...esportsByCountry.values()]
+                .sort((a, b) => b.topCountryEarnings - a.topCountryEarnings);
+
             // 9. Se devuelve el resumen completo.
-            return res.status(200).json({
+            const payload = {
                 // Endpoint local usado como base.
                 localResource: `${BASE_API_URL}/country-summaries`,
 
@@ -1922,8 +1984,7 @@ module.exports = (app, db) => {
                         metricLabel: "Llegadas totales",
 
                         // Top 5 países por llegadas turísticas.
-                        countries: [...touristByCountry.values()]
-                            .sort((a, b) => b.totalArrivals - a.totalArrivals)
+                        countries: touristCountries
                             .slice(0, 5)
                             .map((country) => ({
                                 country: country.country,
@@ -1939,8 +2000,7 @@ module.exports = (app, db) => {
                         metricLabel: "Severidad maxima",
 
                         // Top 5 países por severidad máxima.
-                        countries: [...earthquakesByCountry.values()]
-                            .sort((a, b) => b.maxSeverity - a.maxSeverity)
+                        countries: earthquakeCountries
                             .slice(0, 5)
                             .map((country) => ({
                                 country: country.country,
@@ -1956,8 +2016,7 @@ module.exports = (app, db) => {
                         metricLabel: "Valor plantilla",
 
                         // Top 5 países por valor de plantilla más reciente.
-                        countries: [...fifaByCountry.values()]
-                            .sort((a, b) => b.latestTotalMarketValue - a.latestTotalMarketValue)
+                        countries: fifaCountries
                             .slice(0, 5)
                             .map((country) => ({
                                 country: country.country,
@@ -1973,8 +2032,7 @@ module.exports = (app, db) => {
                         metricLabel: "Premios eSports",
 
                         // Top 5 países por ganancias destacadas de eSports.
-                        countries: [...esportsByCountry.values()]
-                            .sort((a, b) => b.topCountryEarnings - a.topCountryEarnings)
+                        countries: esportsCountries
                             .slice(0, 5)
                             .map((country) => ({
                                 country: country.country,
@@ -1984,12 +2042,22 @@ module.exports = (app, db) => {
                     }
                 ],
 
+                // Datos agrupados completos para que el frontend no llame a cada proxy por separado.
+                studentApiDatasets: {
+                    touristCountries,
+                    earthquakeCountries,
+                    fifaCountries,
+                    esportsCountries
+                },
+
                 // Número de elementos integrados devueltos.
                 count: integrations.length,
 
                 // Datos integrados finales.
                 items: integrations
-            });
+            };
+
+            return res.status(200).json(payload);
         } catch {
             return res.sendStatus(500);
         }
