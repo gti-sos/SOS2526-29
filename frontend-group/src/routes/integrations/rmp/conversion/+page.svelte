@@ -21,6 +21,7 @@
     GBP: "#ed561b"
   };
 
+  // Carga un script externo una sola vez y resuelve al terminar.
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       if (document.querySelector(`script[src="${src}"]`)) return resolve();
@@ -32,6 +33,7 @@
     });
   }
 
+  // Espera a que Highcharts este disponible tras cargar el script CDN.
   function waitForHighcharts() {
     return new Promise(resolve => {
       const check = () => {
@@ -42,6 +44,7 @@
     });
   }
 
+  // Dibuja el grafico que compara precio/unidad y conversiones de divisa.
   function renderChart() {
     if (!chartContainer || !wines.length) return;
     if (rates.USD === null || rates.GBP === null) return;
@@ -142,6 +145,7 @@
     });
   }
 
+  // Consulta una tasa de cambio EUR -> divisa indicada.
   async function fetchRate(code) {
     if (code === "EUR") return 1;
     if (rateCache[code]) return rateCache[code];
@@ -152,6 +156,7 @@
     return data.rate;
   }
 
+  // Carga vinos y tasas de cambio antes de pintar el grafico.
   async function load() {
     loading = true;
     error   = "";
@@ -184,6 +189,7 @@
     }
   }
 
+  // Arranca la integracion al montar la vista.
   onMount(load);
   onDestroy(() => chartInstance?.destroy());
 </script>

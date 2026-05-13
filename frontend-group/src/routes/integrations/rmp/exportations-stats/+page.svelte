@@ -23,6 +23,7 @@
   const fmtDec = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 });
   const fmtInt = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
 
+  // Pasa nombres de pais a formato titulo para mostrarlos mejor.
   function titleCase(str) {
     return String(str ?? "")
       .split(/[-\s]+/)
@@ -31,6 +32,7 @@
       .join(" ");
   }
 
+  // Normaliza paises para poder cruzar wine-stats con exportations-stats.
   function normCountry(str) {
     const cleaned = String(str ?? "")
       .normalize("NFD")
@@ -50,6 +52,7 @@
     return aliases[cleaned] || cleaned;
   }
 
+  // Carga Highcharts y los modulos de Venn y accesibilidad.
   async function loadHighcharts() {
     if (Highcharts) return;
     const mod = await import("highcharts");
@@ -67,16 +70,17 @@
     if (typeof accFn === "function") accFn(Highcharts);
   }
 
- function renderVenn() {
-  if (!vennContainer || !Highcharts) return;
-  vennChart?.destroy();
+  // Pinta el diagrama de Venn de paises compartidos/no compartidos.
+  function renderVenn() {
+    if (!vennContainer || !Highcharts) return;
+    vennChart?.destroy();
 
   // Valores fijos para que los dos círculos tengan el mismo tamaño visual.
   // Solo la intersección es proporcional a `both`.
-  const BASE = 10;
-  const intersectionValue = both > 0 ? Math.max(1, Math.round((both / Math.max(onlyWine + both, onlyArms + both)) * BASE * 2)) : 1;
+    const BASE = 10;
+    const intersectionValue = both > 0 ? Math.max(1, Math.round((both / Math.max(onlyWine + both, onlyArms + both)) * BASE * 2)) : 1;
 
-  vennChart = Highcharts.chart(vennContainer, {
+    vennChart = Highcharts.chart(vennContainer, {
     chart: {
       backgroundColor: "transparent",
       height: 400
@@ -141,9 +145,10 @@
     ],
 
     credits: { enabled: false }
-  });
-}
+    });
+  }
 
+  // Carga vinos y exportaciones, cruza paises y prepara listas auxiliares.
   async function load() {
     loading = true;
     error = "";
@@ -252,6 +257,7 @@
     }
   }
 
+  // Arranca la integracion al abrir la pantalla.
   onMount(load);
   onDestroy(() => vennChart?.destroy());
 </script>

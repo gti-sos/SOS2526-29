@@ -33,6 +33,7 @@
   const fmtDec = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 });
   const fmtInt = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
 
+  // Normaliza texto para comparar tipos de vino y nombres de ingredientes.
   function norm(str) {
     return String(str ?? "")
       .normalize("NFD")
@@ -41,6 +42,7 @@
       .trim();
   }
 
+  // Relaciona cada tipo de vino con un ingrediente que entiende TheCocktailDB.
   function wineTypeToCocktailIngredient(type) {
     const t = norm(type);
     if (t === "red")                  return "Red wine";
@@ -51,6 +53,7 @@
   }
 
   // ── Render Nightingale Rose (ECharts polar bar) ───────────────────────────
+  // Construye el grafico ECharts con tipos de vino y cocktails encontrados.
   async function renderChart() {
     if (!chartContainer || !cocktailRows.length) return;
 
@@ -159,6 +162,7 @@
     chartInstance._onResize = onResize;
   }
 
+  // Pide a TheCocktailDB cocktails que contengan el ingrediente indicado.
   async function fetchCocktailsForIngredient(ingredient) {
     const url = `${COCKTAILS_BY_INGREDIENT_BASE}${encodeURIComponent(ingredient)}`;
     const res = await fetch(url);
@@ -167,6 +171,7 @@
     return Array.isArray(data.drinks) ? data.drinks : [];
   }
 
+  // Carga wine-stats, consulta cocktails por tipo y prepara la tabla/grafico.
   async function load() {
     loading = true;
     error = "";
@@ -218,6 +223,7 @@
     }
   }
 
+  // Ejecuta la carga al entrar en la ruta.
   onMount(load);
   onDestroy(() => {
     if (chartInstance?._onResize) {

@@ -9,6 +9,7 @@
   let error = null;
   let chart = null;
 
+  // Inserta scripts externos en la pagina y resuelve cuando el global existe.
   function loadScript(src, globalName) {
     if (window[globalName]) return Promise.resolve();
 
@@ -29,6 +30,7 @@
     });
   }
 
+  // Carga D3 y C3 solo cuando la pantalla lo necesita.
   async function loadC3() {
     await loadScript(D3_URL, "d3");
     await loadScript(C3_URL, "c3");
@@ -38,8 +40,10 @@
     }
   }
 
+  // Al montar, pide los datos al proxy y genera la grafica.
   onMount(async () => {
     try {
+      // Proxy definido en Express para evitar problemas CORS.
       const res = await fetch("/api/proxy/age-specific-fertility-rates");
       if (!res.ok) throw new Error(`Error ${res.status}`);
       fertility = await res.json();
@@ -60,6 +64,7 @@
     }
   });
 
+  // Transforma los datos de fertilidad en columnas C3 por pais/anio.
   function renderChart() {
     const sample = fertility.slice(0, 20);
     chart?.destroy();

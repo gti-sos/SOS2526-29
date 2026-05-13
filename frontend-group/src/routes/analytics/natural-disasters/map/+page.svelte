@@ -9,6 +9,7 @@
     import MapModule from "highcharts/modules/map";
     import { apiPath } from "@/services/apiBase.js";
 
+    // Div donde Highmaps pintara el mapa.
     let mapContainer;
     let mensaje = "Cargando mapa mundial...";
 
@@ -25,6 +26,7 @@
         'china': 'cn'
     };
 
+    // Carga topologia mundial, datos de la API y pinta el mapa.
     async function cargarMapa() {
         try {
             // 3. Activamos el módulo de mapas (con doble comprobación para evitar el bug de Vite)
@@ -35,10 +37,12 @@
             }
 
             // Descargamos la silueta del mundo desde Highcharts
+            // Topologia oficial de Highcharts con la silueta del mundo.
             const topologyRes = await fetch('https://code.highcharts.com/mapdata/custom/world.topo.json');
             const topology = await topologyRes.json();
 
             // Pedimos tus datos a la API
+            // Datos propios del recurso natural-disasters.
             const res = await fetch(apiPath("/api/v2/natural-disasters"));
             const data = await res.json();
 
@@ -48,6 +52,7 @@
             }
 
             // Transformamos los datos al formato que pide Highmaps
+            // Cada registro se transforma en un punto que Highmaps entiende por hc-key.
             const mapData = data.map(d => {
                 let nombreLimpio = d.country.toLowerCase().trim();
                 let hcKey = codigosPaises[nombreLimpio] || nombreLimpio.substring(0, 2);
@@ -68,6 +73,7 @@
             if (mapContainer) {
                 // 4. Silenciamos el falso error de TypeScript para mapChart
                 // @ts-ignore
+                // Pintado final del mapa con colores segun afectados totales.
                 const chart = Highcharts.mapChart(mapContainer, {
                     chart: {
                         map: topology,
@@ -123,6 +129,7 @@
         }
     }
 
+    // Al montar la pagina se espera a que Svelte haya creado el contenedor.
     onMount(() => {
         // Damos tiempo a Svelte a crear el <div> antes de llamar a la API
         setTimeout(() => cargarMapa(), 200);

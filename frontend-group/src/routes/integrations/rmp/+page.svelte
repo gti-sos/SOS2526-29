@@ -1,6 +1,8 @@
 <script>
+  // Catalogo de integraciones de RMP. Cada objeto alimenta una tarjeta de la vista.
   const integrations = [
     {
+      // Integracion con API SOS de exportaciones; se marca como proxy porque pasa por backend.
       id: "exportations-stats",
       title: "Exportations Stats",
       description: "Análisis de estadísticas de exportaciones mundiales cruzadas con datos de producción vinícola.",
@@ -11,6 +13,7 @@
       url: "/integrations/rmp/exportations-stats"
     },
     {
+      // Uso de drought-stats para relacionar sequias con datos de vino.
       id: "drought-stats",
       title: "Drought Stats",
       description: "Correlación entre sequías por región y el impacto en la producción y calidad del vino.",
@@ -21,6 +24,7 @@
       url: "/integrations/rmp/drought-stats"
     },
     {
+      // Uso sin proxy: el frontend puede consultar la fuente sin endpoint intermedio.
       id: "national-team-rankings",
       title: "National Team Rankings",
       description: "Relación entre el ranking de selecciones nacionales de fútbol y el consumo de vino por país.",
@@ -31,6 +35,7 @@
       url: "/integrations/rmp/national-team-rankings-per-years"
     },
     {
+      // Integracion demografica; proxy necesario para evitar CORS o normalizar respuesta.
       id: "age-specific-fertility",
       title: "Age-Specific Fertility Rates",
       description: "Estudio demográfico entre tasas de fertilidad por edad y tradición vitivinícola por país.",
@@ -41,6 +46,7 @@
       url: "/integrations/rmp/age-specific-fertility-rates"
     },
     {
+      // Integracion geografica/energetica relacionada con agua disponible.
       id: "hydroelectric-plant",
       title: "World Hydroelectric Plant",
       description: "Análisis del impacto de las plantas hidroeléctricas en la disponibilidad hídrica para la viticultura.",
@@ -51,6 +57,7 @@
       url: "/integrations/rmp/world-hydroelectric-plant"
     },
      {
+      // Integracion textual con datos de cocktails.
       id: "cocktails",
       title: "Cocktails",
       description: "Relacion entre cocktails y el tipo de vino que usan.",
@@ -61,6 +68,7 @@
       url: "/integrations/rmp/cocktails"
     },
     {
+      // Integracion con datos de comidas y alcohol de los vinos.
       id: "comidas",
       title: "Comidas",
       description: "Relacion entre el porcentaje de alcohol en los vinos y el tipo de vino.",
@@ -71,6 +79,7 @@
       url: "/integrations/rmp/food"
     },
      {
+      // Integracion de conversion de precio a varias divisas.
       id: "conversion",
       title: "Conversion",
       description: "Relacion entre la puntuacion y el precio en varias divisas.",
@@ -89,6 +98,7 @@
 </svelte:head>
 
 <div class="page">
+  <!-- Cabecera de la pagina de integraciones especificas de wine-stats. -->
   <div class="hero">
     <a href="/integrations" class="back-link">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -114,6 +124,7 @@
     </div>
   </div>
 
+  <!-- Se renderiza una tarjeta por integracion con enlace a su ruta concreta. -->
   <div class="grid">
     {#each integrations as item, i}
       <a href={item.url} class="card" style="--accent: {item.color}">

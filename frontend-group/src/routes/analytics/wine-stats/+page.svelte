@@ -2,15 +2,22 @@
   import { onDestroy, onMount, tick } from "svelte";
   import { getAllWineStats } from "@/services/wine-stats.js";
 
+  // Highcharts se carga de forma dinamica para no cargar librerias pesadas al inicio.
   let Highcharts;
+  // Contenedor donde se insertan las graficas sincronizadas.
   let container;
+  // Contenedor separado para el heatmap.
   let heatmapContainer;
+  // Referencias a las graficas de area para destruirlas al salir.
   let charts = [];
+  // Referencia al heatmap para poder repintarlo o destruirlo.
   let heatmapChart;
+  // Estado de carga, error y datos de la pantalla.
   let loading = true;
   let error = "";
   let wines = [];
 
+// Carga Highcharts y los modulos de accesibilidad y heatmap una sola vez.
 async function loadHighcharts() {
   if (Highcharts) return Highcharts;
   const module = await import("highcharts");
@@ -28,6 +35,7 @@ async function loadHighcharts() {
   return Highcharts;
 }
 
+  // Sincroniza el zoom del eje X entre las distintas graficas.
   function syncExtremes(e) {
     const thisChart = this.chart;
     if (e.trigger !== "syncExtremes") {
@@ -41,6 +49,7 @@ async function loadHighcharts() {
     }
   }
 
+  // Resetea el zoom del resto de graficas cuando una vuelve a su escala inicial.
   function resetZoom(e) {
     if (e.resetSelection) return;
     Highcharts.charts.forEach((chart) => {
@@ -48,6 +57,7 @@ async function loadHighcharts() {
     });
   }
 
+  // Sincroniza tooltip y crosshair al mover el raton o tocar sobre los graficos.
   function bindSync() {
     ["mousemove", "touchmove", "touchstart"].forEach((eventType) => {
       container.addEventListener(eventType, function (e) {
@@ -71,14 +81,18 @@ async function loadHighcharts() {
     };
   }
 
+  // Pinta tres graficas de area: precio, graduacion alcoholica y capacidad.
   function renderCharts() {
+    // Evita duplicar graficas si se vuelve a renderizar.
     charts.forEach((c) => c?.destroy());
     charts = [];
 
+    // Etiquetas cortas para que el eje X no se desborde con titulos largos.
     const categories = wines.map((w) =>
       w.title.length > 20 ? w.title.slice(0, 20) + "…" : w.title
     );
 
+    // Cada dataset define una grafica distinta con sus datos y estilo.
     const datasets = [
       {
         name: "Precio (€)",
@@ -106,6 +120,7 @@ async function loadHighcharts() {
       }
     ];
 
+    // Crea un contenedor y un chart por cada metrica.
     datasets.forEach((dataset) => {
       const chartDiv = document.createElement("div");
       chartDiv.className = "chart-frame";
@@ -166,16 +181,20 @@ async function loadHighcharts() {
       charts.push(c);
     });
 
+    // Al final se activa la sincronizacion de interacciones entre graficas.
     bindSync();
   }
 
+  // Pinta un mapa de calor que cruza tipo de vino con rango de precio.
   function renderHeatmap() {
     if (!heatmapContainer) return;
     heatmapChart?.destroy();
 
+    // Tipos de vino detectados en los datos.
     const types = [...new Set(wines.map(w => w.type || "Otros"))].sort();
     const priceRanges = ["0-8€", "8-12€", "12-16€", "16-20€", "20€+"];
 
+    // Convierte cada precio al indice de su rango.
     function getPriceIndex(price) {
       const p = Number(price);
       if (p < 8) return 0;
@@ -185,6 +204,7 @@ async function loadHighcharts() {
       return 4;
     }
 
+    // Matriz de conteo: clave tipo-rango -> numero de vinos.
     const matrix = {};
     wines.forEach(w => {
       const typeIdx = types.indexOf(w.type || "Otros");
@@ -193,6 +213,7 @@ async function loadHighcharts() {
       matrix[key] = (matrix[key] || 0) + 1;
     });
 
+    // Highcharts heatmap espera puntos [x, y, value].
     const data = [];
     types.forEach((_, ti) => {
       priceRanges.forEach((_, pi) => {
@@ -200,6 +221,7 @@ async function loadHighcharts() {
       });
     });
 
+    // Construccion del heatmap final.
     heatmapChart = Highcharts.chart(heatmapContainer, {
       chart: {
         type: "heatmap",
@@ -265,6 +287,7 @@ async function loadHighcharts() {
     });
   }
 
+  // Flujo principal de la pagina: pedir datos, esperar DOM y pintar widgets.
   async function loadAnalytics() {
     loading = true;
     error = "";
@@ -276,6 +299,7 @@ async function loadHighcharts() {
         return;
       }
       loading = false;
+      // tick garantiza que los div bind:this ya existen antes de crear Highcharts.
       await tick();
       await loadHighcharts();
       renderCharts();
@@ -286,8 +310,10 @@ async function loadHighcharts() {
     }
   }
 
+  // Al entrar en /analytics/wine-stats se carga la analitica.
   onMount(loadAnalytics);
 
+  // Al salir se destruyen los charts para liberar memoria y eventos.
   onDestroy(() => {
     charts.forEach((c) => c?.destroy());
     heatmapChart?.destroy();

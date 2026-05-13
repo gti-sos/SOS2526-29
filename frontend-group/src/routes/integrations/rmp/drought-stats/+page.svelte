@@ -5,8 +5,10 @@
   let loading = true;
   let error = null;
 
+  // Al montar la vista se piden datos al proxy propio del backend.
   onMount(async () => {
     try {
+      // El proxy evita llamadas directas desde el navegador a la API externa.
       const res = await fetch("/api/proxy/drought-stats");
       if (!res.ok) throw new Error(`Error ${res.status}`);
       droughts = await res.json();
@@ -23,11 +25,13 @@
     Red:    { bg: "#dececb", text: "#a13544" }
   };
 
+  // Traduce el nivel de alerta a estilos inline de la tarjeta.
   function alertStyle(level) {
     const c = alertColors[level] || { bg: "#e8e6e2", text: "#555" };
     return `background:${c.bg};color:${c.text}`;
   }
 
+  // Clasifica la severidad en baja, media o alta para aplicar CSS.
   function severityClass(sev) {
     const n = Number(sev) || 0;
     if (n > 100_000_000) return "sev-high";

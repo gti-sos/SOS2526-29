@@ -19,6 +19,7 @@
   const fmtInt = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
 
   // Normalización básica de texto (acentos, mayúsculas)
+  // Normaliza texto general quitando espacios y diferencias de mayusculas.
   function norm(str) {
     return String(str ?? "")
       .normalize("NFD")
@@ -28,6 +29,7 @@
   }
 
   // Normalización de país: convierte español → inglés para cruzar datasets
+  // Normaliza nombres de pais para cruzar rankings con wine-stats.
   function normCountry(str) {
     const cleaned = String(str ?? "")
       .normalize("NFD")
@@ -47,6 +49,7 @@
     return aliases[cleaned] || cleaned;
   }
 
+  // Convierte claves normalizadas a texto legible.
   function titleCase(str) {
     return String(str ?? "")
       .split(/[-\s]+/)
@@ -55,28 +58,33 @@
       .join(" ");
   }
 
+  // Lee el pais desde posibles nombres de campo de la API externa.
   function readCountry(row) {
     return row.country ?? row.team ?? row.national_team ?? row.selection ?? row.name ?? "";
   }
 
+  // Lee el anio desde posibles nombres de campo de la API externa.
   function readYear(row) {
     const value = row.year ?? row.ranking_year ?? row.date_year ?? row.season ?? null;
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
   }
 
+  // Lee el ranking desde posibles nombres de campo.
   function readRank(row) {
     const value = row.rank ?? row.ranking ?? row.position ?? row.team_rank ?? null;
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
   }
 
+  // Lee puntos de ranking desde posibles nombres de campo.
   function readPoints(row) {
     const value = row.points ?? row.score ?? row.total_points ?? null;
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
   }
 
+  // Devuelve clase CSS segun lo bueno que sea el ranking.
   function severityClass(rank) {
     if (rank == null) return "";
     if (rank <= 10) return "rank-top";
@@ -84,6 +92,7 @@
     return "";
   }
 
+  // Carga wine-stats y ranking, cruza por pais y prepara tablas.
   async function load() {
     loading = true;
     error = "";
@@ -220,6 +229,7 @@
     }
   }
 
+  // Ejecuta la integracion al montar la ruta.
   onMount(load);
 </script>
 <svelte:head>

@@ -2,14 +2,19 @@
   import { onDestroy, onMount, tick } from "svelte";
   import { getAllWineStats } from "@/services/wine-stats.js";
 
+  // Highcharts se carga dinamicamente junto con el modulo de mapas.
   let Highcharts;
+  // Div donde Highmaps pintara el mapa mundial.
   let container;
+  // Referencia del mapa para destruirlo al salir de la pantalla.
   let chart;
+  // Estado de carga, error y datos obtenidos desde wine-stats.
   let loading = true;
   let error = "";
   let wines = [];
 
-    async function loadHighcharts() {
+  // Carga Highcharts, accesibilidad y Highmaps una sola vez.
+  async function loadHighcharts() {
   if (Highcharts) return;
   const HC = await import("highcharts");
   Highcharts = HC.default || HC;
@@ -57,17 +62,22 @@
     uruguay: "UY"
   };
 
+  // Agrupa vinos por pais y los transforma al formato que necesita Highmaps.
   function buildMapData(wines) {
     const countryMap = {};
     wines.forEach((w) => {
+      // Convierte el nombre del pais al codigo ISO que usa el mapa.
       const code = countryCodeMap[w.country?.toLowerCase().trim()];
       if (!code) return;
+      // Inicializa el acumulador de ese pais.
       if (!countryMap[code]) {
         countryMap[code] = { code, units: 0, count: 0, country: w.country };
       }
+      // Suma unidades y cuenta cuantos vinos tiene ese pais.
       countryMap[code].units += Number(w.unit) || 0;
       countryMap[code].count += 1;
     });
+    // Cada punto lleva hc-key, valor de color y datos para el tooltip.
     return Object.values(countryMap).map((d) => ({
       "hc-key": d.code.toLowerCase(),
       value: d.units,
@@ -76,15 +86,20 @@
     }));
   }
 
+  // Descarga la topologia del mundo y crea el mapa de unidades por pais.
   async function renderChart() {
+    // Topologia oficial de Highcharts para el mapa mundial.
     const topology = await fetch(
       "https://code.highcharts.com/mapdata/custom/world.topo.json"
     ).then((r) => r.json());
 
+    // Datos agregados ya listos para unirse con el mapa por hc-key.
     const mapData = buildMapData(wines);
 
+    // Destruye el mapa anterior si se repinta.
     chart?.destroy();
 
+    // Highcharts.mapChart pinta el mapa usando la topologia y los datos agregados.
     chart = Highcharts.mapChart(container, {
       chart: {
         map: topology,
@@ -146,6 +161,7 @@
     });
   }
 
+  // Flujo principal: pide vinos, espera el DOM, carga Highmaps y pinta.
   async function loadAnalytics() {
     loading = true;
     error = "";
@@ -157,6 +173,7 @@
         return;
       }
       loading = false;
+      // tick garantiza que container ya esta disponible.
       await tick();
       await loadHighcharts();
       await renderChart();
@@ -166,7 +183,9 @@
     }
   }
 
+  // Al abrir la ruta se cargan los datos del mapa.
   onMount(loadAnalytics);
+  // Al salir se destruye el mapa para no dejar eventos o memoria colgados.
   onDestroy(() => chart?.destroy());
 </script>
 

@@ -4,11 +4,14 @@
     import Highcharts from "highcharts";
     import { apiPath } from "@/services/apiBase.js";
 
+    // Contenedor donde Highcharts pintara la grafica.
     let chartContainer;
     let mensaje = "Cargando analíticas completas...";
 
+    // Carga datos de natural-disasters y pinta la grafica individual.
     async function cargarGrafica() {
         try {
+            // Lee todos los desastres desde la API v2.
             const res = await fetch(apiPath("/api/v2/natural-disasters"));
             if (!res.ok) throw new Error("Error al obtener los datos");
             
@@ -22,6 +25,7 @@
             data.sort((a, b) => a.year - b.year);
 
             // Preparamos los datos
+            // categorias alimenta el eje X y los arrays numericos alimentan las series.
             const categorias = data.map(d => `${d.country} (${d.year})`);
             const muertes = data.map(d => d.death_count);
             const heridos = data.map(d => d.injured_count);
@@ -31,6 +35,7 @@
 
             // Comprobación de seguridad: solo pintamos si el div ya existe
             if (chartContainer) {
+                // Grafica scatter con dos ejes Y: personas afectadas y danos economicos.
                 Highcharts.chart(chartContainer, {
                     chart: { 
                         type: 'scatter', //  Gráfico de dispersión
@@ -69,6 +74,7 @@
         }
     }
 
+    // Al montar la pagina se espera un instante para asegurar que existe el div.
     onMount(() => {
         // Le damos un respiro mínimo a Svelte para que pinte el HTML antes de pedir datos
         setTimeout(() => cargarGrafica(), 100); 

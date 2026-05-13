@@ -22,6 +22,7 @@
   const fmtDec = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 });
   const fmtInt = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
 
+  // Convierte texto normalizado a formato titulo.
   function titleCase(str) {
     return String(str ?? "")
       .split(/[-\s]+/)
@@ -30,6 +31,7 @@
       .join(" ");
   }
 
+  // Normaliza paises para poder cruzar datos hidroelectricos con vinos.
   function normCountry(str) {
     const cleaned = String(str ?? "")
       .normalize("NFD")
@@ -45,6 +47,7 @@
     return cleaned;
   }
 
+  // Carga Highcharts y modulos necesarios para el grafico dumbbell.
   async function loadHighcharts() {
     if (Highcharts) return;
     const mod = await import("highcharts/highstock");
@@ -54,6 +57,7 @@
     await import("highcharts/themes/adaptive");
   }
 
+  // Obtiene datos hidroelectricos y carga inicial si la API externa esta vacia.
   async function fetchHydroData() {
     let res = await fetch(HYDRO_URL);
     if (!res.ok) throw new Error(`world-hydroelectric-plants: ${res.status}`);
@@ -73,6 +77,7 @@
     return Array.isArray(data) ? data : [];
   }
 
+  // Construye las series del grafico agrupadas por pais/anio.
   function buildChartSeries(hydroByCountryYear) {
     const palette = {
       spain: "#01696f",
@@ -95,6 +100,7 @@
     });
   }
 
+  // Renderiza el grafico comparando unidades de vino y capacidad hidroelectrica.
   function renderChart() {
     if (!chartContainer || !Highcharts || !chartSeries.length) return;
 
@@ -161,6 +167,7 @@
     });
   }
 
+  // Cambia la altura del grafico segun el modo elegido por el usuario.
   function setChartSize(mode) {
     if (!stockChart) return;
     if (mode === "small") {
@@ -175,6 +182,7 @@
     }
   }
 
+  // Carga vinos + hidroelectricas, cruza datos y pinta la visualizacion.
   async function load() {
     loading = true;
     error = "";
@@ -287,6 +295,7 @@
     }
   }
 
+  // Arranca la integracion al montar la pantalla.
   onMount(load);
   onDestroy(() => stockChart?.destroy());
 </script>
