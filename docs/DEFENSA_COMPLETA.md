@@ -4674,6 +4674,74 @@ Frase clave:
 
 > Que una ruta este escrita en el archivo no significa que se ejecute al arrancar. Al arrancar solo se registra. El handler de `loadInitialData` se ejecuta cuando llega esa peticion desde Postman o desde la interfaz.
 
+### Tarea 11C: chuleta para no fallar el orden de ejecucion
+
+Cuando te den lineas concretas, clasificalas antes de intentar decir letras:
+
+| Tipo de linea | Se ejecuta al arrancar el servidor | Se ejecuta al llegar una peticion | Como explicarlo |
+| --- | --- | --- | --- |
+| `const express = require(...)` | Si | No | Node carga dependencias al leer `index.js`. |
+| `const app = express()` | Si | No | Se crea la aplicacion Express al arrancar. |
+| `app.use(cors())` | Si, se registra | Despues actua como middleware en cada peticion | Al arrancar se instala; en peticiones se aplica. |
+| `const api = require("./src/back/v2/citys-stats")` | Si | No | Carga el modulo de la API. |
+| `citysStatsApiV2(app, db)` | Si | No | Ejecuta el modulo para registrar rutas. |
+| `function normalizeCityStat(...)` | No por si sola | Solo si alguien la llama | Declarar una funcion no ejecuta su cuerpo. |
+| `app.get("/ruta", (req, res) => { ... })` | Si, registra la ruta | El cuerpo se ejecuta si llega esa ruta | La cabecera registra; el interior espera peticion. |
+| Codigo dentro del callback de `app.get` | No | Si coincide metodo y URL | Es el handler real de la peticion. |
+| `db.count(..., callback)` | Dentro de la peticion | Si | Lanza una operacion asincrona a NeDB. |
+| Codigo dentro del callback de NeDB | No inmediatamente | Despues de que NeDB responda | Sale mas tarde que el codigo sincrono que ya estaba en marcha. |
+| `return res.status(...).json(...)` | No al arrancar | Si esa rama se alcanza | Envia la respuesta y termina esa rama. |
+
+Regla practica:
+
+```text
+1. Primero apunta las letras que estan en codigo de arranque.
+2. Ignora el cuerpo de handlers hasta que exista una peticion.
+3. Cuando haya peticion, entra solo en la ruta que coincide con metodo + URL.
+4. Dentro de esa ruta, sigue el codigo de arriba abajo.
+5. Si aparece NeDB o fetch con await, marca que ahi hay espera asincrona.
+6. El callback o lo que va despues del await continua cuando llega el resultado.
+```
+
+Ejemplo mental para `GET /api/v2/citys-stats/loadInitialData` desde servidor recien arrancado:
+
+```text
+FASE 1: arranque
+index.js importa librerias
+index.js crea app y bases NeDB
+index.js carga citys-stats v2
+citys-stats v2 declara constantes y funciones
+citys-stats v2 registra app.get("/loadInitialData")
+index.js registra frontend y listen
+
+FASE 2: peticion
+Postman o frontend pide GET /api/v2/citys-stats/loadInitialData
+Express busca la ruta que coincide
+entra en el handler de loadInitialData
+llama a db.count({})
+cuando NeDB responde:
+  si count > 0:
+    llama a db.find({})
+    cuando NeDB responde:
+      responde 200 con array sin _id
+  si count === 0:
+    llama a db.insert(initialData)
+    cuando NeDB responde:
+      responde 201 con array sin _id
+```
+
+Frase para defender asincronia:
+
+> En JavaScript el archivo se lee de arriba abajo, pero una peticion HTTP y una consulta a NeDB no bloquean todo el programa. El handler arranca, llama a NeDB, y el codigo del callback continua cuando NeDB devuelve el resultado. Por eso, en el ejercicio de letras, las letras dentro de callbacks pueden salir mas tarde que las lineas sincronas.
+
+Si te pierdes durante el ejercicio:
+
+1. Di en voz baja: "arranque o peticion".
+2. Si es arranque, solo cuentan imports, constantes, creacion de app, bases, llamadas a modulos, registro de rutas y `listen`.
+3. Si es peticion, solo cuenta la ruta exacta que coincide.
+4. Si ves `db.find`, `db.count`, `db.insert`, `db.update` o `db.remove`, entra al callback despues.
+5. Si ves `return`, esa rama ya no sigue bajando.
+
 ### Tarea 12: marcar lineas sin cambiar numeros
 
 Si te dicen "marca esta linea con A sin cambiar la numeracion", no anadas una linea encima.
