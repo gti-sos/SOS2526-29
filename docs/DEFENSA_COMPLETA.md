@@ -1,14 +1,14 @@
 # Defensa completa SOS2526-29
 
-Documento canonico del proyecto para la defensa. Es la fuente principal para estudiar, modificar y explicar el proyecto; el `README.md` queda como entrada breve al repositorio.
+Esta guia reune lo necesario para estudiar, modificar y explicar el proyecto en la defensa. El `README.md` queda como entrada breve al repositorio.
 
-Sustituye toda la documentacion de defensa que antes estaba repartida en varias guias. Esas guias antiguas ya no se conservan como fuentes independientes dentro de `docs/`.
+La defensa se prepara a partir de este documento, para que no haya que contrastar varias guias ni buscar explicaciones repetidas en sitios distintos.
 
 Objetivo: que una persona que no conoce el repositorio pueda entender que hace el proyecto, como se instala, como se ejecuta, como esta organizado, que rutas existen, que funciones importan, como fluyen los datos y como defenderlo ante un profesor o tribunal.
 
-Nota de nombre: el archivo real del repositorio es `docs/DEFENSA_COMPLETA.md`. Cuando en conversaciones o planes aparezca `DEFENSA COMPLETA.md`, se refiere a este documento.
+Archivo de referencia: `docs/DEFENSA_COMPLETA.md`.
 
-Fuente actualizada para estudiar y modificar: este Markdown. Si se quiere una copia PDF para imprimir, debe regenerarse desde esta version.
+Para imprimir o repasar en PDF, se usa la copia generada desde esta misma guia.
 
 ## Indice
 
@@ -5462,14 +5462,14 @@ Si cambia un campo:
 backend + initialData + frontend + analytics + tests
 ```
 
-### Estado final de `docs`
+### Referencias de defensa en `docs`
 
-Los documentos antiguos de defensa dentro de `docs/` ya no deben usarse para estudiar, preparar cambios ni defender el proyecto. Se eliminan como fuentes independientes para evitar duplicar informacion y para que nadie tenga que buscar explicaciones repartidas en varios sitios.
+Para preparar la defensa, la referencia de trabajo dentro de `docs/` es esta guia. Asi se evita estudiar versiones repetidas o explicaciones repartidas entre varios archivos.
 
-Las unicas referencias activas dentro de `docs/` deben ser:
+Archivo principal:
 
 ```text
 docs/DEFENSA_COMPLETA.md
 ```
 
-El PDF antiguo puede usarse solo como copia derivada si se regenera desde este Markdown.
+El PDF de defensa se conserva como copia de lectura e impresion, generada a partir de este documento.

@@ -9,7 +9,7 @@ Toda la documentacion tecnica, guia de instalacion, guia de ejecucion, explicaci
 - [docs/DEFENSA_COMPLETA.md](docs/DEFENSA_COMPLETA.md)
 - [docs/DEFENSA_COMPLETA.pdf](docs/DEFENSA_COMPLETA.pdf) como copia para lectura e impresion en PDF
 
-Los archivos antiguos de defensa dentro de `docs/` se eliminan como fuentes independientes para que toda la informacion activa quede en esos dos documentos.
+Para preparar la defensa, usa esas referencias. Asi toda la explicacion queda concentrada en una guia principal y una copia PDF de lectura.
 
 ## Equipo
 
