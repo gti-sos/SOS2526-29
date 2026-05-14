@@ -8,10 +8,10 @@ const PDF_PATH = path.join(ROOT, "docs", "DEFENSA_COMPLETA.pdf");
 const CSS_PX_PER_MM = 96 / 25.4;
 const PAGE_WIDTH_MM = 210;
 const PAGE_HEIGHT_MM = 297;
-const PAGE_MARGIN_TOP_MM = 13;
-const PAGE_MARGIN_RIGHT_MM = 11;
-const PAGE_MARGIN_BOTTOM_MM = 15;
-const PAGE_MARGIN_LEFT_MM = 11;
+const PAGE_MARGIN_TOP_MM = 10;
+const PAGE_MARGIN_RIGHT_MM = 9;
+const PAGE_MARGIN_BOTTOM_MM = 10;
+const PAGE_MARGIN_LEFT_MM = 9;
 const PRINTABLE_WIDTH_PX = Math.round(
   (PAGE_WIDTH_MM - PAGE_MARGIN_LEFT_MM - PAGE_MARGIN_RIGHT_MM) * CSS_PX_PER_MM
 );
@@ -256,7 +256,7 @@ function buildHtml(markdown) {
 <style>
   @page {
     size: A4;
-    margin: 13mm 11mm 15mm;
+    margin: 10mm 9mm 10mm;
   }
 
   :root {

@@ -564,12 +564,12 @@ module.exports = (app, db) => {
     // 6. Devuelve el creado.
     //
     // USA:
-    // - normalizeCityStat
+    // - parseCityStat
     // - removeDatabaseId
     //
     // RESPUESTA:
     // - 201 con JSON.
-    // - 400 si el body no vale.
+    // - 400 si el body no vale o el pais no esta soportado.
     // - 409 si ya existe.
     // - 500 si falla la base de datos.
     app.post(BASE_API_URL, (req, res) => {
@@ -578,7 +578,7 @@ module.exports = (app, db) => {
         const parsed = parseCityStat(req.body);
         const item = parsed.item;
 
-        // Si item es null, significa que el body no es válido.
+        // Si parsed.error existe, el body no es valido o el pais no esta soportado.
         if (parsed.error) {
             return res.status(400).json({ error: parsed.error });
         }
@@ -671,7 +671,7 @@ module.exports = (app, db) => {
     // 7. Quita _id y devuelve el actualizado.
     //
     // USA:
-    // - normalizeCityStat
+    // - parseCityStat
     // - removeDatabaseId
     //
     // RESPUESTA:
@@ -689,7 +689,7 @@ module.exports = (app, db) => {
         const parsed = parseCityStat(req.body);
         const item = parsed.item;
 
-        // Si el body no es válido, se devuelve error 400.
+        // Si parsed.error existe, se devuelve el error concreto con estado 400.
         if (parsed.error) {
             return res.status(400).json({ error: parsed.error });
         }
