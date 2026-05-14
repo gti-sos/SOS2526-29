@@ -63,7 +63,7 @@
 
         <div class="member-card">
     <div class="member-info">
-        <h3>Alberto Lirola Gomez</h3>
+        <h3> Alberto Lirola Gomez</h3>
         <p class="role">Responsable de: natural-disasters</p>
         <p class="github">
             Usuario GitHub:
