@@ -1043,26 +1043,6 @@ Respuesta corta de defensa:
 
 > Detectamos que la integracion podia generar demasiadas peticiones repetidas. Lo solucionamos moviendo la coordinacion al backend: el frontend hace una sola peticion al endpoint `summary`, el backend consulta y normaliza las fuentes externas, cachea solo respuestas externas y devuelve los datos listos para pintar. Los datos locales no se cachean, asi que los cambios del CRUD se ven al instante.
 
-### Incidencia resuelta: falta de codigo ISO3 en World Bank
-
-Problema detectado:
-
-- `citys-stats` permite guardar los datos locales del usuario.
-- Si un pais no puede resolverse en REST Countries o no trae `cca3`, no hay codigo ISO3 para consultar World Bank.
-- La integracion no debe romper el CRUD ni bloquear la creacion de datos locales por eso.
-
-Solucion aplicada:
-
-- El CRUD de `citys-stats` se queda como antes: no se cambia el contrato ni se renombran paises de la base.
-- En `buildIntegratedCity`, si falta `countryInfo.cca3`, se omite la consulta de World Bank para ese registro.
-- El resumen de integraciones sigue devolviendo el registro local, con `worldBankPopulation: null`.
-- En `integrationErrors` se anade el aviso: `No hay datos externos disponibles para este pais.`
-- La pantalla de integraciones muestra ese aviso en "Avisos de carga" y las graficas simplemente no usan ese punto externo.
-
-Respuesta corta de defensa:
-
-> La API local no debe rechazar un dato solo porque una API externa no pueda enriquecerlo. Por eso mantengo el registro local y hago robusta la integracion: si no hay ISO3, no llamo a World Bank, devuelvo `worldBankPopulation: null` y muestro el aviso "No hay datos externos disponibles para este pais."
-
 ## 16. Funciones importantes explicadas
 
 Esta seccion es la guia tecnica principal para defender y modificar la parte LCC `citys-stats`. La idea no es memorizar todo el repositorio, sino saber leer una funcion, reconocer en que capa esta, explicar por que existe y saber que tocar si en defensa piden un cambio.
@@ -1661,7 +1641,7 @@ function buildIntegratedCity(base, worldBankByCode, worldBankBatchError, student
         worldBankResult = {
             source: "World Bank Indicators API",
             data: null,
-            error: "No hay datos externos disponibles para este pais."
+            error: "Country ISO3 code not available"
         };
     } else if (worldBankBatchError) {
         worldBankResult = {
@@ -1674,7 +1654,7 @@ function buildIntegratedCity(base, worldBankByCode, worldBankBatchError, student
         worldBankResult = {
             source: "World Bank Indicators API",
             data,
-            error: data ? null : "No hay datos externos disponibles para este pais."
+            error: data ? null : "World Bank data not found"
         };
     }
 
@@ -1698,8 +1678,6 @@ function buildIntegratedCity(base, worldBankByCode, worldBankBatchError, student
 Que hace:
 
 Monta el objeto final del endpoint `/api/v1/citys-stats/integrations/summary`: datos locales, geocoding, pais, World Bank y errores parciales.
-
-Si falta el codigo ISO3 (`cca3`), no se hace llamada a World Bank para ese registro. El dato local sigue apareciendo, `worldBankPopulation` queda en `null` y la interfaz muestra el aviso `No hay datos externos disponibles para este pais.`
 
 Como te pueden pedir cambiarla:
 

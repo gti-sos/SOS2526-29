@@ -349,7 +349,6 @@ module.exports = (app, db) => {
     // Si ya hemos pedido la población de JPN, se guarda en el Map.
     // La próxima vez se lee desde aquí, sin volver a llamar a la API externa.
     const worldBankPopulationCache = new Map();
-    const EXTERNAL_COUNTRY_DATA_UNAVAILABLE = "No hay datos externos disponibles para este pais.";
 
     // -------------------------------------------------------------------------
     // Funciones auxiliares para leer datos locales
@@ -861,13 +860,11 @@ module.exports = (app, db) => {
         let worldBankResult;
 
         // Si no tenemos código ISO3, no podemos consultar World Bank.
-        // El registro local sigue siendo valido aunque falte ISO3.
-        // Por eso se omite World Bank y se devuelve un aviso legible.
         if (!code) {
             worldBankResult = {
                 source: "World Bank Indicators API",
                 data: null,
-                error: EXTERNAL_COUNTRY_DATA_UNAVAILABLE
+                error: "Country ISO3 code not available"
             };
         }
 
@@ -887,7 +884,7 @@ module.exports = (app, db) => {
             worldBankResult = {
                 source: "World Bank Indicators API",
                 data,
-                error: data ? null : EXTERNAL_COUNTRY_DATA_UNAVAILABLE
+                error: data ? null : "World Bank data not found"
             };
         }
 
@@ -1678,7 +1675,7 @@ module.exports = (app, db) => {
             const result = await getWorldBankPopulation(req.params.countryCode);
 
             if (!result) {
-                return res.status(404).json({ error: EXTERNAL_COUNTRY_DATA_UNAVAILABLE });
+                return res.status(404).json({ error: "World Bank data not found" });
             }
 
             return res.status(200).json(result);
