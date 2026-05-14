@@ -4487,26 +4487,333 @@ Para que el `POST` sea predecible, usa una ciudad que no exista o borra antes `d
 
 ### Tarea 8: predecir respuesta sin pulsar Send
 
-Tabla que debes memorizar:
+La forma mas facil de defender esto es mirar el JSON y decir que falla. Estos ejemplos son como si el profesor cambiara algo en Postman y te preguntara antes de pulsar Send.
 
-| Peticion | Condicion | Codigo | Respuesta |
-| --- | --- | --- | --- |
-| `GET /api/v2/citys-stats` | DB accesible | `200` | Array JSON sin `_id` |
-| `GET /api/v2/citys-stats?un_2025_population=abc` | Valor no numerico | `400` | `{ "error": "Invalid query" }` |
-| `GET /api/v2/citys-stats?sort=bad` | Campo no permitido | `400` | `{ "error": "Invalid sort field" }` |
-| `GET /api/v2/citys-stats?offset=-1` | Offset invalido | `400` | `{ "error": "Invalid offset" }` |
-| `GET /api/v2/citys-stats?limit=-1` | Limit invalido | `400` | `{ "error": "Invalid limit" }` |
-| `GET /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
-| `POST /api/v2/citys-stats` | Body valido y no duplicado | `201` | Objeto creado |
-| `POST /api/v2/citys-stats` | Duplicado | `409` | `{ "error": "Resource already exists" }` |
-| `POST /api/v2/citys-stats` | Body mal estructurado | `400` | `{ "error": "JSON body does not match expected structure" }` |
-| `POST /api/v2/citys-stats/:city/:country` | POST sobre recurso concreto | `405` | Sin JSON propio |
-| `PUT /api/v2/citys-stats` | PUT sobre coleccion | `405` | Sin JSON propio |
-| `PUT /api/v2/citys-stats/tokyo/japan` | Body no coincide con URL | `400` | `{ "error": "URL and body do not match" }` |
-| `PUT /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
-| `DELETE /api/v2/citys-stats/tokyo/japan` | Existe | `204` | Sin cuerpo |
-| `DELETE /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
-| `PATCH /api/v2/citys-stats/tokyo/japan` | Metodo no implementado | `404` | Respuesta por defecto de Express |
+#### Ejemplo 1: body correcto para crear
+
+Peticion:
+
+```text
+POST /api/v2/citys-stats
+```
+
+Body:
+
+```json
+{
+  "city": "defensa-demo",
+  "country": "spain",
+  "un_2025_population": 123456
+}
+```
+
+Respuesta:
+
+```text
+201 Created
+Devuelve el objeto creado sin _id.
+```
+
+Frase que dices:
+
+> Este body esta bien porque trae exactamente `city`, `country` y `un_2025_population`, y la poblacion es un entero mayor que cero.
+
+#### Ejemplo 2: el profesor quita un campo
+
+Peticion:
+
+```text
+POST /api/v2/citys-stats
+```
+
+Body:
+
+```json
+{
+  "city": "sevilla",
+  "un_2025_population": 684025
+}
+```
+
+Respuesta:
+
+```json
+{
+  "error": "JSON body does not match expected structure"
+}
+```
+
+Codigo: `400`.
+
+Frase que dices:
+
+> Falla porque falta `country`. Mi API exige los tres campos exactos.
+
+#### Ejemplo 3: el profesor mete un campo de mas
+
+Peticion:
+
+```text
+POST /api/v2/citys-stats
+```
+
+Body:
+
+```json
+{
+  "city": "sevilla",
+  "country": "spain",
+  "year": 2025,
+  "un_2025_population": 684025
+}
+```
+
+Respuesta:
+
+```json
+{
+  "error": "JSON body does not match expected structure"
+}
+```
+
+Codigo: `400`.
+
+Frase que dices:
+
+> Aunque los datos parezcan buenos, sobra `year`. En `citys-stats` no existe `year`; solo acepto los tres campos exactos.
+
+#### Ejemplo 4: el profesor rompe la poblacion
+
+Peticion:
+
+```text
+POST /api/v2/citys-stats
+```
+
+Body:
+
+```json
+{
+  "city": "sevilla",
+  "country": "spain",
+  "un_2025_population": "abc"
+}
+```
+
+Respuesta:
+
+```json
+{
+  "error": "JSON body does not match expected structure"
+}
+```
+
+Codigo: `400`.
+
+Frase que dices:
+
+> La estructura de nombres esta bien, pero `un_2025_population` no se puede convertir a entero. Por eso el body no vale.
+
+Si en vez de `"abc"` pone `0`, `-1` o `12.5`, tambien es `400`, porque la poblacion debe ser entero mayor que cero.
+
+#### Ejemplo 5: el profesor repite un recurso
+
+Peticion:
+
+```text
+POST /api/v2/citys-stats
+```
+
+Body:
+
+```json
+{
+  "city": "tokyo",
+  "country": "japan",
+  "un_2025_population": 33412512
+}
+```
+
+Respuesta:
+
+```json
+{
+  "error": "Resource already exists"
+}
+```
+
+Codigo: `409`, si `tokyo/japan` ya existe.
+
+Frase que dices:
+
+> El body es valido, pero la pareja `city` + `country` ya esta en la base de datos. Por eso no es `400`, es `409 Conflict`.
+
+#### Ejemplo 6: actualizar bien con PUT
+
+Peticion:
+
+```text
+PUT /api/v2/citys-stats/tokyo/japan
+```
+
+Body:
+
+```json
+{
+  "city": "tokyo",
+  "country": "japan",
+  "un_2025_population": 34000000
+}
+```
+
+Respuesta:
+
+```text
+200 OK
+Devuelve tokyo/japan actualizado sin _id.
+```
+
+Frase que dices:
+
+> La URL dice `tokyo/japan` y el body tambien dice `tokyo/japan`, asi que puede actualizar la poblacion.
+
+#### Ejemplo 7: PUT con URL y body distintos
+
+Peticion:
+
+```text
+PUT /api/v2/citys-stats/tokyo/japan
+```
+
+Body:
+
+```json
+{
+  "city": "delhi",
+  "country": "india",
+  "un_2025_population": 30222405
+}
+```
+
+Respuesta:
+
+```json
+{
+  "error": "URL and body do not match"
+}
+```
+
+Codigo: `400`.
+
+Frase que dices:
+
+> No actualiza porque la URL apunta a `tokyo/japan`, pero el body intenta guardar `delhi/india`.
+
+#### Ejemplo 8: PUT con recurso que no existe
+
+Peticion:
+
+```text
+PUT /api/v2/citys-stats/nope/spain
+```
+
+Body:
+
+```json
+{
+  "city": "nope",
+  "country": "spain",
+  "un_2025_population": 123
+}
+```
+
+Respuesta:
+
+```json
+{
+  "error": "Resource not found"
+}
+```
+
+Codigo: `404`.
+
+Frase que dices:
+
+> El body esta bien y coincide con la URL, pero ese recurso no existe en la base de datos.
+
+#### Ejemplo 9: trampa de prioridad
+
+Peticion:
+
+```text
+PUT /api/v2/citys-stats/nope/spain
+```
+
+Body:
+
+```json
+{
+  "city": "nope",
+  "un_2025_population": 123
+}
+```
+
+Respuesta:
+
+```json
+{
+  "error": "JSON body does not match expected structure"
+}
+```
+
+Codigo: `400`, no `404`.
+
+Frase que dices:
+
+> Aunque `nope/spain` no exista, la API valida primero el body. Como falta `country`, se queda en `400`.
+
+#### Ejemplo 10: mayusculas y espacios
+
+Peticion:
+
+```text
+PUT /api/v2/citys-stats/tokyo/japan
+```
+
+Body:
+
+```json
+{
+  "city": " TOKYO ",
+  "country": " Japan ",
+  "un_2025_population": 34000000
+}
+```
+
+Respuesta:
+
+```text
+200 OK, si tokyo/japan existe.
+```
+
+Frase que dices:
+
+> Esto puede valer porque la API hace `trim()` y pasa a minusculas. `" TOKYO "` se normaliza a `tokyo`.
+
+#### Ejemplos sin body que tambien pueden preguntar
+
+| Peticion | Codigo | Que dices |
+| --- | --- | --- |
+| `GET /api/v2/citys-stats` | `200` | Array JSON sin `_id` |
+| `GET /api/v2/citys-stats?un_2025_population=abc` | `400` | `{ "error": "Invalid query" }` |
+| `GET /api/v2/citys-stats?sort=bad` | `400` | `{ "error": "Invalid sort field" }` |
+| `GET /api/v2/citys-stats?offset=-1` | `400` | `{ "error": "Invalid offset" }` |
+| `GET /api/v2/citys-stats?limit=-1` | `400` | `{ "error": "Invalid limit" }` |
+| `GET /api/v2/citys-stats/nope/spain` | `404` | `{ "error": "Resource not found" }` |
+| `DELETE /api/v2/citys-stats/tokyo/japan` | `204` | Borrado correcto, sin cuerpo |
+| `POST /api/v2/citys-stats/tokyo/japan` | `405` | POST no se hace sobre recurso concreto |
+| `PUT /api/v2/citys-stats` | `405` | PUT no se hace sobre toda la coleccion |
+| `PATCH /api/v2/citys-stats/tokyo/japan` | `404` | No hay ruta PATCH; respuesta por defecto de Express |
 
 Campos exactos validos:
 
