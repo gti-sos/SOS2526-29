@@ -84,6 +84,8 @@ function friendlyApiMessage(status, rawMessage) {
             return "El numero maximo de resultados debe ser un numero entero igual o mayor que 0.";
         case "JSON body does not match expected structure":
             return "Revise el formulario. Hace falta indicar ciudad, pais y poblacion estimada.";
+        // El backend devuelve esto cuando country no esta en SUPPORTED_COUNTRIES.
+        // Se traduce para que el usuario sepa que debe elegir un pais real.
         case "Invalid country":
             return "El pais indicado no esta soportado. Use un pais real de la lista para evitar errores en las integraciones externas.";
         case "Resource already exists":

@@ -159,6 +159,9 @@ module.exports = (app, db) => {
         "venezuela", "vietnam"
     ]);
 
+    // Alias aceptados por comodidad del usuario.
+    // La clave es lo que puede escribir el usuario ya normalizado.
+    // El valor es el país canónico que realmente se guarda en NeDB.
     const COUNTRY_ALIASES = {
         "alemania": "germany",
         "corea-del-sur": "south-korea",
@@ -230,30 +233,48 @@ module.exports = (app, db) => {
     // Normaliza el pais a la forma canonica guardada por la API.
     // Ejemplo: "South Korea", "south korea" y "south_korea" pasan a "south-korea".
     function normalizeCountryForStorage(country) {
+        // String(...) evita errores si country viene como numero, null o undefined.
         const normalized = String(country ?? "")
+            // Quita espacios al principio y al final.
             .trim()
+            // Separa letras y tildes para poder borrar los acentos.
             .normalize("NFD")
+            // Borra las marcas Unicode de tildes.
             .replace(/[\u0300-\u036f]/g, "")
+            // Guarda todo en minusculas, igual que el resto de la API.
             .toLowerCase()
+            // Quita apostrofes y puntos para aceptar variantes como U.S.A.
             .replace(/['.]/g, "")
+            // Convierte & en texto para evitar simbolos raros.
             .replace(/&/g, "and")
+            // Cambia espacios, barras bajas y cualquier separador por guiones.
             .replace(/[^a-z]+/g, "-")
+            // Elimina guiones sobrantes al principio o al final.
             .replace(/^-+|-+$/g, "");
 
+        // Si el usuario escribio un alias, devolvemos el pais oficial.
+        // Si no era alias, devolvemos el valor normalizado directamente.
         return COUNTRY_ALIASES[normalized] || normalized;
     }
 
     // Valida y normaliza un body de citys-stats.
     // Devuelve { item } si es correcto o { error } si debe responder 400.
     function parseCityStat(body) {
+        // Primero comprobamos la estructura exacta del JSON.
+        // Esto mantiene la regla de la asignatura: no campos de mas ni de menos.
         if (!hasExactCityFields(body)) {
             return { error: "JSON body does not match expected structure" };
         }
 
+        // city se guarda en minusculas para que la clave sea estable.
         const city = String(body.city).trim().toLowerCase();
+        // country se guarda normalizado y con alias resueltos.
         const country = normalizeCountryForStorage(body.country);
+        // La poblacion se convierte a Number porque llega desde JSON/formulario.
         const un_2025_population = Number(body.un_2025_population);
 
+        // Validacion general del recurso.
+        // Si falla, el problema es que el JSON no representa un citys-stats valido.
         if (
             !city ||
             !country ||
@@ -263,37 +284,21 @@ module.exports = (app, db) => {
             return { error: "JSON body does not match expected structure" };
         }
 
+        // Validacion nueva: el pais debe estar en la lista soportada.
+        // Si no esta, no se guarda, porque luego REST Countries/World Bank no
+        // podrian obtener ISO3 ni datos externos para las integraciones.
         if (!SUPPORTED_COUNTRIES.has(country)) {
             return { error: "Invalid country" };
         }
 
+        // Si todo va bien, devolvemos el recurso listo para insertar o actualizar.
         return { item: { city, country, un_2025_population } };
     }
 
-    // Limpia, convierte y valida los datos recibidos en POST y PUT.
-    //
-    // Si el body es válido, devuelve un objeto normalizado.
-    // Si el body no es válido, devuelve null.
+    // Envoltorio compatible con el código anterior.
+    // parseCityStat da más detalle del error; esta función solo devuelve item o null.
     function normalizeCityStat(body) {
-        // Primero se comprueba que el objeto tenga exactamente los campos esperados.
         return parseCityStat(body).item || null;
-
-        // Se normaliza la ciudad:
-        // - Se convierte a texto.
-        // - Se quitan espacios al principio y final.
-        // - Se pasa a minúsculas para guardar siempre el mismo formato.
-
-        // Se normaliza el país igual que la ciudad.
-
-        // Se convierte la población a número.
-
-        // Validaciones importantes:
-        // - city no puede estar vacío.
-        // - country no puede estar vacío.
-        // - un_2025_population debe ser un número entero.
-        // - un_2025_population debe ser mayor que 0.
-
-        // Si todo es correcto, se devuelve el registro limpio.
     }
 
     // Limpia un texto antes de enviarlo a una API externa.

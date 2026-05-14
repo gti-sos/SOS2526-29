@@ -1,5 +1,6 @@
-// Paises que la API de citys-stats acepta para evitar registros inventados.
-// Deben coincidir con la lista del backend, porque el backend es la validacion real.
+// Paises que el formulario de citys-stats muestra como opciones validas.
+// Esta lista ayuda al usuario, pero la seguridad real esta en el backend.
+// Debe mantenerse sincronizada con SUPPORTED_COUNTRIES de citys-stats v1/v2.
 export const supportedCountries = [
   "afghanistan", "albania", "algeria", "andorra", "angola", "argentina",
   "armenia", "australia", "austria", "azerbaijan", "bangladesh",
@@ -18,6 +19,9 @@ export const supportedCountries = [
   "venezuela", "vietnam"
 ];
 
+// Alias que el frontend acepta antes de enviar datos al backend.
+// La clave es lo que puede escribir el usuario despues de normalizarlo.
+// El valor es el pais canonico que se manda a la API.
 const countryAliases = {
   "alemania": "germany",
   "corea-del-sur": "south-korea",
@@ -44,19 +48,32 @@ const countryAliases = {
 };
 
 export function normalizeSupportedCountry(country) {
+  // String(...) evita errores si el campo llega vacio, null o como otro tipo.
   const normalized = String(country ?? "")
+    // Quita espacios sobrantes.
     .trim()
+    // Descompone letras con tilde para poder eliminar la tilde.
     .normalize("NFD")
+    // Elimina las marcas Unicode de acentos.
     .replace(/[\u0300-\u036f]/g, "")
+    // Compara siempre en minusculas.
     .toLowerCase()
+    // Borra apostrofes y puntos: U.S.A. pasa a USA antes de los guiones.
     .replace(/['.]/g, "")
+    // Convierte & a texto para no perder significado.
     .replace(/&/g, "and")
+    // Sustituye espacios, barras bajas y otros separadores por guiones.
     .replace(/[^a-z]+/g, "-")
+    // Limpia guiones sobrantes al principio y al final.
     .replace(/^-+|-+$/g, "");
 
+  // Si coincide con un alias, devolvemos el nombre oficial de la API.
+  // Si no coincide, devolvemos el valor normalizado.
   return countryAliases[normalized] || normalized;
 }
 
 export function isSupportedCountry(country) {
+  // Reutiliza la normalizacion para que "España", "espana" y "spain"
+  // se validen contra la misma lista canonica.
   return supportedCountries.includes(normalizeSupportedCountry(country));
 }

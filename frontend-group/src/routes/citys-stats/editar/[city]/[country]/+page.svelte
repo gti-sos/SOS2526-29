@@ -75,25 +75,33 @@
 
   // Valida el formulario antes de guardar.
   function validateForm() {
+    // La ciudad se mantiene como texto libre, pero sin espacios sobrantes.
     const city = String(form.city ?? "").trim();
+    // El pais se normaliza igual que en el backend para aceptar alias.
     const country = normalizeSupportedCountry(form.country);
+    // La poblacion debe ser un entero positivo.
     const un_2025_population = parsePositiveInteger(
       form.un_2025_population,
       "Poblacion estimada en 2025"
     );
 
+    // No se permite guardar un registro sin ciudad.
     if (!city) {
       throw new Error("Indique una ciudad.");
     }
 
+    // No se permite guardar un registro sin pais.
     if (!country) {
       throw new Error("Indique un pais.");
     }
 
+    // Candado de frontend: avisa antes de llamar a la API si el pais no existe.
+    // El backend repite esta validacion, asi que Postman tampoco puede saltarsela.
     if (!isSupportedCountry(country)) {
       throw new Error("Ese pais no esta soportado. Elija un pais real de la lista.");
     }
 
+    // Devuelve el objeto limpio que se enviara con PUT o POST+DELETE si cambia la clave.
     return {
       city,
       country,
