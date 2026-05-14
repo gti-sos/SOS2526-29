@@ -336,7 +336,7 @@
     
     async function cargarIntegracion3() {
         try {
-            // 1. Llamamos a TU backend local y DIRECTAMENTE a la web de terremotos
+            // 1. Llamadas a las APIs
             const urlUSGS = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=1950-01-01&endtime=2024-12-31&minmagnitude=6.5";
             
             const [resMia, resExterna] = await Promise.all([
@@ -350,7 +350,7 @@
             const misDatos = await resMia.json();
             const datosBrutosSismos = await resExterna.json(); 
 
-            // 2. Procesamos los terremotos por año directamente aquí
+            // 2. Procesamos los terremotos por año
             let terremotosPorAno = {};
             for (let sismo of datosBrutosSismos.features) {
                 const fecha = new Date(sismo.properties.time);
@@ -361,89 +361,70 @@
             // 3. Agrupamos tus muertes por año
             let misMuertesPorAno = {};
             for (let miDato of misDatos) {
-                let ano = miDato.year;
-                if (!misMuertesPorAno[ano]) misMuertesPorAno[ano] = 0;
-                misMuertesPorAno[ano] += (parseFloat(miDato.death_count) || 0);
+                let ano = parseInt(miDato.year);
+                misMuertesPorAno[ano] = (misMuertesPorAno[ano] || 0) + (parseFloat(miDato.death_count) || 0);
             }
 
-            // 4. Cruzamos ambos datos por el "Año"
-            let datosCombinados = [];
+            // 4. Separamos los datos en 3 ejes (X, Y, Z) para Plotly
+            let ejeX_Anos = [];
+            let ejeY_Sismos = [];
+            let ejeZ_Muertes = [];
+            let textosInfo = []; // Para mostrar info al pasar el ratón
+
             for (let ano in misMuertesPorAno) {
                 if (terremotosPorAno[ano]) {
-                    datosCombinados.push({
-                        ano: parseInt(ano),
-                        muertes: misMuertesPorAno[ano],
-                        terremotos: terremotosPorAno[ano]
-                    });
+                    ejeX_Anos.push(parseInt(ano));
+                    ejeY_Sismos.push(terremotosPorAno[ano]);
+                    ejeZ_Muertes.push(misMuertesPorAno[ano]);
+                    
+                    textosInfo.push(`Año: ${ano}<br>Terremotos: ${terremotosPorAno[ano]}<br>Muertes: ${misMuertesPorAno[ano]}`);
                 }
             }
 
-            if (datosCombinados.length === 0) {
+            if (ejeX_Anos.length === 0) {
                 throw new Error("No hay años en común entre ambas APIs.");
             }
 
-            datosCombinados.sort((a, b) => a.ano - b.ano);
+            // 5. Dibujamos la Gráfica 3D con Plotly
+            const intentarDibujar = () => {
+                if (typeof Plotly === 'undefined') {
+                    setTimeout(intentarDibujar, 100); // Esperar a que cargue el script de Plotly
+                    return;
+                }
 
-            let etiquetasAnos = [];
-            let lineaMuertes = [];
-            let barrasTerremotos = [];
-
-            for (let dato of datosCombinados) {
-                etiquetasAnos.push(dato.ano);
-                lineaMuertes.push(dato.muertes);
-                barrasTerremotos.push(dato.terremotos);
-            }
-
-            // 5. Dibujamos la gráfica (Chart.js)
-            setTimeout(() => {
-                const ctx = document.getElementById('grafica-externa-1').getContext('2d');
-                if (window.miGraficaExterna) window.miGraficaExterna.destroy();
-
-                window.miGraficaExterna = new Chart(ctx, {
-                    type: 'bar', 
-                    data: {
-                        labels: etiquetasAnos,
-                        datasets: [
-                            {
-                                type: 'bar', 
-                                label: 'Nº Terremotos (Mag > 6.5)',
-                                data: barrasTerremotos,
-                                yAxisID: 'yIzquierda',
-                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                borderWidth: 1
-                            },
-                            {
-                                type: 'bar', 
-                                label: 'Muertes Totales',
-                                data: lineaMuertes,
-                                yAxisID: 'yDerecha',
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                fill: true,
-                                tension: 0.4
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        interaction: { mode: 'index', intersect: false },
-                        scales: {
-                            x: { title: { display: true, text: 'Años' } },
-                            yIzquierda: {
-                                type: 'linear', position: 'left',
-                                title: { display: true, text: 'Nº Terremotos' }
-                            },
-                            yDerecha: {
-                                type: 'linear', position: 'right',
-                                title: { display: true, text: 'Nº Muertes' },
-                                grid: { drawOnChartArea: false }
-                            }
-                        }
+                const trace = {
+                    x: ejeX_Anos,
+                    y: ejeY_Sismos,
+                    z: ejeZ_Muertes,
+                    mode: 'markers',
+                    type: 'scatter3d', // 👈 ¡TIPO 3D! Cumple todas las reglas.
+                    text: textosInfo,
+                    hoverinfo: 'text',
+                    marker: {
+                        size: 6,
+                        color: ejeZ_Muertes, // El color cambia según el número de muertes
+                        colorscale: 'Viridis', // Escala de colores espectacular de Plotly
+                        opacity: 0.9
                     }
-                });
+                };
+
+                const layout = {
+                    title: 'Análisis 3D: Histórico de Terremotos vs Muertes',
+                    margin: { l: 0, r: 0, b: 0, t: 50 },
+                    scene: {
+                        xaxis: { title: 'Año' },
+                        yaxis: { title: 'Nº Terremotos (>6.5)' },
+                        zaxis: { title: 'Muertes Totales' }
+                    },
+                    paper_bgcolor: 'transparent',
+                    font: { color: '#333' }
+                };
+
+                Plotly.newPlot('grafica-externa-1', [trace], layout, { responsive: true });
                 cargando3 = false;
-            }, 500);
+            };
+
+            intentarDibujar();
 
         } catch (error) {
             errorMensaje3 = error.message;
@@ -842,7 +823,7 @@
     
     <!-- BLOQUE DE LA INTEGRACIÓN 1 (Productividad) -->
     <section class="card integration-card">
-        <h2>1. Mis Datos VS Productividad (Chart.js)</h2>
+        <h2>1. Mis Datos VS Productividad (Chart.js | API de compañero G19)</h2>
         <p>Gráfica de barras con doble eje comparando productividad por país y el número histórico de muertes.</p>
         
         {#if errorMensaje1} <p class="error">❌ {errorMensaje1}</p> {/if}
@@ -855,7 +836,7 @@
 
     <!-- BLOQUE DE LA INTEGRACIÓN 2 (IDH) -->
     <section class="card integration-card">
-        <h2>2. Desastres Naturales VS IDH por país (Chart.js)</h2>
+        <h2>2. Desastres Naturales VS IDH por país (Chart.js | API de compañero G26)</h2>
         <p>Relación entre el número de muertes por desastres naturales y el Índice de Desarrollo Humano por país.</p>
         
         {#if errorMensaje2} <p class="error">❌ {errorMensaje2}</p> {/if}
@@ -868,20 +849,18 @@
 
     <!-- BLOQUE DE LA INTEGRACIÓN 3 (API EXTERNA) -->
     <section class="card integration-card">
-        <h2>3. Terremotos Globales VS Mis Muertes (API USGS)</h2>
-        <p>Comparativa mixta (Barras y Líneas) del número de terremotos extremos (Mag > 6.5) y las muertes históricas por año.</p>
+        <h2>3. Terremotos Globales VS Mis Muertes (Plotly.js | API Externa)</h2>
+        <p>Comparativa del número de terremotos extremos (Mag > 6.5) y las muertes históricas por año.</p>
         
         {#if errorMensaje3} <p class="error">❌ {errorMensaje3}</p> {/if}
         {#if cargando3 && !errorMensaje3} <p>⏳ Carga de Terremotos...</p> {/if}
         
-        <div style="width: 100%; height: 400px; display: flex; justify-content: center;">
-            <canvas id="grafica-externa-1"></canvas>
-        </div>
+        <div id="grafica-externa-1" style="width: 100%; height: 500px; margin: 0 auto;"></div>
     </section>
 
     <!-- BLOQUE DE LA INTEGRACIÓN 4 (ApexCharts) -->
     <section class="card integration-card">
-        <h2>4. Mis Datos VS Calentamiento Global (ApexCharts Vía Proxy)</h2>
+        <h2>4. Mis Datos VS Calentamiento Global (ApexCharts | Vía Proxy)</h2>
         <p>Evolución de las muertes por desastres naturales y subida de la temperatura global, renderizado con la librería ApexCharts.</p>
         
         {#if errorMensaje4} <p class="error">❌ {errorMensaje4}</p> {/if}
@@ -893,8 +872,8 @@
 
     <!-- BLOQUE DE LA INTEGRACIÓN 5 (Plotly.js Directo - COVID) -->
     <section class="card integration-card">
-        <h2>5. Desastres Naturales VS COVID-19 (Plotly.js Directo)</h2>
-        <p>Comparativa del total de muertes históricas por desastres naturales frente a las muertes provocadas por la pandemia de COVID-19 por país (API Externa Directa).</p>
+        <h2>5. Desastres Naturales VS COVID-19 (Plotly.js | API Externa)</h2>
+        <p>Comparativa del total de muertes históricas por desastres naturales frente a las muertes provocadas por la pandemia de COVID-19 por país.</p>
         
         {#if errorMensaje5} <p class="error">❌ {errorMensaje5}</p> {/if}
         {#if cargando5 && !errorMensaje5} <p>⏳ Carga de Datos Pandémicos...</p> {/if}
@@ -904,7 +883,7 @@
 
     <!-- BLOQUE DE LA INTEGRACIÓN 6 (Radar Directo NASA EONET) -->
     <section class="card integration-card">
-        <h2>6. Alerta Global: NASA EONET (Radar Directo)</h2>
+        <h2>6. Alerta Global: NASA EONET (Chart.js | API Externa)</h2>
         <p>Comparativa del "Índice de Peligro Histórico" (Mis datos) vs "Índice de Alerta Actual" (Eventos severos activos hoy según los satélites de la NASA).</p>
         
         {#if errorMensaje6} <p class="error">❌ {errorMensaje6}</p> {/if}
