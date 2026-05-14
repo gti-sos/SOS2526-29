@@ -29,7 +29,7 @@
       source: "wine-stats",
       frontendUrl: "/wine-stats",
       analyticsUrl: "/analytics/wine-stats",
-      videoUrl: null,
+      videoUrl: "https://youtu.be/Ekca5ytk92Y",
       apiLinks: [
         {
           id: "api-v1-wine-stats",
