@@ -17,12 +17,15 @@
             <div class="member-info">
                 <h3>Rufino Moreno Pacheco</h3>
                 <p class="role">Responsable de: wine-stats</p>
-                <p class="github">Usuario GitHub: <code>rufmorpac</code></p>
+                <p class="github">
+                    Usuario GitHub:
+                    <a href="https://github.com/rufmorpac" target="_blank" rel="noopener noreferrer" class="github-user">
+                        rufmorpac
+                    </a>
+                </p>
             </div>
             <div class="video-box">
-                <a href="PENDIENTE_VIDEO_RMP" target="_blank" rel="noreferrer" class="btn-video">
-                    Ver video de defensa (D03)
-                </a>
+                <span class="btn-video btn-video-disabled" aria-disabled="true">Video pendiente (D03)</span>
             </div>
         </div>
 
@@ -30,13 +33,18 @@
             <div class="member-info">
                 <h3>Luis Cortes Cobos</h3>
                 <p class="role">Responsable de: citys-stats</p>
-                <p class="github">Usuario GitHub: <code>luicorcob</code></p>
+                <p class="github">
+                    Usuario GitHub:
+                    <a href="https://github.com/luicorcob" target="_blank" rel="noopener noreferrer" class="github-user">
+                        luicorcob
+                    </a>
+                </p>
             </div>
             <div class="video-box">
                 <a
                     href="https://drive.google.com/file/d/1dDY_aw8wsG-JE98NSscfwc51AOb8sGkt/preview"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     class="btn-video"
                     aria-label="Ver video de defensa D03 de Luis Cortes Cobos"
                 >
@@ -49,12 +57,15 @@
             <div class="member-info">
                 <h3>Alberto Lirola Gomez</h3>
                 <p class="role">Responsable de: natural-disasters</p>
-                <p class="github">Usuario GitHub: <code>albertolg10</code></p>
+                <p class="github">
+                    Usuario GitHub:
+                    <a href="https://github.com/albertolg10" target="_blank" rel="noopener noreferrer" class="github-user">
+                        albertolg10
+                    </a>
+                </p>
             </div>
             <div class="video-box">
-                <a href="PENDIENTE_VIDEO_ALG" target="_blank" rel="noreferrer" class="btn-video">
-                    Ver video de defensa (D03)
-                </a>
+                <span class="btn-video btn-video-disabled" aria-disabled="true">Video pendiente (D03)</span>
             </div>
         </div>
     </section>
@@ -144,13 +155,21 @@
         line-height: 1.5;
     }
 
-    .github code {
+    .github-user {
+        display: inline-block;
+        min-width: 0;
         background: #e5e7eb;
         color: #111827 !important;
-        padding: 2px 6px;
-        border-radius: 4px;
+        padding: 3px 8px;
+        border-radius: 6px;
         font-weight: 600;
         border: 1px solid #d1d5db;
+        text-decoration: none;
+    }
+
+    .github-user:hover {
+        background: #d1d5db;
+        color: #030712 !important;
     }
 
     .video-box {
@@ -171,6 +190,13 @@
 
     .btn-video:hover {
         background: #dc2626;
+    }
+
+    .btn-video-disabled,
+    .btn-video-disabled:hover {
+        cursor: not-allowed;
+        background: #9ca3af;
+        color: #111827;
     }
 
     .project-info {
