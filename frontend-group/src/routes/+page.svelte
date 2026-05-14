@@ -29,6 +29,7 @@
       source: "wine-stats",
       frontendUrl: "/wine-stats",
       analyticsUrl: "/analytics/wine-stats",
+      videoUrl: null,
       apiLinks: [
         {
           id: "api-v1-wine-stats",
@@ -55,6 +56,8 @@
       frontendUrl: "/citys-stats",
       // Pantalla de grafica individual de citys-stats.
       analyticsUrl: "/analytics/citys-stats",
+      // Video individual de defensa D03.
+      videoUrl: "https://drive.google.com/file/d/1dDY_aw8wsG-JE98NSscfwc51AOb8sGkt/preview",
       // Enlaces directos a las dos versiones de API de citys-stats.
       apiLinks: [
         {
@@ -89,6 +92,7 @@
       source: "natural-disasters",
       frontendUrl: "/natural-disasters",
       analyticsUrl: "/analytics/natural-disasters",
+      videoUrl: null,
       apiLinks: [
         {
           id: "api-v1-natural-disasters",
@@ -153,6 +157,21 @@
             <a href={member.analyticsUrl} data-testid={`analytics-${member.resource}`} class="btn-analytics">
               Analytics
             </a>
+
+            <!-- Enlace directo al video individual de defensa D03. -->
+            {#if member.videoUrl}
+              <a
+                href={member.videoUrl}
+                target="_blank"
+                rel="noreferrer"
+                data-testid={`video-${member.resource}`}
+                class="btn-video"
+              >
+                Video defensa
+              </a>
+            {:else}
+              <span class="btn-disabled" aria-disabled="true">Video pendiente</span>
+            {/if}
 
             <!-- Enlaces a endpoints REST de la API. -->
             {#each member.apiLinks as link}
@@ -243,6 +262,25 @@
 
   a:hover {
     background: #1d4ed8;
+  }
+
+  .btn-video {
+    background: #ef4444;
+    color: white;
+  }
+
+  .btn-video:hover {
+    background: #dc2626;
+  }
+
+  .btn-disabled {
+    color: #111827;
+    background: #cbd5e1;
+    padding: 10px 14px;
+    border-radius: 10px;
+    display: inline-block;
+    font-weight: 700;
+    cursor: default;
   }
 
   .members {
