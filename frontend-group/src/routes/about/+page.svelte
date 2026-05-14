@@ -24,8 +24,16 @@
                     </a>
                 </p>
             </div>
-            <div class="video-box">
-                <span class="btn-video btn-video-disabled" aria-disabled="true">Video pendiente (D03)</span>
+           <div class="video-box">
+                <a
+                    href="https://youtu.be/Ekca5ytk92Y"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn-video"
+                    aria-label="Ver video de defensa D03 de Rufino Moreno Pacheco"
+                >
+                    Ver video de defensa (D03)
+                </a>
             </div>
         </div>
 

@@ -28,7 +28,7 @@
       id: "national-team-rankings",
       title: "National Team Rankings",
       description: "Relación entre el ranking de selecciones nacionales de fútbol y el consumo de vino por país.",
-      tipo: "USO",
+      tipo: "INTEGRACION",
       proxy:false,
       icon: "⚽",
       color: "#437a22",
@@ -38,7 +38,7 @@
       // Integracion demografica; proxy necesario para evitar CORS o normalizar respuesta.
       id: "age-specific-fertility",
       title: "Age-Specific Fertility Rates",
-      description: "Estudio demográfico entre tasas de fertilidad por edad y tradición vitivinícola por país.",
+      description: "Estudio demográfico entre las tasas de fertilidad por edad y tradición vitivinícola por país.",
       tipo: "USO",
       proxy:true,
       icon: "👶",
