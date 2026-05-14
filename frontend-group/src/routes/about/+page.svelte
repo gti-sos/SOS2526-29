@@ -65,9 +65,11 @@
                 </p>
             </div>
             <div class="video-box">
-                <span class="btn-video btn-video-disabled" aria-disabled="true">Video pendiente (D03)</span>
+                <a href="https://drive.google.com/file/d/1EWnZG67eu5oh1cb4qRatLUafsLchD4Vu/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-video">
+                     Ver Vídeo de Defensa (D03)
+                </a>
             </div>
-        </div>
+</div>
     </section>
 
     <!-- Enlace comun al repositorio oficial entregado en GitHub. -->
