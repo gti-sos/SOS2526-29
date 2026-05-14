@@ -33,7 +33,7 @@
                 <p class="github">Usuario GitHub: <code>luicorcob</code></p>
             </div>
             <div class="video-box">
-                <a href="PENDIENTE_VIDEO_LCC" target="_blank" rel="noreferrer" class="btn-video">
+                <a href="https://drive.google.com/file/d/1dDY_aw8wsG-JE98NSscfwc51AOb8sGkt/view?usp=sharing" target="_blank" rel="noreferrer" class="btn-video">
                     Ver video de defensa (D03)
                 </a>
             </div>
