@@ -65,6 +65,51 @@ module.exports = (app, db) => {
         { city: "mumbai", country: "india", un_2025_population: 20203056 }
     ];
 
+    // Paises admitidos para crear o editar citys-stats.
+    // Evita guardar paises inventados que luego no tienen ISO3 para World Bank.
+    const SUPPORTED_COUNTRIES = new Set([
+        "afghanistan", "albania", "algeria", "andorra", "angola", "argentina",
+        "armenia", "australia", "austria", "azerbaijan", "bangladesh",
+        "belgium", "bolivia", "brazil", "bulgaria", "cambodia", "cameroon",
+        "canada", "chile", "china", "colombia", "costa-rica", "croatia",
+        "cuba", "czech-republic", "denmark", "dominican-republic", "ecuador",
+        "egypt", "el-salvador", "estonia", "ethiopia", "finland", "france",
+        "germany", "ghana", "greece", "guatemala", "hungary", "india",
+        "indonesia", "ireland", "israel", "italy", "japan", "kenya",
+        "malaysia", "mexico", "morocco", "netherlands", "new-zealand",
+        "nigeria", "norway", "pakistan", "panama", "paraguay", "peru",
+        "philippines", "poland", "portugal", "romania", "russia",
+        "saudi-arabia", "singapore", "south-africa", "south-korea", "spain",
+        "sweden", "switzerland", "taiwan", "thailand", "turkey", "ukraine",
+        "united-arab-emirates", "united-kingdom", "united-states", "uruguay",
+        "venezuela", "vietnam"
+    ]);
+
+    const COUNTRY_ALIASES = {
+        "alemania": "germany",
+        "corea-del-sur": "south-korea",
+        "eeuu": "united-states",
+        "england": "united-kingdom",
+        "espana": "spain",
+        "estados-unidos": "united-states",
+        "francia": "france",
+        "great-britain": "united-kingdom",
+        "holanda": "netherlands",
+        "italia": "italy",
+        "paises-bajos": "netherlands",
+        "reino-unido": "united-kingdom",
+        "republic-of-korea": "south-korea",
+        "scotland": "united-kingdom",
+        "u-k": "united-kingdom",
+        "u-s-a": "united-states",
+        "uae": "united-arab-emirates",
+        "uk": "united-kingdom",
+        "united-states-of-america": "united-states",
+        "us": "united-states",
+        "usa": "united-states",
+        "wales": "united-kingdom"
+    };
+
     // -------------------------------------------------------------------------
     // Funciones auxiliares
     // -------------------------------------------------------------------------
@@ -109,6 +154,49 @@ module.exports = (app, db) => {
             keys.every((k, i) => k === expected[i]);
     }
 
+    // Normaliza el pais a la forma canonica guardada por la API.
+    // Ejemplo: "South Korea", "south korea" y "south_korea" pasan a "south-korea".
+    function normalizeCountryForStorage(country) {
+        const normalized = String(country ?? "")
+            .trim()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/['.]/g, "")
+            .replace(/&/g, "and")
+            .replace(/[^a-z]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+
+        return COUNTRY_ALIASES[normalized] || normalized;
+    }
+
+    // Valida y normaliza un body de citys-stats.
+    // Devuelve { item } si es correcto o { error } si debe responder 400.
+    function parseCityStat(body) {
+        if (!hasExactCityFields(body)) {
+            return { error: "JSON body does not match expected structure" };
+        }
+
+        const city = String(body.city).trim().toLowerCase();
+        const country = normalizeCountryForStorage(body.country);
+        const un_2025_population = Number(body.un_2025_population);
+
+        if (
+            !city ||
+            !country ||
+            !Number.isInteger(un_2025_population) ||
+            un_2025_population <= 0
+        ) {
+            return { error: "JSON body does not match expected structure" };
+        }
+
+        if (!SUPPORTED_COUNTRIES.has(country)) {
+            return { error: "Invalid country" };
+        }
+
+        return { item: { city, country, un_2025_population } };
+    }
+
     // Limpia, normaliza y valida un registro de ciudad.
     //
     // Esta función se usa en POST y PUT para asegurarse de que los datos recibidos
@@ -116,34 +204,22 @@ module.exports = (app, db) => {
     function normalizeCityStat(body) {
         // Si el body no tiene exactamente los campos esperados,
         // se devuelve null para indicar que no es válido.
-        if (!hasExactCityFields(body)) return null;
+        return parseCityStat(body).item || null;
 
         // Se convierte la ciudad a texto, se eliminan espacios al principio/final
         // y se pasa a minúsculas para mantener un formato uniforme.
-        const city = String(body.city).trim().toLowerCase();
 
         // Se hace lo mismo con el país.
-        const country = String(body.country).trim().toLowerCase();
 
         // Se convierte la población a número.
-        const un_2025_population = Number(body.un_2025_population);
 
         // Validaciones importantes:
         // - city no puede estar vacío.
         // - country no puede estar vacío.
         // - un_2025_population debe ser un número entero.
         // - un_2025_population debe ser mayor que 0.
-        if (
-            !city ||
-            !country ||
-            !Number.isInteger(un_2025_population) ||
-            un_2025_population <= 0
-        ) {
-            return null;
-        }
 
         // Si todo es correcto, se devuelve el objeto normalizado.
-        return { city, country, un_2025_population };
     }
 
     // RUTA:
@@ -493,13 +569,12 @@ module.exports = (app, db) => {
     app.post(BASE_API_URL, (req, res) => {
 
         // Se normaliza y valida el body recibido.
-        const item = normalizeCityStat(req.body);
+        const parsed = parseCityStat(req.body);
+        const item = parsed.item;
 
         // Si item es null, significa que el body no es válido.
-        if (!item) {
-            return res.status(400).json({
-                error: "JSON body does not match expected structure"
-            });
+        if (parsed.error) {
+            return res.status(400).json({ error: parsed.error });
         }
 
         // Antes de insertar, se comprueba si ya existe un recurso
@@ -602,16 +677,15 @@ module.exports = (app, db) => {
 
         // Se obtienen los identificadores desde la URL.
         const city = req.params.city.trim().toLowerCase();
-        const country = req.params.country.trim().toLowerCase();
+        const country = normalizeCountryForStorage(req.params.country);
 
         // Se valida y normaliza el body.
-        const item = normalizeCityStat(req.body);
+        const parsed = parseCityStat(req.body);
+        const item = parsed.item;
 
         // Si el body no es válido, se devuelve error 400.
-        if (!item) {
-            return res.status(400).json({
-                error: "JSON body does not match expected structure"
-            });
+        if (parsed.error) {
+            return res.status(400).json({ error: parsed.error });
         }
 
         // Comprobación importante:

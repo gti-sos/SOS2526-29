@@ -139,6 +139,51 @@ module.exports = (app, db) => {
         { city: "mumbai", country: "india", un_2025_population: 20203056 }
     ];
 
+    // Paises admitidos para crear o editar citys-stats.
+    // Evita guardar paises inventados que luego no tienen ISO3 para World Bank.
+    const SUPPORTED_COUNTRIES = new Set([
+        "afghanistan", "albania", "algeria", "andorra", "angola", "argentina",
+        "armenia", "australia", "austria", "azerbaijan", "bangladesh",
+        "belgium", "bolivia", "brazil", "bulgaria", "cambodia", "cameroon",
+        "canada", "chile", "china", "colombia", "costa-rica", "croatia",
+        "cuba", "czech-republic", "denmark", "dominican-republic", "ecuador",
+        "egypt", "el-salvador", "estonia", "ethiopia", "finland", "france",
+        "germany", "ghana", "greece", "guatemala", "hungary", "india",
+        "indonesia", "ireland", "israel", "italy", "japan", "kenya",
+        "malaysia", "mexico", "morocco", "netherlands", "new-zealand",
+        "nigeria", "norway", "pakistan", "panama", "paraguay", "peru",
+        "philippines", "poland", "portugal", "romania", "russia",
+        "saudi-arabia", "singapore", "south-africa", "south-korea", "spain",
+        "sweden", "switzerland", "taiwan", "thailand", "turkey", "ukraine",
+        "united-arab-emirates", "united-kingdom", "united-states", "uruguay",
+        "venezuela", "vietnam"
+    ]);
+
+    const COUNTRY_ALIASES = {
+        "alemania": "germany",
+        "corea-del-sur": "south-korea",
+        "eeuu": "united-states",
+        "england": "united-kingdom",
+        "espana": "spain",
+        "estados-unidos": "united-states",
+        "francia": "france",
+        "great-britain": "united-kingdom",
+        "holanda": "netherlands",
+        "italia": "italy",
+        "paises-bajos": "netherlands",
+        "reino-unido": "united-kingdom",
+        "republic-of-korea": "south-korea",
+        "scotland": "united-kingdom",
+        "u-k": "united-kingdom",
+        "u-s-a": "united-states",
+        "uae": "united-arab-emirates",
+        "uk": "united-kingdom",
+        "united-states-of-america": "united-states",
+        "us": "united-states",
+        "usa": "united-states",
+        "wales": "united-kingdom"
+    };
+
     // -------------------------------------------------------------------------
     // Funciones auxiliares básicas
     // -------------------------------------------------------------------------
@@ -182,42 +227,73 @@ module.exports = (app, db) => {
             keys.every((k, i) => k === expected[i]);
     }
 
-    // Limpia, convierte y valida los datos recibidos en POST y PUT.
-    //
-    // Si el body es válido, devuelve un objeto normalizado.
-    // Si el body no es válido, devuelve null.
-    function normalizeCityStat(body) {
-        // Primero se comprueba que el objeto tenga exactamente los campos esperados.
-        if (!hasExactCityFields(body)) return null;
+    // Normaliza el pais a la forma canonica guardada por la API.
+    // Ejemplo: "South Korea", "south korea" y "south_korea" pasan a "south-korea".
+    function normalizeCountryForStorage(country) {
+        const normalized = String(country ?? "")
+            .trim()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/['.]/g, "")
+            .replace(/&/g, "and")
+            .replace(/[^a-z]+/g, "-")
+            .replace(/^-+|-+$/g, "");
 
-        // Se normaliza la ciudad:
-        // - Se convierte a texto.
-        // - Se quitan espacios al principio y final.
-        // - Se pasa a minúsculas para guardar siempre el mismo formato.
+        return COUNTRY_ALIASES[normalized] || normalized;
+    }
+
+    // Valida y normaliza un body de citys-stats.
+    // Devuelve { item } si es correcto o { error } si debe responder 400.
+    function parseCityStat(body) {
+        if (!hasExactCityFields(body)) {
+            return { error: "JSON body does not match expected structure" };
+        }
+
         const city = String(body.city).trim().toLowerCase();
-
-        // Se normaliza el país igual que la ciudad.
-        const country = String(body.country).trim().toLowerCase();
-
-        // Se convierte la población a número.
+        const country = normalizeCountryForStorage(body.country);
         const un_2025_population = Number(body.un_2025_population);
 
-        // Validaciones importantes:
-        // - city no puede estar vacío.
-        // - country no puede estar vacío.
-        // - un_2025_population debe ser un número entero.
-        // - un_2025_population debe ser mayor que 0.
         if (
             !city ||
             !country ||
             !Number.isInteger(un_2025_population) ||
             un_2025_population <= 0
         ) {
-            return null;
+            return { error: "JSON body does not match expected structure" };
         }
 
+        if (!SUPPORTED_COUNTRIES.has(country)) {
+            return { error: "Invalid country" };
+        }
+
+        return { item: { city, country, un_2025_population } };
+    }
+
+    // Limpia, convierte y valida los datos recibidos en POST y PUT.
+    //
+    // Si el body es válido, devuelve un objeto normalizado.
+    // Si el body no es válido, devuelve null.
+    function normalizeCityStat(body) {
+        // Primero se comprueba que el objeto tenga exactamente los campos esperados.
+        return parseCityStat(body).item || null;
+
+        // Se normaliza la ciudad:
+        // - Se convierte a texto.
+        // - Se quitan espacios al principio y final.
+        // - Se pasa a minúsculas para guardar siempre el mismo formato.
+
+        // Se normaliza el país igual que la ciudad.
+
+        // Se convierte la población a número.
+
+        // Validaciones importantes:
+        // - city no puede estar vacío.
+        // - country no puede estar vacío.
+        // - un_2025_population debe ser un número entero.
+        // - un_2025_population debe ser mayor que 0.
+
         // Si todo es correcto, se devuelve el registro limpio.
-        return { city, country, un_2025_population };
     }
 
     // Limpia un texto antes de enviarlo a una API externa.
@@ -2139,13 +2215,12 @@ module.exports = (app, db) => {
     // - 500 si falla la base de datos.
     app.post(BASE_API_URL, (req, res) => {
         // Se valida y normaliza el body.
-        const item = normalizeCityStat(req.body);
+        const parsed = parseCityStat(req.body);
+        const item = parsed.item;
 
         // Si item es null, el body no es válido.
-        if (!item) {
-            return res.status(400).json({
-                error: "JSON body does not match expected structure"
-            });
+        if (parsed.error) {
+            return res.status(400).json({ error: parsed.error });
         }
 
         // Antes de insertar, se comprueba que no exista ya ese recurso.
@@ -2239,15 +2314,14 @@ module.exports = (app, db) => {
     // - 500 si falla la base de datos.
     app.put(`${BASE_API_URL}/:city/:country`, (req, res) => {
         const city = req.params.city.trim().toLowerCase();
-        const country = req.params.country.trim().toLowerCase();
+        const country = normalizeCountryForStorage(req.params.country);
 
         // Se valida y normaliza el body.
-        const item = normalizeCityStat(req.body);
+        const parsed = parseCityStat(req.body);
+        const item = parsed.item;
 
-        if (!item) {
-            return res.status(400).json({
-                error: "JSON body does not match expected structure"
-            });
+        if (parsed.error) {
+            return res.status(400).json({ error: parsed.error });
         }
 
         // Evita inconsistencias entre la URL y el body.

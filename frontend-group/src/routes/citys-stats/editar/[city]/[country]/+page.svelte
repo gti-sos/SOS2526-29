@@ -9,6 +9,11 @@
     updateCityStat
   } from "@/services/citysStatsApi";
   import { replace } from "@/lib/navigation.js";
+  import {
+    isSupportedCountry,
+    normalizeSupportedCountry,
+    supportedCountries
+  } from "@/lib/supportedCountries.js";
 
   // params contiene city y country tomados de la URL.
   export let params = {};
@@ -71,7 +76,7 @@
   // Valida el formulario antes de guardar.
   function validateForm() {
     const city = String(form.city ?? "").trim();
-    const country = String(form.country ?? "").trim();
+    const country = normalizeSupportedCountry(form.country);
     const un_2025_population = parsePositiveInteger(
       form.un_2025_population,
       "Poblacion estimada en 2025"
@@ -83,6 +88,10 @@
 
     if (!country) {
       throw new Error("Indique un pais.");
+    }
+
+    if (!isSupportedCountry(country)) {
+      throw new Error("Ese pais no esta soportado. Elija un pais real de la lista.");
     }
 
     return {
@@ -223,7 +232,17 @@
 
           <label>
             <span>Pais</span>
-            <input bind:value={form.country} placeholder="Ejemplo: spain" data-testid="edit-country" />
+            <input
+              bind:value={form.country}
+              list="supported-countries"
+              placeholder="Ejemplo: spain"
+              data-testid="edit-country"
+            />
+            <datalist id="supported-countries">
+              {#each supportedCountries as country}
+                <option value={country}></option>
+              {/each}
+            </datalist>
           </label>
 
           <label>
