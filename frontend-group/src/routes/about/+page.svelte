@@ -42,7 +42,7 @@
             </div>
             <div class="video-box">
                 <a
-                    href="https://drive.google.com/file/d/1dDY_aw8wsG-JE98NSscfwc51AOb8sGkt/preview"
+                    href="https://drive.google.com/file/d/1eQrHi9SZjL9rFjSMXKlsfm4OR3bbY3Nf/view?usp=drivesdk"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="btn-video"

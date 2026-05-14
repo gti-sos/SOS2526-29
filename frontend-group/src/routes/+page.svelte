@@ -57,7 +57,7 @@
       // Pantalla de grafica individual de citys-stats.
       analyticsUrl: "/analytics/citys-stats",
       // Video individual de defensa D03.
-      videoUrl: "https://drive.google.com/file/d/1dDY_aw8wsG-JE98NSscfwc51AOb8sGkt/preview",
+      videoUrl: "https://drive.google.com/file/d/1eQrHi9SZjL9rFjSMXKlsfm4OR3bbY3Nf/view?usp=drivesdk",
       // Enlaces directos a las dos versiones de API de citys-stats.
       apiLinks: [
         {
