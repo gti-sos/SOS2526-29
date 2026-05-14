@@ -33,7 +33,13 @@
                 <p class="github">Usuario GitHub: <code>luicorcob</code></p>
             </div>
             <div class="video-box">
-                <a href="https://drive.google.com/file/d/1dDY_aw8wsG-JE98NSscfwc51AOb8sGkt/view?usp=sharing" target="_blank" rel="noreferrer" class="btn-video">
+                <a
+                    href="https://drive.google.com/file/d/1dDY_aw8wsG-JE98NSscfwc51AOb8sGkt/preview"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="btn-video"
+                    aria-label="Ver video de defensa D03 de Luis Cortes Cobos"
+                >
                     Ver video de defensa (D03)
                 </a>
             </div>
@@ -133,15 +139,18 @@
 
     .github {
         font-size: 0.9rem;
-        color: #6b7280;
+        color: #374151 !important;
+        background: #ffffff;
+        line-height: 1.5;
     }
 
     .github code {
-        background: #f3f4f6;
+        background: #e5e7eb;
         color: #111827 !important;
         padding: 2px 6px;
         border-radius: 4px;
         font-weight: 600;
+        border: 1px solid #d1d5db;
     }
 
     .video-box {
