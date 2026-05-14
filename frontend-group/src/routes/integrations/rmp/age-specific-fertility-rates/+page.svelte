@@ -20,7 +20,6 @@
         existingScript.addEventListener("error", () => reject(new Error(`No se pudo cargar ${src}`)), { once: true });
         return;
       }
-
       const script = document.createElement("script");
       script.src = src;
       script.async = true;
@@ -34,10 +33,7 @@
   async function loadC3() {
     await loadScript(D3_URL, "d3");
     await loadScript(C3_URL, "c3");
-
-    if (!window.c3) {
-      throw new Error("No se pudo inicializar C3.js.");
-    }
+    if (!window.c3) throw new Error("No se pudo inicializar C3.js.");
   }
 
   // Al montar, pide los datos al proxy y genera la grafica.
@@ -48,16 +44,12 @@
       if (!res.ok) throw new Error(`Error ${res.status}`);
       fertility = await res.json();
 
-      if (fertility.length > 0) {
-        await loadC3();
-      }
+      if (fertility.length > 0) await loadC3();
 
       loading = false;
       await tick();
 
-      if (fertility.length > 0) {
-        renderChart();
-      }
+      if (fertility.length > 0) renderChart();
     } catch (e) {
       error = e.message || "Error al cargar los datos.";
       loading = false;
@@ -118,6 +110,18 @@
     </p>
   </div>
 
+  <!-- Recuadros de fuentes -->
+  <section class="source-grid">
+    <a class="source-card" href="/api/proxy/age-specific-fertility-rates" target="_blank" rel="noopener">
+      <span>Proxy propio</span>
+      <strong>SOS2526-29 · age-specific-fertility-rates</strong>
+    </a>
+    <a class="source-card" href="/api/v1/wine-stats" target="_blank" rel="noopener">
+      <span>API propia</span>
+      <strong>SOS2526-29 · wine-stats</strong>
+    </a>
+  </section>
+
   {#if loading}
     <div class="status-box">Cargando datos…</div>
   {:else if error}
@@ -141,10 +145,9 @@
       </div>
     </div>
 
-    <!-- Widget C3.js -->
     <section>
       <div class="widget-header">
-        <h2 class="section-title">📊 Fertilidad por franja de edad (primeros 20 países)</h2>
+        <h2 class="section-title">Fertilidad por franja de edad (primeros 20 países)</h2>
         <div class="widget-meta">
           <span class="lib-badge">C3.js</span>
           <span class="type-badge">Bar Chart</span>
@@ -218,6 +221,29 @@ h1 {
   text-align: center;
 }
 .status-box.error { color: #a12c7b; }
+
+/* Recuadros de fuentes */
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 1rem 0 1.5rem;
+}
+.source-card {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid #e8e6e2;
+  border-radius: 10px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transition: box-shadow 160ms ease;
+}
+.source-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+.source-card span { color: #777; font-size: 0.82rem; }
+.source-card strong { color: #1a1a1a; font-size: 0.95rem; word-break: break-all; }
 
 .summary-row {
   display: flex;
@@ -294,7 +320,6 @@ section { margin-bottom: 3rem; }
   overflow-x: auto;
 }
 
-/* CSS extra del widget */
 #chart {
   min-width: 720px;
   min-height: 340px;
