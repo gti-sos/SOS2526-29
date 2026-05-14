@@ -38,7 +38,7 @@
       // Integracion demografica; proxy necesario para evitar CORS o normalizar respuesta.
       id: "age-specific-fertility",
       title: "Age-Specific Fertility Rates",
-      description: "Estudio demográfico entre tasas de fertilidad por edad y tradición vitivinícola por país.",
+      description: "Estudio demográfico entre las tasas de fertilidad por edad y tradición vitivinícola por país.",
       tipo: "USO",
       proxy:true,
       icon: "👶",
