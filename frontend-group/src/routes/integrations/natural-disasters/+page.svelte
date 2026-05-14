@@ -823,7 +823,7 @@
     
     <!-- BLOQUE DE LA INTEGRACIÓN 1 (Productividad) -->
     <section class="card integration-card">
-        <h2>1. Mis Datos VS Productividad (Chart.js | API de compañero G19)</h2>
+        <h2>1. Desastres Naturales VS Productividad (Chart.js | API de compañero G19)</h2>
         <p>Gráfica de barras con doble eje comparando productividad por país y el número histórico de muertes.</p>
         
         {#if errorMensaje1} <p class="error">❌ {errorMensaje1}</p> {/if}
@@ -849,7 +849,7 @@
 
     <!-- BLOQUE DE LA INTEGRACIÓN 3 (API EXTERNA) -->
     <section class="card integration-card">
-        <h2>3. Terremotos Globales VS Mis Muertes (Plotly.js | API Externa)</h2>
+        <h2>3. Desastres Naturales VS Terremotos Globales (Plotly.js | API Externa)</h2>
         <p>Comparativa del número de terremotos extremos (Mag > 6.5) y las muertes históricas por año.</p>
         
         {#if errorMensaje3} <p class="error">❌ {errorMensaje3}</p> {/if}
@@ -860,7 +860,7 @@
 
     <!-- BLOQUE DE LA INTEGRACIÓN 4 (ApexCharts) -->
     <section class="card integration-card">
-        <h2>4. Mis Datos VS Calentamiento Global (ApexCharts | Vía Proxy)</h2>
+        <h2>4. Desastres Naturales VS Calentamiento Global (ApexCharts | Vía Proxy)</h2>
         <p>Evolución de las muertes por desastres naturales y subida de la temperatura global, renderizado con la librería ApexCharts.</p>
         
         {#if errorMensaje4} <p class="error">❌ {errorMensaje4}</p> {/if}
@@ -883,7 +883,7 @@
 
     <!-- BLOQUE DE LA INTEGRACIÓN 6 (Radar Directo NASA EONET) -->
     <section class="card integration-card">
-        <h2>6. Alerta Global: NASA EONET (Chart.js | API Externa)</h2>
+        <h2>6. Desastres Naturales VS Alerta Global: NASA EONET (Chart.js | API Externa)</h2>
         <p>Comparativa del "Índice de Peligro Histórico" (Mis datos) vs "Índice de Alerta Actual" (Eventos severos activos hoy según los satélites de la NASA).</p>
         
         {#if errorMensaje6} <p class="error">❌ {errorMensaje6}</p> {/if}
