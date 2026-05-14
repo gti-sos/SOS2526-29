@@ -10,11 +10,6 @@
     loadInitialCitysStats
   } from "@/services/citysStatsApi";
   import { navigate } from "@/lib/navigation.js";
-  import {
-    isSupportedCountry,
-    normalizeSupportedCountry,
-    supportedCountries
-  } from "@/lib/supportedCountries.js";
 
   // FLUJO ASINCRONO DE ESTA PANTALLA
   // 1. Al abrir /citys-stats, Svelte ejecuta el <script> y registra onMount.
@@ -147,33 +142,21 @@
 
   // Valida el formulario de creacion antes de enviarlo al backend.
   function validateCityStatForm(form) {
-    // La ciudad se mantiene como texto libre, pero sin espacios sobrantes.
     const city = String(form.city ?? "").trim();
-    // El pais se normaliza igual que en el backend para aceptar alias.
-    const country = normalizeSupportedCountry(form.country);
-    // La poblacion debe ser un entero positivo.
+    const country = String(form.country ?? "").trim();
     const un_2025_population = parsePositiveInteger(
       form.un_2025_population,
       "Poblacion estimada en 2025"
     );
 
-    // No se permite crear un registro sin ciudad.
     if (!city) {
       throw new Error("Indique una ciudad.");
     }
 
-    // No se permite crear un registro sin pais.
     if (!country) {
       throw new Error("Indique un pais.");
     }
 
-    // Candado de frontend: avisa antes de llamar a la API si el pais no existe.
-    // El backend repite esta validacion, asi que Postman tampoco puede saltarsela.
-    if (!isSupportedCountry(country)) {
-      throw new Error("Ese pais no esta soportado. Elija un pais real de la lista.");
-    }
-
-    // Devuelve el objeto ya limpio que se enviara por POST.
     return {
       city,
       country,
@@ -494,15 +477,9 @@
           <span>Pais</span>
           <input
             bind:value={createForm.country}
-            list="supported-countries"
             placeholder="Ejemplo: spain"
             data-testid="create-country"
           />
-          <datalist id="supported-countries">
-            {#each supportedCountries as country}
-              <option value={country}></option>
-            {/each}
-          </datalist>
         </label>
 
         <label>

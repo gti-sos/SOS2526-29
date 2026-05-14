@@ -139,54 +139,6 @@ module.exports = (app, db) => {
         { city: "mumbai", country: "india", un_2025_population: 20203056 }
     ];
 
-    // Paises admitidos para crear o editar citys-stats.
-    // Evita guardar paises inventados que luego no tienen ISO3 para World Bank.
-    const SUPPORTED_COUNTRIES = new Set([
-        "afghanistan", "albania", "algeria", "andorra", "angola", "argentina",
-        "armenia", "australia", "austria", "azerbaijan", "bangladesh",
-        "belgium", "bolivia", "brazil", "bulgaria", "cambodia", "cameroon",
-        "canada", "chile", "china", "colombia", "costa-rica", "croatia",
-        "cuba", "czech-republic", "denmark", "dominican-republic", "ecuador",
-        "egypt", "el-salvador", "estonia", "ethiopia", "finland", "france",
-        "germany", "ghana", "greece", "guatemala", "hungary", "india",
-        "indonesia", "ireland", "israel", "italy", "japan", "kenya",
-        "malaysia", "mexico", "morocco", "netherlands", "new-zealand",
-        "nigeria", "norway", "pakistan", "panama", "paraguay", "peru",
-        "philippines", "poland", "portugal", "romania", "russia",
-        "saudi-arabia", "singapore", "south-africa", "south-korea", "spain",
-        "sweden", "switzerland", "taiwan", "thailand", "turkey", "ukraine",
-        "united-arab-emirates", "united-kingdom", "united-states", "uruguay",
-        "venezuela", "vietnam"
-    ]);
-
-    // Alias aceptados por comodidad del usuario.
-    // La clave es lo que puede escribir el usuario ya normalizado.
-    // El valor es el país canónico que realmente se guarda en NeDB.
-    const COUNTRY_ALIASES = {
-        "alemania": "germany",
-        "corea-del-sur": "south-korea",
-        "eeuu": "united-states",
-        "england": "united-kingdom",
-        "espana": "spain",
-        "estados-unidos": "united-states",
-        "francia": "france",
-        "great-britain": "united-kingdom",
-        "holanda": "netherlands",
-        "italia": "italy",
-        "paises-bajos": "netherlands",
-        "reino-unido": "united-kingdom",
-        "republic-of-korea": "south-korea",
-        "scotland": "united-kingdom",
-        "u-k": "united-kingdom",
-        "u-s-a": "united-states",
-        "uae": "united-arab-emirates",
-        "uk": "united-kingdom",
-        "united-states-of-america": "united-states",
-        "us": "united-states",
-        "usa": "united-states",
-        "wales": "united-kingdom"
-    };
-
     // -------------------------------------------------------------------------
     // Funciones auxiliares básicas
     // -------------------------------------------------------------------------
@@ -230,75 +182,42 @@ module.exports = (app, db) => {
             keys.every((k, i) => k === expected[i]);
     }
 
-    // Normaliza el pais a la forma canonica guardada por la API.
-    // Ejemplo: "South Korea", "south korea" y "south_korea" pasan a "south-korea".
-    function normalizeCountryForStorage(country) {
-        // String(...) evita errores si country viene como numero, null o undefined.
-        const normalized = String(country ?? "")
-            // Quita espacios al principio y al final.
-            .trim()
-            // Separa letras y tildes para poder borrar los acentos.
-            .normalize("NFD")
-            // Borra las marcas Unicode de tildes.
-            .replace(/[\u0300-\u036f]/g, "")
-            // Guarda todo en minusculas, igual que el resto de la API.
-            .toLowerCase()
-            // Quita apostrofes y puntos para aceptar variantes como U.S.A.
-            .replace(/['.]/g, "")
-            // Convierte & en texto para evitar simbolos raros.
-            .replace(/&/g, "and")
-            // Cambia espacios, barras bajas y cualquier separador por guiones.
-            .replace(/[^a-z]+/g, "-")
-            // Elimina guiones sobrantes al principio o al final.
-            .replace(/^-+|-+$/g, "");
+    // Limpia, convierte y valida los datos recibidos en POST y PUT.
+    //
+    // Si el body es válido, devuelve un objeto normalizado.
+    // Si el body no es válido, devuelve null.
+    function normalizeCityStat(body) {
+        // Primero se comprueba que el objeto tenga exactamente los campos esperados.
+        if (!hasExactCityFields(body)) return null;
 
-        // Si el usuario escribio un alias, devolvemos el pais oficial.
-        // Si no era alias, devolvemos el valor normalizado directamente.
-        return COUNTRY_ALIASES[normalized] || normalized;
-    }
-
-    // Valida y normaliza un body de citys-stats.
-    // Devuelve { item } si es correcto o { error } si debe responder 400.
-    function parseCityStat(body) {
-        // Primero comprobamos la estructura exacta del JSON.
-        // Esto mantiene la regla de la asignatura: no campos de mas ni de menos.
-        if (!hasExactCityFields(body)) {
-            return { error: "JSON body does not match expected structure" };
-        }
-
-        // city se guarda en minusculas para que la clave sea estable.
+        // Se normaliza la ciudad:
+        // - Se convierte a texto.
+        // - Se quitan espacios al principio y final.
+        // - Se pasa a minúsculas para guardar siempre el mismo formato.
         const city = String(body.city).trim().toLowerCase();
-        // country se guarda normalizado y con alias resueltos.
-        const country = normalizeCountryForStorage(body.country);
-        // La poblacion se convierte a Number porque llega desde JSON/formulario.
+
+        // Se normaliza el país igual que la ciudad.
+        const country = String(body.country).trim().toLowerCase();
+
+        // Se convierte la población a número.
         const un_2025_population = Number(body.un_2025_population);
 
-        // Validacion general del recurso.
-        // Si falla, el problema es que el JSON no representa un citys-stats valido.
+        // Validaciones importantes:
+        // - city no puede estar vacío.
+        // - country no puede estar vacío.
+        // - un_2025_population debe ser un número entero.
+        // - un_2025_population debe ser mayor que 0.
         if (
             !city ||
             !country ||
             !Number.isInteger(un_2025_population) ||
             un_2025_population <= 0
         ) {
-            return { error: "JSON body does not match expected structure" };
+            return null;
         }
 
-        // Validacion nueva: el pais debe estar en la lista soportada.
-        // Si no esta, no se guarda, porque luego REST Countries/World Bank no
-        // podrian obtener ISO3 ni datos externos para las integraciones.
-        if (!SUPPORTED_COUNTRIES.has(country)) {
-            return { error: "Invalid country" };
-        }
-
-        // Si todo va bien, devolvemos el recurso listo para insertar o actualizar.
-        return { item: { city, country, un_2025_population } };
-    }
-
-    // Envoltorio compatible con el código anterior.
-    // parseCityStat da más detalle del error; esta función solo devuelve item o null.
-    function normalizeCityStat(body) {
-        return parseCityStat(body).item || null;
+        // Si todo es correcto, se devuelve el registro limpio.
+        return { city, country, un_2025_population };
     }
 
     // Limpia un texto antes de enviarlo a una API externa.
@@ -430,6 +349,7 @@ module.exports = (app, db) => {
     // Si ya hemos pedido la población de JPN, se guarda en el Map.
     // La próxima vez se lee desde aquí, sin volver a llamar a la API externa.
     const worldBankPopulationCache = new Map();
+    const EXTERNAL_COUNTRY_DATA_UNAVAILABLE = "No hay datos externos disponibles para este pais.";
 
     // -------------------------------------------------------------------------
     // Funciones auxiliares para leer datos locales
@@ -941,11 +861,13 @@ module.exports = (app, db) => {
         let worldBankResult;
 
         // Si no tenemos código ISO3, no podemos consultar World Bank.
+        // El registro local sigue siendo valido aunque falte ISO3.
+        // Por eso se omite World Bank y se devuelve un aviso legible.
         if (!code) {
             worldBankResult = {
                 source: "World Bank Indicators API",
                 data: null,
-                error: "Country ISO3 code not available"
+                error: EXTERNAL_COUNTRY_DATA_UNAVAILABLE
             };
         }
 
@@ -965,7 +887,7 @@ module.exports = (app, db) => {
             worldBankResult = {
                 source: "World Bank Indicators API",
                 data,
-                error: data ? null : "World Bank data not found"
+                error: data ? null : EXTERNAL_COUNTRY_DATA_UNAVAILABLE
             };
         }
 
@@ -1756,7 +1678,7 @@ module.exports = (app, db) => {
             const result = await getWorldBankPopulation(req.params.countryCode);
 
             if (!result) {
-                return res.status(404).json({ error: "World Bank data not found" });
+                return res.status(404).json({ error: EXTERNAL_COUNTRY_DATA_UNAVAILABLE });
             }
 
             return res.status(200).json(result);
@@ -2210,22 +2132,23 @@ module.exports = (app, db) => {
     // 6. Devuelve el creado.
     //
     // USA:
-    // - parseCityStat
+    // - normalizeCityStat
     // - removeDatabaseId
     //
     // RESPUESTA:
     // - 201 con JSON.
-    // - 400 si el body no vale o el pais no esta soportado.
+    // - 400 si el body no vale.
     // - 409 si ya existe.
     // - 500 si falla la base de datos.
     app.post(BASE_API_URL, (req, res) => {
         // Se valida y normaliza el body.
-        const parsed = parseCityStat(req.body);
-        const item = parsed.item;
+        const item = normalizeCityStat(req.body);
 
-        // Si parsed.error existe, el body no es valido o el pais no esta soportado.
-        if (parsed.error) {
-            return res.status(400).json({ error: parsed.error });
+        // Si item es null, el body no es válido.
+        if (!item) {
+            return res.status(400).json({
+                error: "JSON body does not match expected structure"
+            });
         }
 
         // Antes de insertar, se comprueba que no exista ya ese recurso.
@@ -2309,7 +2232,7 @@ module.exports = (app, db) => {
     // 7. Quita _id y devuelve el actualizado.
     //
     // USA:
-    // - parseCityStat
+    // - normalizeCityStat
     // - removeDatabaseId
     //
     // RESPUESTA:
@@ -2319,14 +2242,15 @@ module.exports = (app, db) => {
     // - 500 si falla la base de datos.
     app.put(`${BASE_API_URL}/:city/:country`, (req, res) => {
         const city = req.params.city.trim().toLowerCase();
-        const country = normalizeCountryForStorage(req.params.country);
+        const country = req.params.country.trim().toLowerCase();
 
         // Se valida y normaliza el body.
-        const parsed = parseCityStat(req.body);
-        const item = parsed.item;
+        const item = normalizeCityStat(req.body);
 
-        if (parsed.error) {
-            return res.status(400).json({ error: parsed.error });
+        if (!item) {
+            return res.status(400).json({
+                error: "JSON body does not match expected structure"
+            });
         }
 
         // Evita inconsistencias entre la URL y el body.

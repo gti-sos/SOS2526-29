@@ -1043,42 +1043,25 @@ Respuesta corta de defensa:
 
 > Detectamos que la integracion podia generar demasiadas peticiones repetidas. Lo solucionamos moviendo la coordinacion al backend: el frontend hace una sola peticion al endpoint `summary`, el backend consulta y normaliza las fuentes externas, cachea solo respuestas externas y devuelve los datos listos para pintar. Los datos locales no se cachean, asi que los cambios del CRUD se ven al instante.
 
-### Incidencia resuelta: pais inexistente y World Bank ISO3
+### Incidencia resuelta: falta de codigo ISO3 en World Bank
 
 Problema detectado:
 
-- Si el usuario creaba un registro con un pais inventado, por ejemplo `wakanda`, el CRUD local podia guardarlo.
-- Despues, al abrir `/integrations/citys-stats`, la integracion intentaba cruzar ese pais con REST Countries y World Bank.
-- REST Countries no podia obtener un codigo ISO3 real y World Bank no podia consultar poblacion.
-- El resultado visible era un aviso como `World Bank (1): Country ISO3 code not available`.
+- `citys-stats` permite guardar los datos locales del usuario.
+- Si un pais no puede resolverse en REST Countries o no trae `cca3`, no hay codigo ISO3 para consultar World Bank.
+- La integracion no debe romper el CRUD ni bloquear la creacion de datos locales por eso.
 
 Solucion aplicada:
 
-- En backend v1 y v2 se anadio una lista de paises admitidos: `SUPPORTED_COUNTRIES`.
-- Se anadio `COUNTRY_ALIASES` para aceptar nombres habituales como `espana`, `usa`, `uk` o `corea-del-sur`.
-- `normalizeCountryForStorage` convierte el pais a formato canonico: minusculas, sin tildes, con guiones y alias resueltos.
-- `parseCityStat` valida estructura, poblacion y pais. Si el pais no esta soportado, devuelve `400` con `{ "error": "Invalid country" }`.
-- El frontend usa `supportedCountries.js` para mostrar opciones validas y bloquear el envio antes de llamar a la API.
-- `citysStatsApi.js` traduce `Invalid country` a un mensaje comprensible para el usuario.
-
-Que se consigue:
-
-- No se guardan paises imposibles de cruzar con APIs externas.
-- Las integraciones dejan de fallar por datos locales inventados.
-- El backend sigue siendo la barrera real aunque alguien se salte la interfaz y use Postman.
+- El CRUD de `citys-stats` se queda como antes: no se cambia el contrato ni se renombran paises de la base.
+- En `buildIntegratedCity`, si falta `countryInfo.cca3`, se omite la consulta de World Bank para ese registro.
+- El resumen de integraciones sigue devolviendo el registro local, con `worldBankPopulation: null`.
+- En `integrationErrors` se anade el aviso: `No hay datos externos disponibles para este pais.`
+- La pantalla de integraciones muestra ese aviso en "Avisos de carga" y las graficas simplemente no usan ese punto externo.
 
 Respuesta corta de defensa:
 
-> Antes se podia crear un pais que nuestra API local aceptaba, pero que las integraciones externas no podian resolver. Lo he corregido validando el pais en backend y frontend. Si el pais no esta en la lista soportada, la API responde `400 Invalid country` y no guarda el dato. Asi evito errores posteriores de REST Countries y World Bank.
-
-Prueba que puedes hacer en Postman:
-
-```text
-POST /api/v2/citys-stats
-Body: { "city": "demo", "country": "wakanda", "un_2025_population": 1000 }
-Respuesta: 400
-JSON: { "error": "Invalid country" }
-```
+> La API local no debe rechazar un dato solo porque una API externa no pueda enriquecerlo. Por eso mantengo el registro local y hago robusta la integracion: si no hay ISO3, no llamo a World Bank, devuelvo `worldBankPopulation: null` y muestro el aviso "No hay datos externos disponibles para este pais."
 
 ## 16. Funciones importantes explicadas
 
@@ -1114,12 +1097,11 @@ Frase comodin segura:
 | Capa | Archivo | Funciones o bloques que debes reconocer |
 | --- | --- | --- |
 | Arranque comun | `index.js` | creacion de `app`, bases NeDB, registro de APIs, `express.static`, fallback SPA |
-| Backend CRUD v2 | `src/back/v2/citys-stats.js` | `removeDatabaseId`, `hasExactCityFields`, `normalizeCountryForStorage`, `parseCityStat`, `normalizeCityStat`, handlers `GET`, `POST`, `PUT`, `DELETE` |
+| Backend CRUD v2 | `src/back/v2/citys-stats.js` | `removeDatabaseId`, `hasExactCityFields`, `normalizeCityStat`, handlers `GET`, `POST`, `PUT`, `DELETE` |
 | Backend integraciones v1 | `src/back/v1/citys-stats.js` | `parseLimit`, `normalizeCountryKey`, `buildCityCountrySummaries`, `fetchJson`, `safeExternal`, `buildIntegratedCity` |
 | Service base | `frontend-group/src/services/apiBase.js` | `API_ORIGIN`, `apiPath` |
 | Service CRUD | `frontend-group/src/services/citysStatsApi.js` | `buildUrl`, `encodePathValue`, `friendlyApiMessage`, `handleResponse`, `getAllCitysStats`, `createCityStat`, `updateCityStat` |
 | Service integraciones | `frontend-group/src/services/citysStatsIntegrations.js` | `handleResponse`, `getCitysStatsIntegrationSummary`, endpoints proxy individuales para pruebas |
-| Lista paises LCC | `frontend-group/src/lib/supportedCountries.js` | `supportedCountries`, `normalizeSupportedCountry`, `isSupportedCountry` |
 | CRUD Svelte | `frontend-group/src/routes/citys-stats/+page.svelte` | `validateCityStatForm`, `buildSearchQuery`, `refreshList`, `handleCreate`, `handleSearch`, `openEdit` |
 | Edicion Svelte | `frontend-group/src/routes/citys-stats/editar/[city]/[country]/+page.svelte` | `loadResource`, `isSameResource`, `handleUpdate`, `updateRoute` |
 | Analytics LCC | `frontend-group/src/routes/analytics/citys-stats/+page.svelte` | `loadHighcharts`, `renderChart`, `loadAnalytics` |
@@ -1191,50 +1173,16 @@ Pillada probable:
 
 > Si mando `{ city, country, un_2025_population, extra }`, devuelve `400` porque la API valida estructura exacta.
 
-#### `normalizeCountryForStorage`
+#### `normalizeCityStat`
 
-Codigo clave:
-
-```js
-function normalizeCountryForStorage(country) {
-    const normalized = String(country ?? "")
-        .trim()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/['.]/g, "")
-        .replace(/&/g, "and")
-        .replace(/[^a-z]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-
-    return COUNTRY_ALIASES[normalized] || normalized;
-}
-```
-
-Que hace:
-
-Convierte el pais escrito por el usuario a la forma canonica que guarda la API. Por ejemplo, `Espana`, `espana` y `spain` acaban como `spain`; `South Korea` acaba como `south-korea`; `USA` acaba como `united-states`.
-
-Por que existe:
-
-Evita que el mismo pais se guarde con variantes distintas y permite comparar contra `SUPPORTED_COUNTRIES`.
-
-Respuesta de defensa:
-
-> Esta funcion no decide si el pais existe. Solo limpia y normaliza el texto. La decision de aceptar o rechazar se hace despues, comparando con `SUPPORTED_COUNTRIES`.
-
-#### `parseCityStat`
-
-Codigo clave:
+Codigo:
 
 ```js
-function parseCityStat(body) {
-    if (!hasExactCityFields(body)) {
-        return { error: "JSON body does not match expected structure" };
-    }
+function normalizeCityStat(body) {
+    if (!hasExactCityFields(body)) return null;
 
     const city = String(body.city).trim().toLowerCase();
-    const country = normalizeCountryForStorage(body.country);
+    const country = String(body.country).trim().toLowerCase();
     const un_2025_population = Number(body.un_2025_population);
 
     if (
@@ -1243,49 +1191,26 @@ function parseCityStat(body) {
         !Number.isInteger(un_2025_population) ||
         un_2025_population <= 0
     ) {
-        return { error: "JSON body does not match expected structure" };
+        return null;
     }
 
-    if (!SUPPORTED_COUNTRIES.has(country)) {
-        return { error: "Invalid country" };
-    }
-
-    return { item: { city, country, un_2025_population } };
+    return { city, country, un_2025_population };
 }
 ```
 
 Que hace:
 
-Es la validacion real del recurso. Comprueba que el JSON tenga solo `city`, `country` y `un_2025_population`; convierte valores; exige poblacion entera positiva; y rechaza paises no soportados.
+Valida contenido y normaliza valores: textos sin espacios, en minusculas, y poblacion convertida a entero positivo.
 
 Como te pueden pedir cambiarla:
 
 - Permitir poblacion `0`: cambiar `un_2025_population <= 0` por `un_2025_population < 0`.
-- Aceptar un pais nuevo real: anadirlo a `SUPPORTED_COUNTRIES`.
-- Aceptar una variante escrita por usuarios: anadirla a `COUNTRY_ALIASES`.
-- Anadir un campo: actualizar `hasExactCityFields`, leerlo aqui, validarlo y devolverlo en `item`.
+- Mantener mayusculas originales: quitar `.toLowerCase()`, pero revisar busquedas, URLs y tests.
+- Anadir un campo: leerlo, validarlo y devolverlo en el objeto final.
 
 Respuesta de defensa:
 
-> El frontend tambien valida, pero `parseCityStat` es la barrera real. Aunque llamen a la API con Postman, el backend no guarda datos invalidos ni paises que luego rompan integraciones externas.
-
-#### `normalizeCityStat`
-
-Codigo actual:
-
-```js
-function normalizeCityStat(body) {
-    return parseCityStat(body).item || null;
-}
-```
-
-Que hace:
-
-Es un envoltorio compatible con el codigo anterior. Antes normalizaba todo directamente; ahora delega en `parseCityStat`, que puede devolver errores mas concretos.
-
-Respuesta de defensa:
-
-> `normalizeCityStat` se mantiene como funcion auxiliar simple, pero el flujo nuevo usa `parseCityStat` para distinguir entre estructura invalida e `Invalid country`.
+> El frontend tambien valida, pero esta funcion es la barrera real. Aunque llamen a la API sin interfaz, el backend no guarda datos invalidos.
 
 #### Handler `GET /api/v2/citys-stats`
 
@@ -1404,11 +1329,12 @@ Codigo:
 
 ```js
 app.post(BASE_API_URL, (req, res) => {
-    const parsed = parseCityStat(req.body);
-    const item = parsed.item;
+    const item = normalizeCityStat(req.body);
 
-    if (parsed.error) {
-        return res.status(400).json({ error: parsed.error });
+    if (!item) {
+        return res.status(400).json({
+            error: "JSON body does not match expected structure"
+        });
     }
 
     db.findOne({ city: item.city, country: item.country }, (err, doc) => {
@@ -1431,11 +1357,11 @@ Como te pueden pedir cambiarla:
 
 - Cambiar la clave de duplicado: modificar el objeto de `db.findOne`.
 - Devolver otro codigo al crear: cambiar `res.status(201)`.
-- Guardar un campo nuevo: primero debe salir de `parseCityStat`.
+- Guardar un campo nuevo: primero debe salir de `normalizeCityStat`.
 
 Respuesta de defensa:
 
-> `POST` crea dentro de la coleccion. Si el body es invalido o el pais no esta soportado, devuelve `400`. Si ya existe el recurso, devuelve `409 Conflict`.
+> `POST` crea dentro de la coleccion. Si ya existe el recurso, devuelve `409 Conflict`.
 
 #### Handler `PUT /api/v2/citys-stats/:city/:country`
 
@@ -1444,13 +1370,14 @@ Fragmento clave:
 ```js
 app.put(`${BASE_API_URL}/:city/:country`, (req, res) => {
     const city = req.params.city.trim().toLowerCase();
-    const country = normalizeCountryForStorage(req.params.country);
+    const country = req.params.country.trim().toLowerCase();
 
-    const parsed = parseCityStat(req.body);
-    const item = parsed.item;
+    const item = normalizeCityStat(req.body);
 
-    if (parsed.error) {
-        return res.status(400).json({ error: parsed.error });
+    if (!item) {
+        return res.status(400).json({
+            error: "JSON body does not match expected structure"
+        });
     }
 
     if (item.city !== city || item.country !== country) {
@@ -1734,7 +1661,7 @@ function buildIntegratedCity(base, worldBankByCode, worldBankBatchError, student
         worldBankResult = {
             source: "World Bank Indicators API",
             data: null,
-            error: "Country ISO3 code not available"
+            error: "No hay datos externos disponibles para este pais."
         };
     } else if (worldBankBatchError) {
         worldBankResult = {
@@ -1747,7 +1674,7 @@ function buildIntegratedCity(base, worldBankByCode, worldBankBatchError, student
         worldBankResult = {
             source: "World Bank Indicators API",
             data,
-            error: data ? null : "World Bank data not found"
+            error: data ? null : "No hay datos externos disponibles para este pais."
         };
     }
 
@@ -1771,6 +1698,8 @@ function buildIntegratedCity(base, worldBankByCode, worldBankBatchError, student
 Que hace:
 
 Monta el objeto final del endpoint `/api/v1/citys-stats/integrations/summary`: datos locales, geocoding, pais, World Bank y errores parciales.
+
+Si falta el codigo ISO3 (`cca3`), no se hace llamada a World Bank para ese registro. El dato local sigue apareciendo, `worldBankPopulation` queda en `null` y la interfaz muestra el aviso `No hay datos externos disponibles para este pais.`
 
 Como te pueden pedir cambiarla:
 
@@ -2503,9 +2432,8 @@ Frases utiles:
 
 | Cambio | Revisar tambien |
 | --- | --- |
-| `hasExactCityFields` | `parseCityStat`, bodies de tests, formularios Svelte |
-| `parseCityStat` | datos iniciales, mensajes de error, POST, PUT, edicion |
-| `SUPPORTED_COUNTRIES` o alias | `supportedCountries.js`, frontend crear/editar, integraciones y tests |
+| `hasExactCityFields` | `normalizeCityStat`, bodies de tests, formularios Svelte |
+| `normalizeCityStat` | datos iniciales, mensajes de error, POST, PUT, edicion |
 | Handler `GET` v2 | `buildSearchQuery`, tests de filtros, analytics y mapa |
 | Handler `POST` v2 | `createCityStat`, `handleCreate`, test de duplicado `409` |
 | Handler `PUT` v2 | `updateCityStat`, `handleUpdate`, regla URL/body |
@@ -2527,8 +2455,6 @@ Frases utiles:
 | --- | --- |
 | Por que quitas `_id`? | Porque es interno de NeDB y no pertenece al contrato publico. |
 | Por que validas en frontend y backend? | Frontend mejora UX; backend protege el sistema real. |
-| Por que no permites paises inventados? | Porque despues no tienen ISO3 real y rompen cruces con REST Countries o World Bank. |
-| Que pasa si escribo `Espana`, `usa` o `uk`? | `normalizeCountryForStorage` y los alias lo convierten al pais canonico antes de guardar. |
 | Por que `POST` devuelve `409`? | Porque ya existe un recurso con la misma clave `city + country`. |
 | Por que `PUT` compara URL y body? | Para asegurar que actualizo exactamente el recurso identificado por la URL. |
 | Por que integras por pais? | REST Countries, World Bank y varias APIs SOS encajan mejor por `country` que por ciudad. |
@@ -2551,8 +2477,7 @@ Frases utiles:
 Comandos utiles:
 
 ```powershell
-rg "parseCityStat"
-rg "SUPPORTED_COUNTRIES"
+rg "normalizeCityStat"
 rg "buildSearchQuery"
 rg "loadIntegrations"
 npm.cmd run test-LCC-v2
@@ -2695,11 +2620,9 @@ handleCreate
   -> createCityStat
      -> buildUrl()
      -> fetch POST /api/v2/citys-stats
-           -> backend v2 app.post(BASE_API_URL)
-           -> parseCityStat
+        -> backend v2 app.post(BASE_API_URL)
+           -> normalizeCityStat
               -> hasExactCityFields
-              -> normalizeCountryForStorage
-              -> SUPPORTED_COUNTRIES
            -> db.findOne para duplicado
            -> db.insert
            -> removeDatabaseId
@@ -2816,11 +2739,8 @@ handleUpdate
      -> buildUrl("/:city/:country")
      -> fetch PUT /api/v2/citys-stats/:city/:country
         -> backend v2 app.put(`${BASE_API_URL}/:city/:country`)
-           -> normalizeCountryForStorage(req.params.country)
-           -> parseCityStat
+           -> normalizeCityStat
               -> hasExactCityFields
-              -> normalizeCountryForStorage(body.country)
-              -> SUPPORTED_COUNTRIES
            -> comprueba URL y body
            -> db.findOne
            -> db.update
@@ -2844,10 +2764,8 @@ handleUpdate
      -> buildUrl()
      -> fetch POST /api/v2/citys-stats
      -> backend v2 app.post(BASE_API_URL)
-        -> parseCityStat
+        -> normalizeCityStat
            -> hasExactCityFields
-           -> normalizeCountryForStorage
-           -> SUPPORTED_COUNTRIES
         -> db.findOne
         -> db.insert
         -> removeDatabaseId
@@ -3135,10 +3053,8 @@ app.get(BASE_API_URL)
 
 ```text
 app.post(BASE_API_URL)
-  -> parseCityStat
+  -> normalizeCityStat
      -> hasExactCityFields
-     -> normalizeCountryForStorage
-     -> SUPPORTED_COUNTRIES
   -> db.findOne duplicado
   -> db.insert
   -> removeDatabaseId
@@ -3149,11 +3065,8 @@ app.post(BASE_API_URL)
 
 ```text
 app.put(`${BASE_API_URL}/:city/:country`)
-  -> normalizeCountryForStorage(req.params.country)
-  -> parseCityStat
+  -> normalizeCityStat
      -> hasExactCityFields
-     -> normalizeCountryForStorage(body.country)
-     -> SUPPORTED_COUNTRIES
   -> comprobar URL/body
   -> db.findOne
   -> db.update
@@ -3316,7 +3229,7 @@ GET /api/v1/citys-stats/integrations/summary
 | `200` | Lectura correcta o actualizacion con respuesta |
 | `201` | Recurso creado o datos iniciales insertados |
 | `204` | Borrado correcto sin cuerpo, usado en eliminaciones correctas |
-| `400` | Body incorrecto, pais no soportado, query invalida o URL/body no coinciden |
+| `400` | Body incorrecto, query invalida o URL/body no coinciden |
 | `404` | Recurso concreto no encontrado |
 | `405` | Metodo no permitido para esa URL |
 | `409` | Duplicado o coleccion ya cargada segun recurso |
@@ -3341,10 +3254,10 @@ Esta es la tabla que conviene saberse para defensa LCC. Es la API principal del 
 | `GET` | `/api/v2/citys-stats/loadInitialData` | Carga datos iniciales si la base esta vacia | `201` si inserta, `200` si ya habia datos, `500` si falla NeDB |
 | `GET` | `/api/v2/citys-stats` | Lista coleccion con filtros, `q`, `sort`, `offset`, `limit` | `200`, `400` si query/sort/paginacion invalida, `500` |
 | `GET` | `/api/v2/citys-stats/:city/:country` | Devuelve un registro concreto | `200`, `404` si no existe, `500` |
-| `POST` | `/api/v2/citys-stats` | Crea un registro nuevo | `201`, `400` body invalido o pais no soportado, `409` duplicado, `500` |
+| `POST` | `/api/v2/citys-stats` | Crea un registro nuevo | `201`, `400` body invalido, `409` duplicado, `500` |
 | `POST` | `/api/v2/citys-stats/:city/:country` | No permitido sobre recurso concreto | `405` |
 | `PUT` | `/api/v2/citys-stats` | No permitido sobre coleccion completa | `405` |
-| `PUT` | `/api/v2/citys-stats/:city/:country` | Actualiza un registro concreto | `200`, `400` body invalido o pais no soportado, `400` si URL/body no coinciden, `404`, `500` |
+| `PUT` | `/api/v2/citys-stats/:city/:country` | Actualiza un registro concreto | `200`, `400` body invalido, `400` si URL/body no coinciden, `404`, `500` |
 | `DELETE` | `/api/v2/citys-stats` | Borra toda la coleccion | `204`, `500` |
 | `DELETE` | `/api/v2/citys-stats/:city/:country` | Borra un registro concreto | `204`, `404`, `500` |
 
@@ -3395,8 +3308,8 @@ Se usa sobre la coleccion porque el recurso todavia no existe. El backend decide
 Orden:
 
 ```text
-1. parseCityStat(req.body)
-2. Si body invalido o pais no soportado -> 400
+1. normalizeCityStat(req.body)
+2. Si body invalido -> 400
 3. db.findOne busca duplicado por city + country
 4. Si ya existe -> 409
 5. db.insert crea
@@ -3415,8 +3328,8 @@ Orden:
 
 ```text
 1. Lee city y country de req.params.
-2. parseCityStat(req.body).
-3. Si body invalido o pais no soportado -> 400.
+2. normalizeCityStat(req.body).
+3. Si body invalido -> 400.
 4. Si body.city/body.country no coinciden con URL -> 400.
 5. db.findOne comprueba si existe.
 6. Si no existe -> 404.
@@ -3433,7 +3346,7 @@ Frase perfecta:
 
 `400 Bad Request`:
 
-> El cliente ha mandado mal la peticion: body con estructura incorrecta, pais no soportado, query invalida, sort no permitido, offset/limit invalidos o URL/body que no coinciden.
+> El cliente ha mandado mal la peticion: body con estructura incorrecta, query invalida, sort no permitido, offset/limit invalidos o URL/body que no coinciden.
 
 `404 Not Found`:
 
@@ -3559,7 +3472,7 @@ tests/LCC/e2e/citys-stats.spec.js
 Pasos:
 
 1. Anadir campo en `hasExactCityFields`.
-2. Limpiar y validar en `parseCityStat`.
+2. Limpiar y validar en `normalizeCityStat`.
 3. Anadirlo a `initialData`.
 4. Anadir input en formulario de crear.
 5. Anadir input en formulario de editar.
@@ -4162,7 +4075,7 @@ HTML submit
 -> handleUpdate()
 -> updateCityStat()
 -> PUT /api/v2/citys-stats/:city/:country con JSON
--> parseCityStat()
+-> normalizeCityStat()
 -> db.findOne()
 -> db.update()
 -> db.findOne()
@@ -4353,25 +4266,9 @@ Si ya existe la ciudad y el pais:
 POST /api/v2/citys-stats -> 409 Conflict
 ```
 
-Si el pais no existe o no esta soportado:
-
-```text
-POST /api/v2/citys-stats -> 400 Bad Request
-Response: { "error": "Invalid country" }
-```
-
-Ojo con la diferencia entre interfaz y Postman:
-
-- Desde la interfaz normal, el frontend valida primero con `isSupportedCountry`, asi que lo habitual es que no llegue a aparecer el `POST`.
-- Si alguien se salta la interfaz y manda el dato con Postman, la API lo rechaza igualmente con `400`.
-
 Frase para decir:
 
 > Al crear, la accion real de escritura es el `POST`. El `GET` posterior es la recarga automatica de la tabla para que el usuario vea el dato nuevo sin refrescar a mano.
-
-Frase si te preguntan por el error de World Bank:
-
-> Ese error aparecia porque habia un pais local que no se podia traducir a ISO3. Ahora no dejo guardar paises no soportados: el frontend lo avisa antes de enviar y el backend lo bloquea con `400 Invalid country` si llega por Postman.
 
 #### Caso 3: buscar con filtros
 
@@ -4625,10 +4522,8 @@ Tabla que debes memorizar:
 | `POST /api/v2/citys-stats` | Body valido y no duplicado | `201` | Objeto creado |
 | `POST /api/v2/citys-stats` | Duplicado | `409` | `{ "error": "Resource already exists" }` |
 | `POST /api/v2/citys-stats` | Body mal estructurado | `400` | `{ "error": "JSON body does not match expected structure" }` |
-| `POST /api/v2/citys-stats` | Pais no soportado | `400` | `{ "error": "Invalid country" }` |
 | `POST /api/v2/citys-stats/:city/:country` | POST sobre recurso concreto | `405` | Sin JSON propio |
 | `PUT /api/v2/citys-stats` | PUT sobre coleccion | `405` | Sin JSON propio |
-| `PUT /api/v2/citys-stats/tokyo/japan` | Pais del body no soportado | `400` | `{ "error": "Invalid country" }` |
 | `PUT /api/v2/citys-stats/tokyo/japan` | Body no coincide con URL | `400` | `{ "error": "URL and body do not match" }` |
 | `PUT /api/v2/citys-stats/nope/spain` | No existe | `404` | `{ "error": "Resource not found" }` |
 | `DELETE /api/v2/citys-stats/tokyo/japan` | Existe | `204` | Sin cuerpo |
@@ -4645,18 +4540,11 @@ un_2025_population
 
 La poblacion debe ser entero mayor que cero.
 
-El pais debe existir en la lista soportada. Si el JSON tiene estructura correcta pero `country` no se puede cruzar con las integraciones, la respuesta esperada es:
-
-```text
-400
-{ "error": "Invalid country" }
-```
-
 Si preguntan por un campo `year`:
 
 > En mi recurso LCC `citys-stats` no existe campo `year`. Mis campos son `city`, `country` y `un_2025_population`. La validacion equivalente a "valor invalido" es que `un_2025_population` no sea entero mayor que cero.
 
-Si el JSON esta roto de sintaxis, por ejemplo falta una llave, puede fallar antes de entrar al endpoint, en `express.json()`. Eso tambien es `400`, pero no lo genera `parseCityStat`.
+Si el JSON esta roto de sintaxis, por ejemplo falta una llave, puede fallar antes de entrar al endpoint, en `express.json()`. Eso tambien es `400`, pero no lo genera `normalizeCityStat`.
 
 Frase para escribir:
 
@@ -4711,9 +4599,7 @@ Funciones clave:
 | --- | --- |
 | `removeDatabaseId` | Quita `_id` de NeDB antes de responder. |
 | `hasExactCityFields` | Comprueba que el body tenga exactamente los campos esperados. |
-| `normalizeCountryForStorage` | Limpia pais, quita tildes, aplica guiones y resuelve alias. |
-| `parseCityStat` | Valida estructura, poblacion y pais soportado; devuelve `item` o `error`. |
-| `normalizeCityStat` | Envoltorio compatible que delega en `parseCityStat`. |
+| `normalizeCityStat` | Limpia `city` y `country`, convierte poblacion a numero y valida. |
 | `db.find` | Lista registros. |
 | `db.findOne` | Busca uno o comprueba duplicados. |
 | `db.insert` | Crea. |
@@ -4724,8 +4610,8 @@ Explicar `POST`:
 
 ```text
 1. Entra en app.post(BASE_API_URL).
-2. Ejecuta parseCityStat(req.body).
-3. Si falla estructura, poblacion o pais soportado, responde 400.
+2. Ejecuta normalizeCityStat(req.body).
+3. Si falla, responde 400.
 4. Busca duplicado con db.findOne.
 5. Si existe, responde 409.
 6. Si no existe, inserta con db.insert.
@@ -4736,13 +4622,12 @@ Explicar `PUT`:
 
 ```text
 1. Lee city y country de req.params.
-2. Normaliza country de la URL.
-3. Valida el body con parseCityStat.
-4. Comprueba que URL y body coinciden.
-5. Busca si el recurso existe.
-6. Si no existe, responde 404.
-7. Actualiza con db.update.
-8. Vuelve a buscar y responde 200.
+2. Valida el body.
+3. Comprueba que URL y body coinciden.
+4. Busca si el recurso existe.
+5. Si no existe, responde 404.
+6. Actualiza con db.update.
+7. Vuelve a buscar y responde 200.
 ```
 
 Si falla NeDB:
@@ -4774,7 +4659,7 @@ Orden de un `POST`:
 
 ```text
 handler POST
--> parseCityStat
+-> normalizeCityStat
 -> si falla, 400
 -> db.findOne
 -> si existe, 409
@@ -4822,7 +4707,7 @@ Cuando te den lineas concretas, clasificalas antes de intentar decir letras:
 | `app.use(cors())` | Si, se registra | Despues actua como middleware en cada peticion | Al arrancar se instala; en peticiones se aplica. |
 | `const api = require("./src/back/v2/citys-stats")` | Si | No | Carga el modulo de la API. |
 | `citysStatsApiV2(app, db)` | Si | No | Ejecuta el modulo para registrar rutas. |
-| `function parseCityStat(...)` | No por si sola | Solo si alguien la llama | Declarar una funcion no ejecuta su cuerpo. |
+| `function normalizeCityStat(...)` | No por si sola | Solo si alguien la llama | Declarar una funcion no ejecuta su cuerpo. |
 | `app.get("/ruta", (req, res) => { ... })` | Si, registra la ruta | El cuerpo se ejecuta si llega esa ruta | La cabecera registra; el interior espera peticion. |
 | Codigo dentro del callback de `app.get` | No | Si coincide metodo y URL | Es el handler real de la peticion. |
 | `db.count(..., callback)` | Dentro de la peticion | Si | Lanza una operacion asincrona a NeDB. |
@@ -4886,14 +4771,14 @@ Si te dicen "marca esta linea con A sin cambiar la numeracion", no anadas una li
 Correcto:
 
 ```js
-const parsed = parseCityStat(req.body); // A
+const item = normalizeCityStat(req.body); // A
 ```
 
 Incorrecto:
 
 ```js
 // A
-const parsed = parseCityStat(req.body);
+const item = normalizeCityStat(req.body);
 ```
 
 ### Tarea 13: GitHub, local y Render sincronizados
@@ -5045,10 +4930,9 @@ Svelte script -> html:
 | Que metodo borra | `DELETE` |
 | Que pasa si falta un campo | `400` con `JSON body does not match expected structure` |
 | Que pasa si ya existe | `409` con `Resource already exists` |
-| Que pasa si el pais no existe | `400` con `Invalid country` |
 | Que pasa si no existe | `404` con `Resource not found` |
 | Que base usas | NeDB |
-| Donde se valida | `parseCityStat`, `hasExactCityFields` y `SUPPORTED_COUNTRIES` |
+| Donde se valida | `normalizeCityStat` y `hasExactCityFields` |
 | Donde se ve el JSON | Network: `Payload`, `Response`, `Preview` |
 
 ### Simulacro practico cronometrado
