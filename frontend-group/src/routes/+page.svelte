@@ -92,7 +92,7 @@
       source: "natural-disasters",
       frontendUrl: "/natural-disasters",
       analyticsUrl: "/analytics/natural-disasters",
-      videoUrl: null,
+      videoUrl: "https://drive.google.com/file/d/1EWnZG67eu5oh1cb4qRatLUafsLchD4Vu/view?usp=sharing",
       apiLinks: [
         {
           id: "api-v1-natural-disasters",
