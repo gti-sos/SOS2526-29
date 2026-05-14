@@ -28,7 +28,7 @@
       id: "national-team-rankings",
       title: "National Team Rankings",
       description: "Relación entre el ranking de selecciones nacionales de fútbol y el consumo de vino por país.",
-      tipo: "USO",
+      tipo: "INTEGRACION",
       proxy:false,
       icon: "⚽",
       color: "#437a22",
